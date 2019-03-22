@@ -122,10 +122,6 @@ def main():
     }
 
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=2, verbose=10)
-
-    print(train_x)
-    print(train_y)
-
     grid_search_tune.fit(train_x, train_y)
 
     print("Best parameters set:")
