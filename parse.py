@@ -98,7 +98,7 @@ def generate_submission_file(predictions, ml_binarizer, dev_data_x):
     """
 
     with gzip.open('answer.txt.zip', 'wt') as f_out:
-        f_out.write(str('subtask_a+\n'))
+        f_out.write(str('subtask_a\n'))
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
             f_out.write(data['isbn']+'\t'+'\t'.join([p for p in pred])+'\n')
 
@@ -119,8 +119,9 @@ def train_model(train_data_x, train_data_y):
     y_labels = ml_binarizer.fit_transform(train_data_y)
     print('Total of {} classes'.format(len(ml_binarizer.classes_)))
 
-    train_data_x = train_data_x[:1000]
-    data_y = y_labels[:1000]
+    #train_data_x = train_data_x[:1000]
+    #data_y = y_labels[:1000]
+    data_y = y_labels
 
     new_data_x = [x['title'] + "SEP" + x['body'] for x in train_data_x]
 
@@ -133,15 +134,15 @@ def train_model(train_data_x, train_data_y):
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words)),
-        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=1000), n_jobs=2))
+        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=3000), n_jobs=3))
     ])
     parameters = {
-        'tfidf__max_df': (0.25, 0.5),
-        'tfidf__ngram_range': [(1, 1)],
-        "clf__estimator__C": [0.01],
+        'tfidf__max_df': (0.25, 0.5, 0.75),
+        'tfidf__ngram_range': [(1, 1), (1,2), (1,3)],
+        "clf__estimator__C": [0.01, 0.1, 1],
         "clf__estimator__class_weight": ['balanced', None],
     }
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=2, verbose=2)
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
     print("Best parameters set:")
     print(grid_search_tune.best_estimator_.steps)
