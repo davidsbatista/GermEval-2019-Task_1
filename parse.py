@@ -4,7 +4,7 @@ import gzip
 from collections import defaultdict
 from os.path import join
 
-from bs4 import BeautifulSoup, Tag
+from bs4 import BeautifulSoup, Tag, NavigableString
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.preprocessing import MultiLabelBinarizer
@@ -17,17 +17,22 @@ from sklearn.pipeline import Pipeline
 from nltk.corpus import stopwords
 
 
-def load_data(file):
+def load_data(file, hierarchical=False):
     """
     Parses and loads the training/dev/test data into a list of dicts
 
+    :param hierarchical:
     :param file:
     :return:
     """
     base_path = 'blurbs_dev_participants/'
     full_path = join(base_path, file)
 
-    topics_distribution = defaultdict(int)
+    topics_distribution = defaultdict(int)  # level 0 - only
+
+    labels_by_level = {'0': defaultdict(int),
+                       '1': defaultdict(int),
+                       '2': defaultdict(int)}
 
     with open(full_path, 'rt') as f_in:
         print("Loading {}".format(full_path))
@@ -42,20 +47,39 @@ def load_data(file):
                  'isbn': book.isbn.text}
 
             if 'train' in full_path:
-                topics = set()
-                for categ in book.categories:
-                    for t in categ:
-                        if isinstance(t, Tag):
-                            if t['d'] == "0":
-                                topics.add(t.text)
-                                topics_distribution[t.text] += 1
-                data_y.append(list(topics))
+                if not hierarchical:
+                    topics = set()
+                    for categ in book.categories:
+                        for t in categ:
+                            if isinstance(t, Tag):
+                                if t['d'] == "0":
+                                    topics.add(t.text)
+                                    topics_distribution[t.text] += 1
+                    data_y.append(list(topics))
+
+                elif hierarchical:
+                    categories = []
+                    for categ in book.categories:
+                        if isinstance(categ, NavigableString):
+                            continue
+                        topics = [None] * 3
+                        for t in categ:
+                            if isinstance(t, Tag):
+                                level = int(t['d'])
+                                topics[level] = t.text
+                                labels_by_level[str(level)][t.text] += 1
+                        categories.append(topics)
+
+                    data_y.append(categories)
 
             data_x.append(x)
 
         print(f'Loaded {len(data_x)} documents')
 
-    return data_x, data_y, topics_distribution
+    if hierarchical:
+        return data_x, data_y, labels_by_level
+    else:
+        return data_x, data_y, topics_distribution
 
 
 def generate_submission_file(predictions, ml_binarizer, dev_data_x):
@@ -163,18 +187,37 @@ def main():
     :return:
     """
     # load train data
-    train_data_x, train_data_y, topics_distribution = load_data('blurbs_train.txt')
-    for k, v in topics_distribution.items():
-        print(k, v)
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=True)
+
+    # for k, v in topics_distribution.items():
+    #     print(k, v)
+    #
+    # print()
+
+    print(train_data_x[-1])
+    print(train_data_y[-1])
     print()
-    best_clf, ml_binarizer = train_model(train_data_x, train_data_y)
-    print(best_clf)
+
+    for x, y in zip(train_data_x, train_data_y):
+        if x['isbn'] == '9783579087276':
+            print(x)
+            print(y)
+            print()
+
+    for k, v in labels.items():
+        print(k)
+        print(len(v))
+        print(v)
+        print()
+
+    # best_clf, ml_binarizer = train_model(train_data_x, train_data_y)
+    # print(best_clf)
 
     # apply on  dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
-    new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
-    predictions = best_clf.predict(new_data_x)
-    generate_submission_file(predictions, ml_binarizer, dev_data_x)
+    # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
+    # new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
+    # predictions = best_clf.predict(new_data_x)
+    # generate_submission_file(predictions, ml_binarizer, dev_data_x)
 
 
 if __name__ == '__main__':

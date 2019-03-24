@@ -1,0 +1,39 @@
+                            precision    recall  f1-score   support
+
+      Architektur & Garten       0.42      1.00      0.59        32
+Ganzheitliches Bewusstsein       0.52      0.80      0.63       138
+            Glaube & Ethik       0.70      0.71      0.70       112
+   Kinderbuch & Jugendbuch       0.69      0.75      0.72       412
+                    Künste       0.36      0.77      0.49        22
+  Literatur & Unterhaltung       0.87      0.90      0.89      1608
+                  Ratgeber       0.67      0.89      0.76       394
+                  Sachbuch       0.56      0.75      0.64       412
+
+                 micro avg       0.73      0.85      0.79      3130
+                 macro avg       0.60      0.82      0.68      3130
+              weighted avg       0.75      0.85      0.79      3130
+               samples avg       0.77      0.87      0.80      3130
+
+
+Pipeline(memory=None,
+     steps=[('tfidf', TfidfVectorizer(analyzer='word', binary=False, decode_error='strict',
+        dtype=<class 'numpy.float64'>, encoding='utf-8', input='content',
+        lowercase=True, max_df=0.25, max_features=None, min_df=1,
+        ngram_range=(1, 1), norm='l2', preprocessor=None, smooth_idf=True..._state=None,
+          solver='sag', tol=0.0001, verbose=0, warm_start=False),
+          n_jobs=3))])
+
+
+Subtask_a detailed scores:
+Recall: '0.8534'
+Precision: '0.7356'
+F1_micro: '0.7901'
+Subset_acc: '0.6469'
+
+Subtask_b detailed scores:
+Recall: '0.0000'
+Precision: '0.0000'
+F1_micro: '0.0000'
+Subset_acc: '0.0000'
+
+---------------------------------------------------------------------------------------------------
