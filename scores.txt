@@ -37,3 +37,36 @@ F1_micro: '0.0000'
 Subset_acc: '0.0000'
 
 ---------------------------------------------------------------------------------------------------
+
+                            precision    recall  f1-score   support
+
+      Architektur & Garten       1.00      0.41      0.58        32
+Ganzheitliches Bewusstsein       0.71      0.52      0.60       138
+            Glaube & Ethik       0.81      0.46      0.58       112
+   Kinderbuch & Jugendbuch       0.77      0.59      0.67       412
+                    Künste       0.82      0.41      0.55        22
+  Literatur & Unterhaltung       0.86      0.89      0.88      1608
+                  Ratgeber       0.75      0.69      0.72       394
+                  Sachbuch       0.68      0.46      0.55       412
+
+                 micro avg       0.81      0.73      0.77      3130
+                 macro avg       0.80      0.55      0.64      3130
+              weighted avg       0.80      0.73      0.76      3130
+               samples avg       0.79      0.76      0.77      3130
+
+network parameters
+==================
+hidden_units = 128
+dropout = 0.2
+recurrent_dropout = 0.3
+dense_dropout = 0.1
+learning_rate = 0.001
+
+
+training parameters
+===================
+batch_size=32
+epochs=10
+verbose=1
+validation_split=0.2
+

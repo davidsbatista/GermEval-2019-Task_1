@@ -9,7 +9,6 @@ def load_data(file, hierarchical=False):
     """
     Parses and loads the training/dev/test data into a list of dicts
 
-    :param word_mappings:
     :param hierarchical: whether to consider the hierarchy labels or just the first level
     :param file:
     :return:
@@ -22,8 +21,6 @@ def load_data(file, hierarchical=False):
     labels_by_level = {'0': defaultdict(int),
                        '1': defaultdict(int),
                        '2': defaultdict(int)}
-
-    tokens = set()
 
     with open(full_path, 'rt') as f_in:
         print("Loading {}".format(full_path))
