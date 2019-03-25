@@ -251,6 +251,7 @@ def main():
 
     #train_data_x = vectors_padded[:100]
     #data_y = y_labels[:100]
+    train_data_x = vectors_padded
     data_y = y_labels
 
     # split into train and hold out set
@@ -263,7 +264,7 @@ def main():
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     model = build_lstm_based_model(static_embeddings, ml_binarizer)
 
-    model.fit(train_x, train_y, batch_size=64, epochs=1, verbose=1, validation_split=0.2)
+    model.fit(train_x, train_y, batch_size=32, epochs=10, verbose=1, validation_split=0.2)
 
     predictions = model.predict(test_x)
 
