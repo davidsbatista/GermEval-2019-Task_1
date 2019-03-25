@@ -249,9 +249,9 @@ def main():
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_length,
                                    truncating='post', value=token2idx['PADDED'])
 
-    train_data_x = vectors_padded[:100]
-    data_y = y_labels[:100]
-    # data_y = y_labels
+    #train_data_x = vectors_padded[:100]
+    #data_y = y_labels[:100]
+    data_y = y_labels
 
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x,
@@ -260,7 +260,7 @@ def main():
                                                         test_size=0.20)
 
     print("Loading pre-trained Embeddings")
-    static_embeddings = KeyedVectors.load('/Users/dsbatista/resources/de-wiki-fasttext-300d-1M')
+    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     model = build_lstm_based_model(static_embeddings, ml_binarizer)
 
     model.fit(train_x, train_y, batch_size=64, epochs=1, verbose=1, validation_split=0.2)
