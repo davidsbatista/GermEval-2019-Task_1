@@ -1,5 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+from collections import defaultdict
+from copy import deepcopy
 
 from gensim.models import KeyedVectors
 from keras.layers import np
@@ -134,7 +136,7 @@ def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
         "clf__estimator__C": [0.01, 0.1, 1],
         "clf__estimator__class_weight": ['balanced', None],
     }
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=0)
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=1)
     grid_search_tune.fit(train_x, train_y)
     print("Best parameters set:")
     print(grid_search_tune.best_estimator_.steps)
@@ -142,8 +144,8 @@ def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
     # measuring performance on test set
     # print("Applying best classifier on test data:")
     best_clf = grid_search_tune.best_estimator_
-    # predictions = best_clf.predict(test_x)
-    # print(classification_report(test_y, predictions, target_names=ml_binarizer.classes_))
+    predictions = best_clf.predict(test_x)
+    print(classification_report(test_y, predictions, target_names=ml_binarizer.classes_))
 
     return best_clf
 
@@ -161,8 +163,10 @@ def train_baseline_3_models(train_data_x, train_data_y):
         labels_2 = set()
         for label in y_labels:
             labels_0.add(label[0])
-            labels_1.add(label[1])
-            labels_2.add(label[2])
+            if 1 in label:
+                labels_1.add(label[1])
+            if 2 in label:
+                labels_2.add(label[2])
         data_y_level_0.append(labels_0)
         data_y_level_1.append(labels_1)
         data_y_level_2.append(labels_2)
@@ -170,25 +174,11 @@ def train_baseline_3_models(train_data_x, train_data_y):
     classifiers = []
     ml_binarizers = []
 
-    level = 0
     for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
-
-        data_x = []
-        data_y = []
-
-        for x, y in zip(train_data_x, train_data_y):
-            print(len(y))
-            if not y:
-                continue
-            else:
-                data_x.append(x)
-                data_y.append(y)
-        print(train_data_y)
-        print()
 
         # encode y labels into one-hot vectors
         ml_binarizer = MultiLabelBinarizer()
-        y_labels = ml_binarizer.fit_transform(data_y)
+        y_labels = ml_binarizer.fit_transform(train_data_y)
         print('Total of {} classes'.format(len(ml_binarizer.classes_)))
         data_y = y_labels
 
@@ -199,11 +189,8 @@ def train_baseline_3_models(train_data_x, train_data_y):
         train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
                                                             test_size=0.20)
         clf = train_classifier(train_x, train_y, test_x, test_y, ml_binarizer)
-
-        print("done!")
-
-        # classifiers.append(clf)
-        # ml_binarizers.append(ml_binarizer)
+        classifiers.append(clf)
+        ml_binarizers.append(ml_binarizer)
 
     return classifiers, ml_binarizers
 
@@ -253,17 +240,30 @@ def main():
     # train 3 classifiers, one for each level
     classifiers, ml_binarizers = train_baseline_3_models(train_data_x[:100], train_data_y[:100])
 
-    level_0 = []
-    level_1 = []
-    level_2 = []
+    levels = {0: defaultdict(list),
+              1: defaultdict(list),
+              2: defaultdict(list)}
+
+    classification = {}
+    for data in dev_data_x:
+        classification[data['isbn']] = deepcopy(levels)
 
     new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
+    level = 0
     for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
         predictions = clf_level.predict(new_data_x)
 
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-            print(data['isbn']+'\t'+'\t'.join([p for p in pred])+'\n')
+            classification[data['isbn']][level] = '\t'.join([p for p in pred])
+        level += 1
 
+    for x in dev_data_x:
+        isbn = x['isbn']
+        print(isbn+'\t' + classification[isbn][0] + '\t'
+              + classification[isbn][1] + '\t' + classification[isbn][2] + '\n')
+
+    # Level 0 multi-label classifier
+    #
     # model, ml_binarizer = train_baseline(train_data_x, train_data_y)
     # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
     # new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]

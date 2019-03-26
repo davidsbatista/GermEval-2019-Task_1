@@ -50,14 +50,14 @@ def load_data(file, hierarchical=False):
                     for categ in book.categories:
                         if isinstance(categ, NavigableString):
                             continue
-                        topics = [None] * 3
+                        topics = {}
                         for t in categ:
                             if isinstance(t, Tag):
                                 level = int(t['d'])
                                 topics[level] = t.text
                                 labels_by_level[str(level)][t.text] += 1
-                        categories.append(topics)
-
+                        if topics is not None and len(topics) > 0:
+                            categories.append(topics)
                     data_y.append(categories)
             data_x.append(x)
 
@@ -87,4 +87,4 @@ def generate_submission_file(predictions, ml_binarizer, dev_data_x):
     with gzip.open('answer.txt.zip', 'wt') as f_out:
         f_out.write(str('subtask_a\n'))
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-            f_out.write(data['isbn']+'\t'+'\t'.join([p for p in pred])+'\n')
+            f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
