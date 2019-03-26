@@ -94,9 +94,7 @@ def train_baseline(train_data_x, train_data_y):
     new_data_x = [x['title'] + "SEP" + x['body'] for x in train_data_x]
 
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(new_data_x,
-                                                        data_y,
-                                                        random_state=42,
+    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
                                                         test_size=0.20)
 
     stop_words = set(stopwords.words('german'))
@@ -124,13 +122,98 @@ def train_baseline(train_data_x, train_data_y):
     return best_clf, ml_binarizer
 
 
+def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
+    stop_words = set(stopwords.words('german'))
+    pipeline = Pipeline([
+        ('tfidf', TfidfVectorizer(stop_words=stop_words)),
+        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=3000), n_jobs=3))
+    ])
+    parameters = {
+        'tfidf__max_df': (0.25, 0.5, 0.75),
+        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
+        "clf__estimator__C": [0.01, 0.1, 1],
+        "clf__estimator__class_weight": ['balanced', None],
+    }
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=0)
+    grid_search_tune.fit(train_x, train_y)
+    print("Best parameters set:")
+    print(grid_search_tune.best_estimator_.steps)
+
+    # measuring performance on test set
+    # print("Applying best classifier on test data:")
+    best_clf = grid_search_tune.best_estimator_
+    # predictions = best_clf.predict(test_x)
+    # print(classification_report(test_y, predictions, target_names=ml_binarizer.classes_))
+
+    return best_clf
+
+
+def train_baseline_3_models(train_data_x, train_data_y):
+
+    # aggregate data for 3-independent classifiers
+    data_y_level_0 = []
+    data_y_level_1 = []
+    data_y_level_2 = []
+
+    for y_labels in train_data_y:
+        labels_0 = set()
+        labels_1 = set()
+        labels_2 = set()
+        for label in y_labels:
+            labels_0.add(label[0])
+            labels_1.add(label[1])
+            labels_2.add(label[2])
+        data_y_level_0.append(labels_0)
+        data_y_level_1.append(labels_1)
+        data_y_level_2.append(labels_2)
+
+    classifiers = []
+    ml_binarizers = []
+
+    level = 0
+    for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
+
+        data_x = []
+        data_y = []
+
+        for x, y in zip(train_data_x, train_data_y):
+            print(len(y))
+            if not y:
+                continue
+            else:
+                data_x.append(x)
+                data_y.append(y)
+        print(train_data_y)
+        print()
+
+        # encode y labels into one-hot vectors
+        ml_binarizer = MultiLabelBinarizer()
+        y_labels = ml_binarizer.fit_transform(data_y)
+        print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+        data_y = y_labels
+
+        # text representation: merge title and body
+        new_data_x = [x['title'] + "SEP" + x['body'] for x in train_data_x]
+
+        # split into train and hold out set
+        train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
+                                                            test_size=0.20)
+        clf = train_classifier(train_x, train_y, test_x, test_y, ml_binarizer)
+
+        print("done!")
+
+        # classifiers.append(clf)
+        # ml_binarizers.append(ml_binarizer)
+
+    return classifiers, ml_binarizers
+
+
 def data_analysis():
     # TODO
     pass
 
 
 def main():
-
     """
     Subtasks
     This shared task consists of two subtask, described below. You can participate in one of
@@ -162,10 +245,24 @@ def main():
     """
 
     # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=False)
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=True)
 
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
+
+    # train 3 classifiers, one for each level
+    classifiers, ml_binarizers = train_baseline_3_models(train_data_x[:100], train_data_y[:100])
+
+    level_0 = []
+    level_1 = []
+    level_2 = []
+
+    new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
+    for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
+        predictions = clf_level.predict(new_data_x)
+
+        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+            print(data['isbn']+'\t'+'\t'.join([p for p in pred])+'\n')
 
     # model, ml_binarizer = train_baseline(train_data_x, train_data_y)
     # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
@@ -173,25 +270,27 @@ def main():
     # predictions = model.predict(new_data_x)
     # generate_submission_file(predictions, ml_binarizer, dev_data_x)
 
-    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x[:50],
-                                                                 train_data_y[:50])
-    # dev_data_x: vectorize, i.e. tokens to indexes and pad
-    vectors = []
-    for x in dev_data_x:
-        tokens = []
-        text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
-        vectors.append(vector)
-    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                 truncating='post', value=token2idx['PADDED'])
-    predictions = model.predict(test_vectors)
-    binary_predictions = []
-    for pred in predictions:
-        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
-    generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
+    # Neural Networks Approach
+    #
+    # model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x[:50],
+    #                                                              train_data_y[:50])
+    # # dev_data_x: vectorize, i.e. tokens to indexes and pad
+    # vectors = []
+    # for x in dev_data_x:
+    #     tokens = []
+    #     text = x['title'] + " SEP " + x['body']
+    #     sentences = sent_tokenize(text, language='german')
+    #     for s in sentences:
+    #         tokens += word_tokenize(s)
+    #     vector = vectorizer(tokens)
+    #     vectors.append(vector)
+    # test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+    #                              truncating='post', value=token2idx['PADDED'])
+    # predictions = model.predict(test_vectors)
+    # binary_predictions = []
+    # for pred in predictions:
+    #     binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+    # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
 if __name__ == '__main__':
