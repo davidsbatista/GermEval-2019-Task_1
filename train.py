@@ -1,15 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+
 import gzip
 import pickle
 from collections import defaultdict
 from copy import deepcopy
 
 from gensim.models import KeyedVectors
+
 from keras.layers import np
 from keras_preprocessing.sequence import pad_sequences
+
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
+
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
@@ -126,6 +130,10 @@ def train_baseline(train_data_x, train_data_y):
     return best_clf, ml_binarizer
 
 
+def train_cnn_sent_class(train_data_x, train_data_y):
+    pass
+
+
 def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
@@ -239,76 +247,79 @@ def main():
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
-    # sub-task B
-    # train 3 classifiers, one for each level
-    classifiers, ml_binarizers = train_baseline_3_models(train_data_x, train_data_y)
-
-    with open('models_3_labels.pkl', 'wb') as f_out:
-        pickle.dump(classifiers, f_out)
-
-    with open('ml_binarizers_3_labels.pkl', 'wb') as f_out:
-        pickle.dump(ml_binarizers, f_out)
-
-    levels = {0: defaultdict(list),
-              1: defaultdict(list),
-              2: defaultdict(list)}
-
-    classification = {}
-    for data in dev_data_x:
-        classification[data['isbn']] = deepcopy(levels)
-
-    new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
-    level = 0
-
-    for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
-        predictions = clf_level.predict(new_data_x)
-
-        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-            classification[data['isbn']][level] = '\t'.join([p for p in pred])
-        level += 1
-
-    with gzip.open('answer.txt.zip', 'wt') as f_out:
-        f_out.write(str('subtask_a\n'))
-        for x in dev_data_x:
-            isbn = x['isbn']
-            f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
-
-        f_out.write(str('subtask_b\n'))
-        for x in dev_data_x:
-            isbn = x['isbn']
-            f_out.write(
-                isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
-                classification[isbn][2] + '\n')
-
-    # Level 0 multi-label classifier
+    # sub-task B Train 3 classifiers, one for each level
     #
+    # classifiers, ml_binarizers = train_baseline_3_models(train_data_x, train_data_y)
+    #
+    # with open('models_3_labels.pkl', 'wb') as f_out:
+    #     pickle.dump(classifiers, f_out)
+    #
+    # with open('ml_binarizers_3_labels.pkl', 'wb') as f_out:
+    #     pickle.dump(ml_binarizers, f_out)
+    #
+    # levels = {0: defaultdict(list),
+    #           1: defaultdict(list),
+    #           2: defaultdict(list)}
+    #
+    # classification = {}
+    # for data in dev_data_x:
+    #     classification[data['isbn']] = deepcopy(levels)
+    #
+    # new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
+    # level = 0
+    #
+    # for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
+    #     predictions = clf_level.predict(new_data_x)
+    #
+    #     for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+    #         classification[data['isbn']][level] = '\t'.join([p for p in pred])
+    #     level += 1
+    #
+    # with gzip.open('answer.txt.zip', 'wt') as f_out:
+    #     f_out.write(str('subtask_a\n'))
+    #     for x in dev_data_x:
+    #         isbn = x['isbn']
+    #         f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
+    #
+    #     f_out.write(str('subtask_b\n'))
+    #     for x in dev_data_x:
+    #         isbn = x['isbn']
+    #         f_out.write(
+    #             isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
+    #             classification[isbn][2] + '\n')
+
+    # Subtask-A: Level 0 multi-label classifier
+
     # model, ml_binarizer = train_baseline(train_data_x, train_data_y)
     # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
     # new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
     # predictions = model.predict(new_data_x)
     # generate_submission_file(predictions, ml_binarizer, dev_data_x)
 
-    # Neural Networks Approach
+    # Subtask-A: Neural Networks Approach
     #
-    # model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x[:50],
-    #                                                              train_data_y[:50])
-    # # dev_data_x: vectorize, i.e. tokens to indexes and pad
-    # vectors = []
-    # for x in dev_data_x:
-    #     tokens = []
-    #     text = x['title'] + " SEP " + x['body']
-    #     sentences = sent_tokenize(text, language='german')
-    #     for s in sentences:
-    #         tokens += word_tokenize(s)
-    #     vector = vectorizer(tokens)
-    #     vectors.append(vector)
-    # test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-    #                              truncating='post', value=token2idx['PADDED'])
-    # predictions = model.predict(test_vectors)
-    # binary_predictions = []
-    # for pred in predictions:
-    #     binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
-    # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
+    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x[:50],
+                                                                 train_data_y[:50])
+    # dev_data_x: vectorize, i.e. tokens to indexes and pad
+    vectors = []
+    for x in dev_data_x:
+        tokens = []
+        text = x['title'] + " SEP " + x['body']
+        sentences = sent_tokenize(text, language='german')
+        for s in sentences:
+            tokens += word_tokenize(s)
+        vector = vectorizer(tokens)
+        vectors.append(vector)
+    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+                                 truncating='post', value=token2idx['PADDED'])
+    predictions = model.predict(test_vectors)
+    binary_predictions = []
+    for pred in predictions:
+        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+        print(pred)
+        print(binary_predictions)
+        print()
+    generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
 if __name__ == '__main__':

@@ -97,10 +97,10 @@ def build_lstm_based_model(embeddings, label_encoder, max_sent_length):
                                 recurrent_dropout=recurrent_dropout))(embedded_sequences)
     l_lstm_w_drop = Dropout(dense_dropout)(l_lstm)
     preds = Dense(len(label_encoder.classes_),
-                  activation='softmax', name='softmax')(l_lstm_w_drop)
+                  activation='sigmoid', name='sigmoid')(l_lstm_w_drop)
     model = Model(inputs=[sequence_input], outputs=[preds])
 
-    model.compile(loss='categorical_crossentropy',
+    model.compile(loss='binary_crossentropy',
                   optimizer=optimizers.Adam(lr=learning_rate),
                   metrics=['acc'])
 
