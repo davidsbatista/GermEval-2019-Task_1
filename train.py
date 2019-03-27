@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 import gzip
+import pickle
 from collections import defaultdict
 from copy import deepcopy
 
@@ -241,6 +242,12 @@ def main():
     # sub-task B
     # train 3 classifiers, one for each level
     classifiers, ml_binarizers = train_baseline_3_models(train_data_x, train_data_y)
+
+    with open('models_3_labels.pkl', 'wb') as f_out:
+        pickle.dump(classifiers, f_out)
+
+    with open('ml_binarizers_3_labels.pkl', 'wb') as f_out:
+        pickle.dump(ml_binarizers, f_out)
 
     levels = {0: defaultdict(list),
               1: defaultdict(list),
