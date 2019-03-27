@@ -129,7 +129,7 @@ def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words)),
-        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=3000), n_jobs=3))
+        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=5000), n_jobs=20))
     ])
     parameters = {
         'tfidf__max_df': (0.25, 0.5, 0.75),
@@ -137,7 +137,7 @@ def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
         "clf__estimator__C": [0.01, 0.1, 1],
         "clf__estimator__class_weight": ['balanced', None],
     }
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=1)
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
     print("Best parameters set:")
     print(grid_search_tune.best_estimator_.steps)
@@ -188,7 +188,7 @@ def train_baseline_3_models(train_data_x, train_data_y):
 
         # split into train and hold out set
         train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
-                                                            test_size=0.20)
+                                                            test_size=0.25)
         clf = train_classifier(train_x, train_y, test_x, test_y, ml_binarizer)
         classifiers.append(clf)
         ml_binarizers.append(ml_binarizer)
@@ -240,7 +240,7 @@ def main():
 
     # sub-task B
     # train 3 classifiers, one for each level
-    classifiers, ml_binarizers = train_baseline_3_models(train_data_x[:100], train_data_y[:100])
+    classifiers, ml_binarizers = train_baseline_3_models(train_data_x, train_data_y)
 
     levels = {0: defaultdict(list),
               1: defaultdict(list),
