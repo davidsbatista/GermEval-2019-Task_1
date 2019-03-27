@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import gzip
 from collections import defaultdict
 from copy import deepcopy
 
@@ -237,6 +238,7 @@ def main():
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
+    # sub-task B
     # train 3 classifiers, one for each level
     classifiers, ml_binarizers = train_baseline_3_models(train_data_x[:100], train_data_y[:100])
 
@@ -250,6 +252,7 @@ def main():
 
     new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
     level = 0
+
     for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
         predictions = clf_level.predict(new_data_x)
 
@@ -257,10 +260,18 @@ def main():
             classification[data['isbn']][level] = '\t'.join([p for p in pred])
         level += 1
 
-    for x in dev_data_x:
-        isbn = x['isbn']
-        print(isbn+'\t' + classification[isbn][0] + '\t'
-              + classification[isbn][1] + '\t' + classification[isbn][2] + '\n')
+    with gzip.open('answer.txt.zip', 'wt') as f_out:
+        f_out.write(str('subtask_a\n'))
+        for x in dev_data_x:
+            isbn = x['isbn']
+            f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
+
+        f_out.write(str('subtask_b\n'))
+        for x in dev_data_x:
+            isbn = x['isbn']
+            f_out.write(
+                isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
+                classification[isbn][2] + '\n')
 
     # Level 0 multi-label classifier
     #
