@@ -298,8 +298,10 @@ def main():
 
     # Subtask-A: Neural Networks Approach
     #
-    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x[:50],
-                                                                 train_data_y[:50])
+    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x[:1000],
+                                                                 train_data_y[:1000])
+
+    print("Vectorizing dev data\n")
     # dev_data_x: vectorize, i.e. tokens to indexes and pad
     vectors = []
     for x in dev_data_x:
