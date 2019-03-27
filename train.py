@@ -242,7 +242,7 @@ def main():
     """
 
     # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=True)
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=False)
 
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
@@ -315,9 +315,10 @@ def main():
     predictions = model.predict(test_vectors)
     binary_predictions = []
     for pred in predictions:
-        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+        binary = [0 if i <= 0.5 else 1 for i in pred]
+        binary_predictions.append(binary)
         print(pred)
-        print(binary_predictions)
+        print(binary)
         print()
     generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
