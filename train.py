@@ -22,7 +22,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from neural_networks import build_lstm_based_model, build_token_index, vectorizer
+from neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
 from utils import load_data, generate_submission_file
 
 
@@ -66,7 +66,7 @@ def train_bi_lstm(train_data_x, train_data_y):
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     model = build_lstm_based_model(static_embeddings, ml_binarizer, max_sent_len)
-    model.fit(train_x, train_y, batch_size=16, epochs=2, verbose=1, validation_split=0.2)
+    model.fit(train_x, train_y, batch_size=16, epochs=5, verbose=1, validation_split=0.2)
     predictions = model.predict(test_x)
 
     # ToDo: there must be a more efficient way to do this
