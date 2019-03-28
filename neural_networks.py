@@ -67,7 +67,7 @@ def build_lstm_based_model(embeddings, label_encoder, max_sent_length):
 
     :param max_sent_length:
     :param embeddings: pre-trained static embeddings
-    :param label_encoder: the enconding of the y labels
+    :param label_encoder: the encoding of the y labels
     :return:
     """
     hidden_units = 128

@@ -73,10 +73,6 @@ def train_bi_lstm(train_data_x, train_data_y):
     binary_predictions = []
     for pred in predictions:
         binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
-        print(pred)
-        print(sum(pred))
-        print(binary_predictions)
-        print()
     print(classification_report(test_y, np.array(binary_predictions),
                                 target_names=ml_binarizer.classes_))
 
@@ -306,8 +302,7 @@ def main():
 
     # Subtask-A: Neural Networks Approach
     #
-    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x[:1000],
-                                                                 train_data_y[:1000])
+    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
 
     print("Vectorizing dev data\n")
     # dev_data_x: vectorize, i.e. tokens to indexes and pad
@@ -327,10 +322,6 @@ def main():
     for pred in predictions:
         binary = [0 if i <= 0.5 else 1 for i in pred]
         binary_predictions.append(binary)
-        print(pred)
-        print(sum(pred))
-        print(binary)
-        print()
     generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
