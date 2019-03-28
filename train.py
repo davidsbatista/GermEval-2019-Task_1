@@ -103,12 +103,12 @@ def train_baseline(train_data_x, train_data_y):
 
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
-                                                        test_size=0.20)
+                                                        test_size=0.30)
 
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words)),
-        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=3000), n_jobs=3))
+        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=5000), n_jobs=3))
     ])
     parameters = {
         'tfidf__max_df': (0.25, 0.5, 0.75),
@@ -135,6 +135,10 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 
 
 def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
+    pass
+
+
+def train_random_forests_multilabel():
     pass
 
 
@@ -294,35 +298,35 @@ def main():
 
     # Subtask-A: Level 0 multi-label classifier
 
-    # model, ml_binarizer = train_baseline(train_data_x, train_data_y)
-    # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
-    # new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
-    # predictions = model.predict(new_data_x)
-    # generate_submission_file(predictions, ml_binarizer, dev_data_x)
+    model, ml_binarizer = train_baseline(train_data_x, train_data_y)
+    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
+    new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
+    predictions = model.predict(new_data_x)
+    generate_submission_file(predictions, ml_binarizer, dev_data_x)
 
     # Subtask-A: Neural Networks Approach
     #
-    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
-
-    print("Vectorizing dev data\n")
-    # dev_data_x: vectorize, i.e. tokens to indexes and pad
-    vectors = []
-    for x in dev_data_x:
-        tokens = []
-        text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
-        vectors.append(vector)
-    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                 truncating='post', value=token2idx['PADDED'])
-    predictions = model.predict(test_vectors)
-    binary_predictions = []
-    for pred in predictions:
-        binary = [0 if i <= 0.5 else 1 for i in pred]
-        binary_predictions.append(binary)
-    generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
+    # model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
+    #
+    # print("Vectorizing dev data\n")
+    # # dev_data_x: vectorize, i.e. tokens to indexes and pad
+    # vectors = []
+    # for x in dev_data_x:
+    #     tokens = []
+    #     text = x['title'] + " SEP " + x['body']
+    #     sentences = sent_tokenize(text, language='german')
+    #     for s in sentences:
+    #         tokens += word_tokenize(s)
+    #     vector = vectorizer(tokens)
+    #     vectors.append(vector)
+    # test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+    #                              truncating='post', value=token2idx['PADDED'])
+    # predictions = model.predict(test_vectors)
+    # binary_predictions = []
+    # for pred in predictions:
+    #     binary = [0 if i <= 0.5 else 1 for i in pred]
+    #     binary_predictions.append(binary)
+    # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
 if __name__ == '__main__':
