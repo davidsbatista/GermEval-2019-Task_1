@@ -1,4 +1,3 @@
-import gzip
 from collections import defaultdict
 from os.path import join
 
@@ -84,7 +83,7 @@ def generate_submission_file(predictions, ml_binarizer, dev_data_x):
     :return:
     """
 
-    with gzip.open('answer.txt.zip', 'wt') as f_out:
+    with open('answer.txt', 'wt') as f_out:
         f_out.write(str('subtask_a\n'))
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
             f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')

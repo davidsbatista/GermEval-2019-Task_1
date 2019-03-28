@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import gzip
 import pickle
 from collections import defaultdict
 from copy import deepcopy
@@ -126,6 +125,8 @@ def train_baseline(train_data_x, train_data_y):
     best_clf = grid_search_tune.best_estimator_
     predictions = best_clf.predict(test_x)
     print(classification_report(test_y, predictions, target_names=ml_binarizer.classes_))
+
+    # ToDO: retrain best classifier on all data
 
     return best_clf, ml_binarizer
 
