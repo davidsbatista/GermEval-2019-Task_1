@@ -66,13 +66,17 @@ def train_bi_lstm(train_data_x, train_data_y):
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     model = build_lstm_based_model(static_embeddings, ml_binarizer, max_sent_len)
-    model.fit(train_x, train_y, batch_size=16, epochs=3, verbose=1, validation_split=0.2)
+    model.fit(train_x, train_y, batch_size=16, epochs=2, verbose=1, validation_split=0.2)
     predictions = model.predict(test_x)
 
     # ToDo: there must be a more efficient way to do this
     binary_predictions = []
     for pred in predictions:
         binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+        print(pred)
+        print(sum(pred))
+        print(binary_predictions)
+        print()
     print(classification_report(test_y, np.array(binary_predictions),
                                 target_names=ml_binarizer.classes_))
 
@@ -131,6 +135,10 @@ def train_baseline(train_data_x, train_data_y):
 
 
 def train_cnn_sent_class(train_data_x, train_data_y):
+    pass
+
+
+def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
     pass
 
 
