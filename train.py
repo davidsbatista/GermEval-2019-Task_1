@@ -12,6 +12,7 @@ from keras_preprocessing.sequence import pad_sequences
 
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
+from sklearn.ensemble import RandomForestClassifier
 
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
@@ -98,7 +99,7 @@ def train_baseline(train_data_x, train_data_y):
 
     # TODO: use author as feature, what about unseen authors ?
 
-    new_data_x = [x['title'] + "SEP" + x['body'] for x in train_data_x]
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
 
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
@@ -126,9 +127,14 @@ def train_baseline(train_data_x, train_data_y):
     predictions = best_clf.predict(test_x)
     print(classification_report(test_y, predictions, target_names=ml_binarizer.classes_))
 
-    # ToDO: retrain best classifier on all data
+    # train a classifier on all data using the parameters that yielded best result
+    print("Training classifier with best parameters on all data")
+    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
+    clf = grid_search_tune.best_estimator_.steps[1][1]
+    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
+    best_pipeline.fit(new_data_x, data_y)
 
-    return best_clf, ml_binarizer
+    return best_pipeline, ml_binarizer
 
 
 def train_cnn_sent_class(train_data_x, train_data_y):
@@ -139,23 +145,20 @@ def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
     pass
 
 
-def train_random_forests_multilabel():
-    pass
+def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer):
 
-
-def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words)),
-        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=5000), n_jobs=20))
+        ('clf', RandomForestClassifier(n_estimators=10))
     ])
+
     parameters = {
         'tfidf__max_df': (0.25, 0.5, 0.75),
-        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
-        "clf__estimator__C": [0.01, 0.1, 1],
-        "clf__estimator__class_weight": ['balanced', None],
+        'tfidf__ngram_range': [(1, 1)],
+        "clf__n_estimators": [10, 50],
     }
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=4)
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
     print("Best parameters set:")
     print(grid_search_tune.best_estimator_.steps)
@@ -169,7 +172,7 @@ def train_classifier(train_x, train_y, test_x, test_y, ml_binarizer):
     return best_clf
 
 
-def train_baseline_3_models(train_data_x, train_data_y):
+def train_random_forests_multilabel(train_data_x, train_data_y):
 
     # aggregate data for 3-independent classifiers
     data_y_level_0 = []
@@ -202,34 +205,24 @@ def train_baseline_3_models(train_data_x, train_data_y):
         data_y = y_labels
 
         # text representation: merge title and body
-        new_data_x = [x['title'] + "SEP" + x['body'] for x in train_data_x]
+        new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
 
         # split into train and hold out set
         train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
                                                             test_size=0.25)
-        clf = train_classifier(train_x, train_y, test_x, test_y, ml_binarizer)
+        clf = train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer)
         classifiers.append(clf)
         ml_binarizers.append(ml_binarizer)
 
     return classifiers, ml_binarizers
 
 
-def data_analysis():
-    # TODO
-    pass
-
-
-def main():
+def subtask_a(train_data_x, train_data_y, dev_data_x):
     """
-    Subtasks
-    This shared task consists of two subtask, described below. You can participate in one of
-    them or both.
-
     Subtask A
     =========
     The task is to classify german books into one or multiple most general writing genres (d=0).
-    Therfore, it can be considered a multi-label classification task. In total, there are 8 classes
-    that can be assigned to a book:
+    Therfore, it can be considered a multi-label classification task. In total, there are 8 classes.
     - Literatur & Unterhaltung,
     - Ratgeber,
     - Kinderbuch & Jugendbuch,
@@ -239,71 +232,22 @@ def main():
     - Künste,
     - Architektur & Garten.
 
-
-    Subtask B
-    =========
-    The second task is a hierarchical multi-label classification into multiple writing genres.
-    In addition to the very general writing genres additional genres of different specificity can
-    be assigned to a book. In total, there are 343 different classes that are hierarchically
-    structured.
-
+    :param dev_data_x:
+    :param train_data_x:
+    :param train_data_y:
     :return:
     """
 
-    # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=False)
-
-    # load dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
-
-    # sub-task B Train 3 classifiers, one for each level
-    #
-    # classifiers, ml_binarizers = train_baseline_3_models(train_data_x, train_data_y)
-    #
-    # with open('models_3_labels.pkl', 'wb') as f_out:
-    #     pickle.dump(classifiers, f_out)
-    #
-    # with open('ml_binarizers_3_labels.pkl', 'wb') as f_out:
-    #     pickle.dump(ml_binarizers, f_out)
-    #
-    # levels = {0: defaultdict(list),
-    #           1: defaultdict(list),
-    #           2: defaultdict(list)}
-    #
-    # classification = {}
-    # for data in dev_data_x:
-    #     classification[data['isbn']] = deepcopy(levels)
-    #
-    # new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
-    # level = 0
-    #
-    # for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
-    #     predictions = clf_level.predict(new_data_x)
-    #
-    #     for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-    #         classification[data['isbn']][level] = '\t'.join([p for p in pred])
-    #     level += 1
-    #
-    # with gzip.open('answer.txt.zip', 'wt') as f_out:
-    #     f_out.write(str('subtask_a\n'))
-    #     for x in dev_data_x:
-    #         isbn = x['isbn']
-    #         f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
-    #
-    #     f_out.write(str('subtask_b\n'))
-    #     for x in dev_data_x:
-    #         isbn = x['isbn']
-    #         f_out.write(
-    #             isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
-    #             classification[isbn][2] + '\n')
-
     # Subtask-A: Level 0 multi-label classifier
-
+    #
     model, ml_binarizer = train_baseline(train_data_x, train_data_y)
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
-    new_data_x = [x['title'] + "SEP" + x['body'] for x in dev_data_x]
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
     predictions = model.predict(new_data_x)
-    generate_submission_file(predictions, ml_binarizer, dev_data_x)
+
+    with open('answer_a.txt', 'wt') as f_out:
+        f_out.write(str('subtask_a\n'))
+        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+            f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
 
     # Subtask-A: Neural Networks Approach
     #
@@ -328,6 +272,70 @@ def main():
     #     binary = [0 if i <= 0.5 else 1 for i in pred]
     #     binary_predictions.append(binary)
     # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
+
+
+def subtask_b(train_data_x, train_data_y, dev_data_x):
+    """
+    Subtask B
+    =========
+    The second task is a hierarchical multi-label classification into multiple writing genres.
+    In addition to the very general writing genres additional genres of different specificity can
+    be assigned to a book. In total, there are 343 different classes that are hierarchically
+    structured.
+
+    """
+
+    # sub-task B Train 3 classifiers, one for each level, random forests
+
+    classifiers, ml_binarizers = train_random_forests_multilabel(train_data_x, train_data_y)
+
+    with open('models_3_labels.pkl', 'wb') as f_out:
+        pickle.dump(classifiers, f_out)
+
+    with open('ml_binarizers_3_labels.pkl', 'wb') as f_out:
+        pickle.dump(ml_binarizers, f_out)
+    levels = {0: defaultdict(list),
+              1: defaultdict(list),
+              2: defaultdict(list)}
+    classification = {}
+    for data in dev_data_x:
+        classification[data['isbn']] = deepcopy(levels)
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+    level = 0
+    for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
+        predictions = clf_level.predict(new_data_x)
+
+        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+            classification[data['isbn']][level] = '\t'.join([p for p in pred])
+        level += 1
+    with open('answer_a.txt', 'wt') as f_out:
+        f_out.write(str('subtask_a\n'))
+        for x in dev_data_x:
+            isbn = x['isbn']
+            f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
+
+        f_out.write(str('subtask_b\n'))
+        for x in dev_data_x:
+            isbn = x['isbn']
+            f_out.write(
+                isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
+                classification[isbn][2] + '\n')
+
+
+def data_analysis():
+    # TODO
+    pass
+
+
+def main():
+    # load train data
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=False)
+
+    # load dev data
+    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
+
+    # subtask_a(train_data_x[:100], train_data_y[:100], dev_data_x)
+    # subtask_b(train_data_x, train_data_y, dev_data_x)
 
 
 if __name__ == '__main__':
