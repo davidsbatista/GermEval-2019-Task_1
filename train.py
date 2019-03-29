@@ -125,7 +125,10 @@ def train_baseline(train_data_x, train_data_y):
     print("Applying best classifier on test data:")
     best_clf = grid_search_tune.best_estimator_
     predictions = best_clf.predict(test_x)
-    print(classification_report(test_y, predictions, target_names=ml_binarizer.classes_))
+    report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
+    print(report)
+    with open('models_subtask_a_report.txt', 'wt') as f_out:
+        f_out.write(report)
 
     # train a classifier on all data using the parameters that yielded best result
     print("Training classifier with best parameters on all data")
@@ -137,15 +140,7 @@ def train_baseline(train_data_x, train_data_y):
     return best_pipeline, ml_binarizer
 
 
-def train_cnn_sent_class(train_data_x, train_data_y):
-    pass
-
-
-def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
-    pass
-
-
-def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer):
+def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
 
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
@@ -167,7 +162,10 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer):
     # print("Applying best classifier on test data:")
     best_clf = grid_search_tune.best_estimator_
     predictions = best_clf.predict(test_x)
-    print(classification_report(test_y, predictions, target_names=ml_binarizer.classes_))
+    report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
+    print(report)
+    with open('models_subtask_a_report_{}.txt'.format(level), 'wt') as f_out:
+        f_out.write(report)
 
     return best_clf
 
@@ -196,6 +194,7 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
     classifiers = []
     ml_binarizers = []
 
+    level = 0
     for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
 
         # encode y labels into one-hot vectors
@@ -210,9 +209,10 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
         # split into train and hold out set
         train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
                                                             test_size=0.25)
-        clf = train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer)
+        clf = train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level)
         classifiers.append(clf)
         ml_binarizers.append(ml_binarizer)
+        level += 1
 
     return classifiers, ml_binarizers
 
@@ -239,8 +239,15 @@ def subtask_a(train_data_x, train_data_y, dev_data_x):
     """
 
     # Subtask-A: Level 0 multi-label classifier
-    #
     model, ml_binarizer = train_baseline(train_data_x, train_data_y)
+
+    with open('models_subtask_a.pkl', 'wb') as f_out:
+        pickle.dump(model, f_out)
+
+    with open('ml_binarizer_subtask_a.pkl', 'wb') as f_out:
+        pickle.dump(ml_binarizer, f_out)
+
+    # apply on dev data
     new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
     predictions = model.predict(new_data_x)
 
@@ -286,7 +293,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     """
 
     # sub-task B Train 3 classifiers, one for each level, random forests
-
     classifiers, ml_binarizers = train_random_forests_multilabel(train_data_x, train_data_y)
 
     with open('models_3_labels.pkl', 'wb') as f_out:
@@ -294,12 +300,17 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
     with open('ml_binarizers_3_labels.pkl', 'wb') as f_out:
         pickle.dump(ml_binarizers, f_out)
+
+    # apply on dev data
     levels = {0: defaultdict(list),
               1: defaultdict(list),
               2: defaultdict(list)}
+
     classification = {}
+
     for data in dev_data_x:
         classification[data['isbn']] = deepcopy(levels)
+
     new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
     level = 0
     for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
@@ -308,11 +319,13 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
             classification[data['isbn']][level] = '\t'.join([p for p in pred])
         level += 1
-    with open('answer_a.txt', 'wt') as f_out:
+    with open('answer_b.txt', 'wt') as f_out:
+        """
         f_out.write(str('subtask_a\n'))
         for x in dev_data_x:
             isbn = x['isbn']
             f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
+        """
 
         f_out.write(str('subtask_b\n'))
         for x in dev_data_x:
@@ -322,20 +335,35 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
                 classification[isbn][2] + '\n')
 
 
+# ToDo: functions w/ other ideas/models
+
+def train_cnn_sent_class(train_data_x, train_data_y):
+    pass
+
+
+def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
+    pass
+
+
 def data_analysis():
     # TODO
     pass
 
 
 def main():
-    # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=False)
+
+    # ToDo: train subtask_b on all data after parameter selection
 
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
-    # subtask_a(train_data_x[:100], train_data_y[:100], dev_data_x)
-    # subtask_b(train_data_x, train_data_y, dev_data_x)
+    # load train data
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=False)
+    subtask_a(train_data_x, train_data_y, dev_data_x)
+
+    # load train data
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=True)
+    subtask_b(train_data_x, train_data_y, dev_data_x)
 
 
 if __name__ == '__main__':
