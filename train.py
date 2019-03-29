@@ -107,14 +107,14 @@ def train_baseline(train_data_x, train_data_y):
 
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=stop_words)),
-        ('clf', OneVsRestClassifier(LogisticRegression(solver='sag', max_iter=5000), n_jobs=3))
+        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
+        ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
+                                                       solver='sag',
+                                                       max_iter=5000),
+                                    n_jobs=3))
     ])
     parameters = {
-        'tfidf__max_df': (0.25, 0.5, 0.75),
-        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
-        "clf__estimator__C": [0.01, 0.1, 1],
-        "clf__estimator__class_weight": ['balanced', None],
+        "clf__estimator__C": [1, 10],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
@@ -144,14 +144,12 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
 
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=stop_words)),
-        ('clf', RandomForestClassifier(n_estimators=10))
+        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
+        ('clf', RandomForestClassifier())
     ])
 
     parameters = {
-        'tfidf__max_df': (0.25, 0.5, 0.75),
-        'tfidf__ngram_range': [(1, 1)],
-        "clf__n_estimators": [10, 50],
+        "clf__n_estimators": [10, 100, 1000, 5000],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
@@ -164,7 +162,7 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
     predictions = best_clf.predict(test_x)
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
-    with open('models_subtask_a_report_{}.txt'.format(level), 'wt') as f_out:
+    with open('models_subtask_b_report_{}.txt'.format(level), 'wt') as f_out:
         f_out.write(report)
 
     return best_clf
@@ -353,6 +351,7 @@ def data_analysis():
 def main():
 
     # ToDo: train subtask_b on all data after parameter selection
+    # ToDo: load just one time the training data
 
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
