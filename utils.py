@@ -34,6 +34,7 @@ def load_data(file, hierarchical=False):
                  'isbn': book.isbn.text}
 
             if 'train' in full_path:
+                """
                 if not hierarchical:
                     topics = set()
                     for categ in book.categories:
@@ -43,29 +44,26 @@ def load_data(file, hierarchical=False):
                                     topics.add(t.text)
                                     topics_distribution[t.text] += 1
                     data_y.append(list(topics))
-
                 elif hierarchical:
-                    categories = []
-                    for categ in book.categories:
-                        if isinstance(categ, NavigableString):
-                            continue
-                        topics = {}
-                        for t in categ:
-                            if isinstance(t, Tag):
-                                level = int(t['d'])
-                                topics[level] = t.text
-                                labels_by_level[str(level)][t.text] += 1
-                        if topics is not None and len(topics) > 0:
-                            categories.append(topics)
-                    data_y.append(categories)
+                """
+                categories = []
+                for categ in book.categories:
+                    if isinstance(categ, NavigableString):
+                        continue
+                    topics = {}
+                    for t in categ:
+                        if isinstance(t, Tag):
+                            level = int(t['d'])
+                            topics[level] = t.text
+                            labels_by_level[str(level)][t.text] += 1
+                    if topics is not None and len(topics) > 0:
+                        categories.append(topics)
+                data_y.append(categories)
             data_x.append(x)
 
         print(f'Loaded {len(data_x)} documents')
 
-    if hierarchical:
-        return data_x, data_y, labels_by_level
-    else:
-        return data_x, data_y, topics_distribution
+    return data_x, data_y, labels_by_level
 
 
 def generate_submission_file(predictions, ml_binarizer, dev_data_x):

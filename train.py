@@ -149,7 +149,8 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
     ])
 
     parameters = {
-        "clf__n_estimators": [10, 100, 1000],
+        # "clf__n_estimators": [10, 100, 1000],
+        "clf__n_estimators": [10, 20],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
@@ -164,6 +165,15 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
     print(report)
     with open('models_subtask_b_report_{}.txt'.format(level), 'wt') as f_out:
         f_out.write(report)
+
+    # train a classifier on all data using the parameters that yielded best result
+    print("Training classifier with best parameters on all data")
+    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
+    clf = grid_search_tune.best_estimator_.steps[1][1]
+    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
+    all_data_x = np.concatenate([train_x, test_x])
+    all_data_y = np.concatenate([train_y, test_y])
+    best_pipeline.fit(all_data_x, all_data_y)
 
     return best_clf
 
@@ -343,26 +353,32 @@ def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
     pass
 
 
-def data_analysis():
+def data_analysis(train_data_x, train_data_y, labels):
     # TODO
     pass
 
 
 def main():
-
-    # ToDo: train subtask_b on all data after parameter selection
-    # ToDo: load just one time the training data
+    # load train data
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
 
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
-    # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=False)
-    subtask_a(train_data_x, train_data_y, dev_data_x)
+    # do some data analysis
+    data_analysis(train_data_x, train_data_y, labels)
 
-    # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', hierarchical=True)
-    subtask_b(train_data_x, train_data_y, dev_data_x)
+    # train subtask_a
+    data_y_level_0 = []
+    for y_labels in train_data_y:
+        labels_0 = set()
+        for label in y_labels:
+            labels_0.add(label[0])
+        data_y_level_0.append(list(labels_0))
+    subtask_a(train_data_x[:100], data_y_level_0[:100], dev_data_x)
+
+    # train subtask_b
+    #subtask_b(train_data_x[:100], train_data_y[:100], dev_data_x)
 
 
 if __name__ == '__main__':
