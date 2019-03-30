@@ -5,6 +5,7 @@ import pickle
 from collections import defaultdict
 from copy import deepcopy
 
+from flair.data import TaggedCorpus
 from gensim.models import KeyedVectors
 
 from keras.layers import np
@@ -23,7 +24,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
-from neural_networks_pytorch import embed_document
+from neural_networks_pytorch import embed_documents
 from utils import load_data, generate_submission_file
 
 
@@ -351,11 +352,23 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     pass
 
 
-def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
-    pass
+def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y, dev_data_x):
+    """
     # multi-label classification
     # https://stackoverflow.com/questions/52855843/multi-label-classification-in-pytorch
     # https://pytorch.org/docs/stable/nn.html#bceloss
+
+    :param train_data_x:
+    :param train_data_y:
+    :param dev_data_x:
+    :return:
+    """
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, train_data_y,
+                                                        random_state=42, test_size=0.30)
+
+    embed_documents(train_x, test_x, train_y, test_y)
 
 
 def data_analysis(train_data_x, train_data_y, labels):
@@ -386,9 +399,6 @@ def data_analysis(train_data_x, train_data_y, labels):
 
 def main():
 
-    embed_document(None)
-    exit(-1)
-
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
 
@@ -396,7 +406,7 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # do some data analysis
-    data_analysis(train_data_x, train_data_y, labels)
+    # data_analysis(train_data_x, train_data_y, labels)
 
     # train subtask_a
     data_y_level_0 = []
@@ -405,7 +415,9 @@ def main():
         for label in y_labels:
             labels_0.add(label[0])
         data_y_level_0.append(list(labels_0))
-    subtask_a(train_data_x[:100], data_y_level_0[:100], dev_data_x)
+    # subtask_a(train_data_x[:100], data_y_level_0[:100], dev_data_x)
+
+    train_lstm_class_with_flair_embeddings(train_data_x[:100], data_y_level_0[:100], dev_data_x)
 
     # train subtask_b
     #subtask_b(train_data_x[:100], train_data_y[:100], dev_data_x)
