@@ -28,7 +28,7 @@ def embed_documents(train_x, test_x, train_y, test_y):
         flair_sentence.add_labels(y)
         test_data_x.append(flair_sentence)
 
-    corpus = TaggedCorpus(train=train_data_x, test=test_data_x, dev=[])
+    corpus = TaggedCorpus(train=train_data_x, test=test_data_x, dev=test_data_x)
 
     stats = corpus.obtain_statistics()
 
@@ -63,7 +63,7 @@ def embed_documents(train_x, test_x, train_y, test_y):
                   mini_batch_size=32,
                   anneal_factor=0.5,
                   patience=5,
-                  max_epochs=150)
+                  max_epochs=5)
 
     # 8. plot training curves (optional)
     from flair.visual.training_curves import Plotter
