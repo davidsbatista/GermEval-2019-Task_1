@@ -23,6 +23,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
+from neural_networks_pytorch import embed_document
 from utils import load_data, generate_submission_file
 
 
@@ -215,8 +216,9 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
         new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
 
         # split into train and hold out set
-        train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
-                                                            test_size=0.25)
+        train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
+                                                            random_state=42,
+                                                            test_size=0.30)
         clf = train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level)
         classifiers.append(clf)
         ml_binarizers.append(ml_binarizer)
@@ -351,14 +353,42 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 
 def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y):
     pass
+    # multi-label classification
+    # https://stackoverflow.com/questions/52855843/multi-label-classification-in-pytorch
+    # https://pytorch.org/docs/stable/nn.html#bceloss
 
 
 def data_analysis(train_data_x, train_data_y, labels):
-    # TODO
-    pass
+    # TODO: top-words per class
+    # for sample_x, sample_y in zip(train_data_x, train_data_y):
+    #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+    #     print(len(sample_x['title'].split()))
+    #     print(len(sample_x['body'].split()))
+    #     print(len(sample_y))
+    #     print()
+
+    from pandas import DataFrame
+    df_stats_level_0 = DataFrame.from_dict(labels['0'], orient='index', columns=['counts'])
+
+    print(df_stats_level_0)
+    df_stats_level_0.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
+    print()
+
+    df_stats_level_1 = DataFrame.from_dict(labels['1'], orient='index', columns=['counts'])
+    print(df_stats_level_1)
+    df_stats_level_1.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
+    print()
+
+    df_stats_level_2 = DataFrame.from_dict(labels['2'], orient='index', columns=['counts'])
+    print(df_stats_level_2)
+    df_stats_level_2.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
 
 
 def main():
+
+    embed_document(None)
+    exit(-1)
+
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
 

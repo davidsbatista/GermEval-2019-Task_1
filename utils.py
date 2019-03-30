@@ -4,18 +4,15 @@ from os.path import join
 from bs4 import BeautifulSoup, Tag, NavigableString
 
 
-def load_data(file, hierarchical=False):
+def load_data(file):
     """
     Parses and loads the training/dev/test data into a list of dicts
 
-    :param hierarchical: whether to consider the hierarchy labels or just the first level
     :param file:
     :return:
     """
     base_path = 'blurbs_dev_participants/'
     full_path = join(base_path, file)
-
-    topics_distribution = defaultdict(int)  # level 0 - only
 
     labels_by_level = {'0': defaultdict(int),
                        '1': defaultdict(int),
@@ -34,18 +31,6 @@ def load_data(file, hierarchical=False):
                  'isbn': book.isbn.text}
 
             if 'train' in full_path:
-                """
-                if not hierarchical:
-                    topics = set()
-                    for categ in book.categories:
-                        for t in categ:
-                            if isinstance(t, Tag):
-                                if t['d'] == "0":
-                                    topics.add(t.text)
-                                    topics_distribution[t.text] += 1
-                    data_y.append(list(topics))
-                elif hierarchical:
-                """
                 categories = []
                 for categ in book.categories:
                     if isinstance(categ, NavigableString):
