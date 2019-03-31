@@ -10,16 +10,6 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
 
-    for x in dev_data_x:
-        # a single embedding for the whole document
-        tokens = word_tokenize(x['body'].lower())
-        if len(tokens) == 0:
-            print("skipped")
-            print(x)
-            print()
-            continue
-        flair_sentence = Sentence(' '.join(tokens))
-
     train_data_x = []
     for x, y in zip(train_x, train_y):
         # a single embedding for the whole document
@@ -61,11 +51,11 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
 
     trainer = ModelTrainer(classifier, corpus)
     trainer.train('resources/taggers/',
-                  learning_rate=0.1,
+                  learning_rate=0.01,
                   mini_batch_size=32,
                   anneal_factor=0.5,
                   patience=5,
-                  max_epochs=1)
+                  max_epochs=10)
 
     # 8. plot training curves (optional)
     # from flair.visual.training_curves import Plotter
