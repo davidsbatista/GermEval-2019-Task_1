@@ -55,7 +55,7 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
                   mini_batch_size=32,
                   anneal_factor=0.5,
                   patience=5,
-                  max_epochs=10)
+                  max_epochs=50)
 
     # 8. plot training curves (optional)
     # from flair.visual.training_curves import Plotter
