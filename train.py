@@ -398,6 +398,9 @@ def data_analysis(train_data_x, train_data_y, labels):
 
 def main():
 
+    # ToDo: use stratified splits
+    # ToDo: produce a run for subtask-B
+
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
 
@@ -416,7 +419,7 @@ def main():
         data_y_level_0.append(list(labels_0))
     # subtask_a(train_data_x[:100], data_y_level_0[:100], dev_data_x)
 
-    train_lstm_class_with_flair_embeddings(train_data_x, data_y_level_0, dev_data_x)
+    train_lstm_class_with_flair_embeddings(train_data_x[:500], data_y_level_0[:500], dev_data_x)
 
     # train subtask_b
     #subtask_b(train_data_x[:100], train_data_y[:100], dev_data_x)

@@ -4,30 +4,34 @@ from flair.embeddings import WordEmbeddings, FlairEmbeddings, DocumentPoolEmbedd
 from flair.models import TextClassifier
 from flair.trainers import ModelTrainer
 from nltk import sent_tokenize, word_tokenize
-
-
-def convert_data_flair_format(train_x):
-    pass
+from sklearn.metrics import classification_report
+from sklearn.preprocessing import MultiLabelBinarizer
 
 
 def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
+
+    for x in dev_data_x:
+        # a single embedding for the whole document
+        tokens = word_tokenize(x['body'].lower())
+        if len(tokens) == 0:
+            print("skipped")
+            print(x)
+            print()
+            continue
+        flair_sentence = Sentence(' '.join(tokens))
+
     train_data_x = []
     for x, y in zip(train_x, train_y):
         # a single embedding for the whole document
         tokens = word_tokenize(x['body'].lower())
-        #print(x['body'].lower())
-        #print(tokens)
-        #print(len(tokens))
         if len(tokens) == 0:
             continue
-        try:
-            flair_sentence = Sentence(' '.join(tokens))
-            flair_sentence.add_labels(y)
-            train_data_x.append(flair_sentence)
-        except UnboundLocalError:
-            print(x)
+        flair_sentence = Sentence(' '.join(tokens))
+        flair_sentence.add_labels(y)
+        train_data_x.append(flair_sentence)
 
     test_data_x = []
+    test_data_y = []
     for x, y in zip(test_x, test_y):
         # a single embedding for the whole document
         tokens = word_tokenize(x['body'].lower())
@@ -36,38 +40,32 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
         flair_sentence = Sentence(' '.join(tokens))
         flair_sentence.add_labels(y)
         test_data_x.append(flair_sentence)
+        test_data_y.append(y)
 
-    corpus = TaggedCorpus(train=train_data_x, test=test_data_x, dev=test_data_x)
-    stats = corpus.obtain_statistics()
-    print(stats)
+    corpus = TaggedCorpus(train=train_data_x, dev=test_data_x, test=[])
+    # stats = corpus.obtain_statistics()
+    # print(stats)
     label_dict = corpus.make_label_dictionary()
 
     word_embeddings = [WordEmbeddings('de-crawl')]
                        # FlairEmbeddings('de-forward'),
                        # FlairEmbeddings('de-backward')]
 
-    # 4. initialize document embedding by passing list of word embeddings
-    # Can choose between many RNN types (GRU by default, to change use rnn_type parameter)
     document_embeddings = DocumentRNNEmbeddings(word_embeddings,
                                                 hidden_size=512,
-                                                reproject_words=True,
+                                                reproject_words=False,
                                                 reproject_words_dimension=256,
-                                                bidirectional=True
-                                                )
+                                                bidirectional=True)
 
-    # 5. create the text classifier
     classifier = TextClassifier(document_embeddings, label_dictionary=label_dict, multi_label=True)
 
-    # 6. initialize the text classifier trainer
     trainer = ModelTrainer(classifier, corpus)
-
-    # 7. start the training
     trainer.train('resources/taggers/',
                   learning_rate=0.1,
                   mini_batch_size=32,
                   anneal_factor=0.5,
                   patience=5,
-                  max_epochs=25)
+                  max_epochs=1)
 
     # 8. plot training curves (optional)
     # from flair.visual.training_curves import Plotter
@@ -77,49 +75,47 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
     classifier.save("text-classifier-model")
 
     # print(corpus.obtain_statistics())
+    predictions = classifier.predict(test_data_x)
+    pred_labels = []
+    for sent in predictions:
+        preds = []
+        for x in sent.labels:
+            preds.append(x.value)
+        pred_labels.append(preds)
 
+    ml_binarizer = MultiLabelBinarizer()
+    true_y_labels = ml_binarizer.fit_transform(test_data_y)
+    pred_y_labels = ml_binarizer.transform(pred_labels)
+
+    report = classification_report(true_y_labels, pred_y_labels, target_names=ml_binarizer.classes_)
+
+    print(report)
+
+    # apply trained classifier on dev data
     dev_data = []
     for x in dev_data_x:
         # a single embedding for the whole document
         tokens = word_tokenize(x['body'].lower())
+        if len(tokens) == 0:
+            continue
         flair_sentence = Sentence(' '.join(tokens))
         dev_data.append(flair_sentence)
 
     predictions = classifier.predict(dev_data)
-
+    pred_labels = []
     for sent in predictions:
-        print(sent)
-        print(sent.labels)
-        print()
+        preds = []
+        for x in sent.labels:
+            preds.append(x.value)
+        pred_labels.append(preds)
+
+    with open('answer_a.txt', 'wt') as f_out:
+        f_out.write(str('subtask_a\n'))
+        for pred, data in zip(pred_labels, dev_data_x):
+            f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
 
     """
-    # initialize the word embeddings
-    glove_embedding = WordEmbeddings('glove')
-    flair_embedding_forward = FlairEmbeddings('german-forward')
-    flair_embedding_backward = FlairEmbeddings('german-backward')
-
-    # initialize the document embeddings, mode = mean
-    document_pool_embeddings = DocumentPoolEmbeddings([glove_embedding,
-                                                       flair_embedding_backward,
-                                                       flair_embedding_forward])
-
-    # initialize the document embeddings, mode = LSTM
-    document_rnn_embeddings = DocumentRNNEmbeddings(
-        [glove_embedding, flair_embedding_backward, flair_embedding_forward],
-        rnn_type='LSTM',
-        bidirectional=True)
-
     for x in data_x:
-        # a single embedding for the whole document
-        tokens = word_tokenize(x['body'].lower())
-        flair_sentence = Sentence(' '.join(tokens))
-
-        # document_rnn_embeddings.embed(flair_sentence)
-
-        print(flair_sentence.tokens)
-        print(flair_sentence.get_embedding())
-        print()
-
         # # one embedding per sentence
         # sentences = sent_tokenize(x, language='german')
         # flair_sentences = []
