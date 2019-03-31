@@ -42,16 +42,18 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
     print(stats)
     label_dict = corpus.make_label_dictionary()
 
-    word_embeddings = [WordEmbeddings('de-crawl'), FlairEmbeddings('de-forward'),
-                       FlairEmbeddings('de-backward')]
+    word_embeddings = [WordEmbeddings('de-crawl')]
+                       # FlairEmbeddings('de-forward'),
+                       # FlairEmbeddings('de-backward')]
 
     # 4. initialize document embedding by passing list of word embeddings
     # Can choose between many RNN types (GRU by default, to change use rnn_type parameter)
-    document_embeddings: DocumentRNNEmbeddings = DocumentRNNEmbeddings(word_embeddings,
-                                                                       hidden_size=512,
-                                                                       reproject_words=True,
-                                                                       reproject_words_dimension=256,
-                                                                       )
+    document_embeddings = DocumentRNNEmbeddings(word_embeddings,
+                                                hidden_size=512,
+                                                reproject_words=True,
+                                                reproject_words_dimension=256,
+                                                bidirectional=True
+                                                )
 
     # 5. create the text classifier
     classifier = TextClassifier(document_embeddings, label_dictionary=label_dict, multi_label=True)
