@@ -42,12 +42,7 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
     print(stats)
     label_dict = corpus.make_label_dictionary()
 
-    # 3. make a list of word embeddings
-    word_embeddings = [WordEmbeddings('glove'),
-                       # comment in flair embeddings for state-of-the-art results
-                       # FlairEmbeddings('news-forward'),
-                       # FlairEmbeddings('news-backward'),
-                       ]
+    word_embeddings = [WordEmbeddings('de'), FlairEmbeddings('de'), FlairEmbeddings('de')]
 
     # 4. initialize document embedding by passing list of word embeddings
     # Can choose between many RNN types (GRU by default, to change use rnn_type parameter)
