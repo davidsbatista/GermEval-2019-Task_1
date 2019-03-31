@@ -11,21 +11,28 @@ def convert_data_flair_format(train_x):
 
 
 def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
-
     train_data_x = []
     for x, y in zip(train_x, train_y):
         # a single embedding for the whole document
         tokens = word_tokenize(x['body'].lower())
+        #print(x['body'].lower())
+        #print(tokens)
+        #print(len(tokens))
         if len(tokens) == 0:
             continue
-        flair_sentence = Sentence(' '.join(tokens))
-        flair_sentence.add_labels(y)
-        train_data_x.append(flair_sentence)
+        try:
+            flair_sentence = Sentence(' '.join(tokens))
+            flair_sentence.add_labels(y)
+            train_data_x.append(flair_sentence)
+        except UnboundLocalError:
+            print(x)
 
     test_data_x = []
     for x, y in zip(test_x, test_y):
         # a single embedding for the whole document
         tokens = word_tokenize(x['body'].lower())
+        if len(tokens) == 0:
+            continue
         flair_sentence = Sentence(' '.join(tokens))
         flair_sentence.add_labels(y)
         test_data_x.append(flair_sentence)
