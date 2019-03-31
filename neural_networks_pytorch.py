@@ -10,7 +10,7 @@ def convert_data_flair_format(train_x):
     pass
 
 
-def embed_documents(train_x, test_x, train_y, test_y):
+def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
 
     train_data_x = []
     for x, y in zip(train_x, train_y):
@@ -29,11 +29,8 @@ def embed_documents(train_x, test_x, train_y, test_y):
         test_data_x.append(flair_sentence)
 
     corpus = TaggedCorpus(train=train_data_x, test=test_data_x, dev=test_data_x)
-
     stats = corpus.obtain_statistics()
-
     print(stats)
-
     label_dict = corpus.make_label_dictionary()
 
     # 3. make a list of word embeddings
@@ -58,28 +55,35 @@ def embed_documents(train_x, test_x, train_y, test_y):
     trainer = ModelTrainer(classifier, corpus)
 
     # 7. start the training
-    trainer.train('resources/taggers/ag_news',
+    trainer.train('resources/taggers/',
                   learning_rate=0.1,
                   mini_batch_size=32,
                   anneal_factor=0.5,
                   patience=5,
-                  max_epochs=5)
+                  max_epochs=25)
 
     # 8. plot training curves (optional)
-    from flair.visual.training_curves import Plotter
-    plotter = Plotter()
-    plotter.plot_training_curves('resources/taggers/ag_news/loss.tsv')
-    plotter.plot_weights('resources/taggers/ag_news/weights.txt')
-
-
-
-
-
-
-
-
+    # from flair.visual.training_curves import Plotter
+    # plotter = Plotter()
+    # plotter.plot_training_curves('resources/taggers/germeval19/loss.tsv')
+    # plotter.plot_weights('resources/taggers/germeval19/weights.txt')
+    classifier.save("text-classifier-model")
 
     # print(corpus.obtain_statistics())
+
+    dev_data = []
+    for x in dev_data_x:
+        # a single embedding for the whole document
+        tokens = word_tokenize(x['body'].lower())
+        flair_sentence = Sentence(' '.join(tokens))
+        dev_data.append(flair_sentence)
+
+    predictions = classifier.predict(dev_data)
+
+    for sent in predictions:
+        print(sent)
+        print(sent.labels)
+        print()
 
     """
     # initialize the word embeddings

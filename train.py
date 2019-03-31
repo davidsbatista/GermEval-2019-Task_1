@@ -5,7 +5,6 @@ import pickle
 from collections import defaultdict
 from copy import deepcopy
 
-from flair.data import TaggedCorpus
 from gensim.models import KeyedVectors
 
 from keras.layers import np
@@ -368,7 +367,7 @@ def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y, dev_data_
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, train_data_y,
                                                         random_state=42, test_size=0.30)
 
-    embed_documents(train_x, test_x, train_y, test_y)
+    embed_documents(train_x, test_x, train_y, test_y, dev_data_x)
 
 
 def data_analysis(train_data_x, train_data_y, labels):
@@ -417,7 +416,7 @@ def main():
         data_y_level_0.append(list(labels_0))
     # subtask_a(train_data_x[:100], data_y_level_0[:100], dev_data_x)
 
-    train_lstm_class_with_flair_embeddings(train_data_x[:500], data_y_level_0[:500], dev_data_x)
+    train_lstm_class_with_flair_embeddings(train_data_x, data_y_level_0, dev_data_x)
 
     # train subtask_b
     #subtask_b(train_data_x[:100], train_data_y[:100], dev_data_x)
