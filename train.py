@@ -417,9 +417,9 @@ def main():
         for label in y_labels:
             labels_0.add(label[0])
         data_y_level_0.append(list(labels_0))
-    subtask_a(train_data_x, data_y_level_0, dev_data_x)
+    # subtask_a(train_data_x, data_y_level_0, dev_data_x)
 
-    # train_lstm_class_with_flair_embeddings(train_data_x, data_y_level_0, dev_data_x)
+    train_lstm_class_with_flair_embeddings(train_data_x, data_y_level_0, dev_data_x)
 
     # train subtask_b
     #subtask_b(train_data_x[:100], train_data_y[:100], dev_data_x)
