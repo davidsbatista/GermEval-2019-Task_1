@@ -42,12 +42,18 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
                        # FlairEmbeddings('de-backward')]
 
     document_embeddings = DocumentRNNEmbeddings(word_embeddings,
-                                                hidden_size=128,
+                                                hidden_size=64,
                                                 reproject_words=False,
                                                 reproject_words_dimension=256,
-                                                bidirectional=False)
+                                                dropout=0.5,
+                                                word_dropout=0.3,
+                                                locked_dropout=0.25,
+                                                bidirectional=False,
+                                                rnn_type='LSTM')
 
-    classifier = TextClassifier(document_embeddings, label_dictionary=label_dict, multi_label=True)
+    classifier = TextClassifier(document_embeddings,
+                                label_dictionary=label_dict,
+                                multi_label=True)
 
     trainer = ModelTrainer(classifier, corpus)
     trainer.train('resources/taggers/',
