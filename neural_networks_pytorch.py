@@ -37,7 +37,7 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
     # print(stats)
     label_dict = corpus.make_label_dictionary()
 
-    word_embeddings = [WordEmbeddings('de-crawl')
+    word_embeddings = [WordEmbeddings('de-crawl'),
                        FlairEmbeddings('de-forward'),
                        FlairEmbeddings('de-backward')]
 
