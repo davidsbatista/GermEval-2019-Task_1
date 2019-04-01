@@ -13,7 +13,7 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
     train_data_x = []
     for x, y in zip(train_x, train_y):
         # a single embedding for the whole document
-        tokens = word_tokenize(x['body'].lower())
+        tokens = word_tokenize(x['title'].lower() + " SEP " + x['body'].lower())
         if len(tokens) == 0:
             continue
         flair_sentence = Sentence(' '.join(tokens))
@@ -24,7 +24,7 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
     test_data_y = []
     for x, y in zip(test_x, test_y):
         # a single embedding for the whole document
-        tokens = word_tokenize(x['body'].lower())
+        tokens = word_tokenize(x['title'].lower() + " SEP " + x['body'].lower())
         if len(tokens) == 0:
             continue
         flair_sentence = Sentence(' '.join(tokens))
@@ -91,7 +91,7 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
     dev_data = []
     for x in dev_data_x:
         # a single embedding for the whole document
-        tokens = word_tokenize(x['body'].lower())
+        tokens = word_tokenize(x['title'].lower() + " SEP " + x['body'].lower())
         if len(tokens) == 0:
             continue
         flair_sentence = Sentence(' '.join(tokens))
