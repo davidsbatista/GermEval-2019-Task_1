@@ -42,7 +42,7 @@ def embed_documents(train_x, test_x, train_y, test_y, dev_data_x):
                        # FlairEmbeddings('de-backward')]
 
     document_embeddings = DocumentRNNEmbeddings(word_embeddings,
-                                                hidden_size=64,
+                                                hidden_size=128,
                                                 reproject_words=False,
                                                 reproject_words_dimension=256,
                                                 bidirectional=False)
