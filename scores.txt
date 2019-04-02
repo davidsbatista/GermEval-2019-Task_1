@@ -175,3 +175,12 @@ Ganzheitliches Bewusstsein       0.57      0.70      0.63       138
                  macro avg       0.74      0.61      0.66      3130
               weighted avg       0.79      0.77      0.78      3130
                samples avg       0.79      0.79      0.78      3130
+
+
+wget https://s3.eu-central-1.amazonaws.com/alan-nlp/resources/embeddings-v0.4/de-wiki-fasttext-300d-1M.vectors.npy
+wget https://s3.eu-central-1.amazonaws.com/alan-nlp/resources/embeddings-v0.4/de-wiki-fasttext-300d-1M
+#wget https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.de.300.bin.gz
+
+pip install gensim
+python -m nltk.downloader punkt
+
