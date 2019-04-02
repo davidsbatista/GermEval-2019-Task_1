@@ -155,7 +155,7 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
 
     parameters = {
         # "clf__n_estimators": [10, 100, 1000],
-        "clf__n_estimators": [10, 20],
+        "clf__n_estimators": [250, 300],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
