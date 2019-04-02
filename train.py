@@ -24,7 +24,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import class_weight, compute_sample_weight
 
 from neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
-#from neural_networks_pytorch import embed_documents
+# from neural_networks_pytorch import embed_documents
 from utils import load_data, generate_submission_file
 
 
@@ -147,7 +147,6 @@ def train_baseline(train_data_x, train_data_y):
 
 
 def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
-
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
@@ -185,7 +184,6 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
 
 
 def train_random_forests_multilabel(train_data_x, train_data_y):
-
     # aggregate data for 3-independent classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -210,7 +208,6 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
 
     level = 0
     for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
-
         # encode y labels into one-hot vectors
         ml_binarizer = MultiLabelBinarizer()
         y_labels = ml_binarizer.fit_transform(train_data_y)
@@ -230,6 +227,25 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
         level += 1
 
     return classifiers, ml_binarizers
+
+
+def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y, dev_data_x):
+    """
+    # multi-label classification
+    # https://stackoverflow.com/questions/52855843/multi-label-classification-in-pytorch
+    # https://pytorch.org/docs/stable/nn.html#bceloss
+
+    :param train_data_x:
+    :param train_data_y:
+    :param dev_data_x:
+    :return:
+    """
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, train_data_y,
+                                                        random_state=42, test_size=0.30)
+
+    embed_documents(train_x, test_x, train_y, test_y, dev_data_x)
 
 
 def subtask_a(train_data_x, train_data_y, dev_data_x):
@@ -356,27 +372,11 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     pass
 
 
-def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y, dev_data_x):
-    """
-    # multi-label classification
-    # https://stackoverflow.com/questions/52855843/multi-label-classification-in-pytorch
-    # https://pytorch.org/docs/stable/nn.html#bceloss
-
-    :param train_data_x:
-    :param train_data_y:
-    :param dev_data_x:
-    :return:
-    """
-
-    # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, train_data_y,
-                                                        random_state=42, test_size=0.30)
-
-    embed_documents(train_x, test_x, train_y, test_y, dev_data_x)
-
-
 def data_analysis(train_data_x, train_data_y, labels):
     # TODO: top-words per class
+
+    author_topic = defaultdict(int)
+
     # for sample_x, sample_y in zip(train_data_x, train_data_y):
     #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
     #     print(len(sample_x['title'].split()))
@@ -384,6 +384,20 @@ def data_analysis(train_data_x, train_data_y, labels):
     #     print(len(sample_y))
     #     print()
 
+    for sample_x, sample_y in zip(train_data_x, train_data_y):
+        # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+        print(sample_x['authors'].split(","))
+        print(sample_y)
+        print()
+
+        for x in sample_x['authors'].split(","):
+            author_topic[x.strip()] += 1
+
+    for k, v in author_topic.items():
+        if v > 1:
+            print(k, v)
+
+    """
     from pandas import DataFrame
     df_stats_level_0 = DataFrame.from_dict(labels['0'], orient='index', columns=['counts'])
 
@@ -399,10 +413,10 @@ def data_analysis(train_data_x, train_data_y, labels):
     df_stats_level_2 = DataFrame.from_dict(labels['2'], orient='index', columns=['counts'])
     print(df_stats_level_2)
     df_stats_level_2.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
+    """
 
 
 def main():
-
     # ToDo: use stratified splits
     # ToDo: produce a run for subtask-B
 
@@ -414,20 +428,19 @@ def main():
 
     # do some data analysis
     # data_analysis(train_data_x, train_data_y, labels)
+    # exit(-1)
 
-    # train subtask_a
-    data_y_level_0 = []
-    for y_labels in train_data_y:
-        labels_0 = set()
-        for label in y_labels:
-            labels_0.add(label[0])
-        data_y_level_0.append(list(labels_0))
-    subtask_a(train_data_x, data_y_level_0, dev_data_x)
-
-    # train_lstm_class_with_flair_embeddings(train_data_x, data_y_level_0, dev_data_x)
+    # # train subtask_a
+    # data_y_level_0 = []
+    # for y_labels in train_data_y:
+    #     labels_0 = set()
+    #     for label in y_labels:
+    #         labels_0.add(label[0])
+    #     data_y_level_0.append(list(labels_0))
+    # subtask_a(train_data_x, data_y_level_0, dev_data_x)
 
     # train subtask_b
-    #subtask_b(train_data_x[:100], train_data_y[:100], dev_data_x)
+    subtask_b(train_data_x, train_data_y, dev_data_x)
 
 
 if __name__ == '__main__':
