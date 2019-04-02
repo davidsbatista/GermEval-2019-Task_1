@@ -24,7 +24,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import class_weight, compute_sample_weight
 
 from neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
-from neural_networks_pytorch import embed_documents
+#from neural_networks_pytorch import embed_documents
 from utils import load_data, generate_submission_file
 
 
