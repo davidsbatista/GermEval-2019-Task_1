@@ -70,9 +70,8 @@ def train_bi_lstm(train_data_x, train_data_y):
     model = build_lstm_based_model(static_embeddings, ml_binarizer, max_sent_len)
 
     # since we have imbalanced dataset
-    sample_weights = compute_sample_weight('balanced', train_y)
-    model.fit(train_x, train_y, batch_size=16, epochs=5, verbose=1, validation_split=0.2,
-              sample_weight=sample_weights)
+    # sample_weights = compute_sample_weight('balanced', train_y)
+    model.fit(train_x, train_y, batch_size=16, epochs=5, verbose=1, validation_split=0.2)
 
     predictions = model.predict(test_x)
 
