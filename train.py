@@ -24,7 +24,6 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import class_weight, compute_sample_weight
 
 from neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
-# from neural_networks_pytorch import embed_documents
 from utils import load_data, generate_submission_file
 
 
@@ -108,16 +107,16 @@ def train_baseline(train_data_x, train_data_y):
     new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
 
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
+    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
+                                                        random_state=42,
                                                         test_size=0.30)
 
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
-        ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
-                                                       solver='sag',
-                                                       max_iter=5000),
-                                    n_jobs=3))
+        ('clf', OneVsRestClassifier(
+            LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
+            n_jobs=3))
     ])
     parameters = {
         "clf__estimator__C": [1, 10],
@@ -229,25 +228,6 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
     return classifiers, ml_binarizers
 
 
-def train_lstm_class_with_flair_embeddings(train_data_x, train_data_y, dev_data_x):
-    """
-    # multi-label classification
-    # https://stackoverflow.com/questions/52855843/multi-label-classification-in-pytorch
-    # https://pytorch.org/docs/stable/nn.html#bceloss
-
-    :param train_data_x:
-    :param train_data_y:
-    :param dev_data_x:
-    :return:
-    """
-
-    # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, train_data_y,
-                                                        random_state=42, test_size=0.30)
-
-    embed_documents(train_x, test_x, train_y, test_y, dev_data_x)
-
-
 def subtask_a(train_data_x, train_data_y, dev_data_x):
     """
     Subtask A
@@ -270,46 +250,46 @@ def subtask_a(train_data_x, train_data_y, dev_data_x):
     """
 
     # Subtask-A: Level 0 multi-label classifier
-    # model, ml_binarizer = train_baseline(train_data_x, train_data_y)
-    #
-    # with open('models_subtask_a.pkl', 'wb') as f_out:
-    #     pickle.dump(model, f_out)
-    #
-    # with open('ml_binarizer_subtask_a.pkl', 'wb') as f_out:
-    #     pickle.dump(ml_binarizer, f_out)
-    #
-    # # apply on dev data
-    # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-    # predictions = model.predict(new_data_x)
-    #
-    # with open('answer_a.txt', 'wt') as f_out:
-    #     f_out.write(str('subtask_a\n'))
-    #     for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-    #         f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
+    model, ml_binarizer = train_baseline(train_data_x, train_data_y)
 
-    # Subtask-A: Neural Networks Approach
+    with open('models_subtask_a.pkl', 'wb') as f_out:
+        pickle.dump(model, f_out)
 
-    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
+    with open('ml_binarizer_subtask_a.pkl', 'wb') as f_out:
+        pickle.dump(ml_binarizer, f_out)
 
-    print("Vectorizing dev data\n")
-    # dev_data_x: vectorize, i.e. tokens to indexes and pad
-    vectors = []
-    for x in dev_data_x:
-        tokens = []
-        text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
-        vectors.append(vector)
-    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                 truncating='post', value=token2idx['PADDED'])
-    predictions = model.predict(test_vectors)
-    binary_predictions = []
-    for pred in predictions:
-        binary = [0 if i <= 0.5 else 1 for i in pred]
-        binary_predictions.append(binary)
-    generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
+    # apply on dev data
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+    predictions = model.predict(new_data_x)
+
+    with open('answer_a.txt', 'wt') as f_out:
+        f_out.write(str('subtask_a\n'))
+        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+            f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
+
+    # # Subtask-A: Neural Networks Approach
+    #
+    # model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
+    #
+    # print("Vectorizing dev data\n")
+    # # dev_data_x: vectorize, i.e. tokens to indexes and pad
+    # vectors = []
+    # for x in dev_data_x:
+    #     tokens = []
+    #     text = x['title'] + " SEP " + x['body']
+    #     sentences = sent_tokenize(text, language='german')
+    #     for s in sentences:
+    #         tokens += word_tokenize(s)
+    #     vector = vectorizer(tokens)
+    #     vectors.append(vector)
+    # test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+    #                              truncating='post', value=token2idx['PADDED'])
+    # predictions = model.predict(test_vectors)
+    # binary_predictions = []
+    # for pred in predictions:
+    #     binary = [0 if i <= 0.5 else 1 for i in pred]
+    #     binary_predictions.append(binary)
+    # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
 def subtask_b(train_data_x, train_data_y, dev_data_x):
@@ -417,8 +397,8 @@ def data_analysis(train_data_x, train_data_y, labels):
 
 
 def main():
-    # ToDo: use stratified splits
     # ToDo: produce a run for subtask-B
+    # ToDo: explore the hiearchical structure and enforce it in the classifiers
 
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
@@ -431,16 +411,16 @@ def main():
     # exit(-1)
 
     # # train subtask_a
-    # data_y_level_0 = []
-    # for y_labels in train_data_y:
-    #     labels_0 = set()
-    #     for label in y_labels:
-    #         labels_0.add(label[0])
-    #     data_y_level_0.append(list(labels_0))
-    # subtask_a(train_data_x, data_y_level_0, dev_data_x)
+    data_y_level_0 = []
+    for y_labels in train_data_y:
+        labels_0 = set()
+        for label in y_labels:
+            labels_0.add(label[0])
+        data_y_level_0.append(list(labels_0))
+    subtask_a(train_data_x, data_y_level_0, dev_data_x)
 
     # train subtask_b
-    subtask_b(train_data_x, train_data_y, dev_data_x)
+    # subtask_b(train_data_x, train_data_y, dev_data_x)
 
 
 if __name__ == '__main__':
