@@ -119,7 +119,7 @@ def train_baseline(train_data_x, train_data_y):
             n_jobs=3))
     ])
     parameters = {
-        "clf__estimator__C": [100, 150, 200, 250],
+        "clf__estimator__C": [200, 250, 300, 350]
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
