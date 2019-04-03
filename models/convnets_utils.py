@@ -64,7 +64,6 @@ def get_conv_pool(x_input, suffix, n_grams=[3,4,5], feature_maps=100):
     for n in n_grams:
         branch = Conv1D(filters=feature_maps, kernel_size=n, activation=relu, name='Conv_'+suffix+'_'+str(n))(x_input)
         branch = MaxPooling1D(pool_size=2, strides=None, padding='valid', name='MaxPooling_'+suffix+'_'+str(n))(branch)
-        # branch = GlobalMaxPooling1D(pool_size=2, strides=None, padding='valid', name='MaxPooling_'+suffix+'_'+str(n))(branch)
         branch = Flatten(name='Flatten_'+suffix+'_'+str(n))(branch)
         branches.append(branch)
     return branches

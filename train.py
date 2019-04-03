@@ -395,9 +395,6 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_x.shape)
     print(train_y.shape)
 
-    # model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
-    # model.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.3)
-
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     # build a word embeddings matrix, out of vocabulary words will be initialized randomly
@@ -418,13 +415,13 @@ def train_cnn_sent_class(train_data_x, train_data_y):
                                        weights=[embedding_matrix], input_length=max_sent_len,
                                        trainable=False, name='embeddings_static')
 
-    model= get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
-    model.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
+    # model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
+    # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
+    # model.fit(train_x, train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
 
-    #model= get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
-    #model.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
-
-    predictions = model.predict(test_x, verbose=1)
+    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
+    model.fit([train_x, train_x], train_y, batch_size=32, epochs=10)
+    predictions = model.predict([train_x, train_x], verbose=1)
 
     # ToDo: there must be a more efficient way to do this
     binary_predictions = []
