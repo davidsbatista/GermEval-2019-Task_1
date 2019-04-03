@@ -1,0 +1,107 @@
+Level 0
+=======
+Literatur & Unterhaltung 	 15
+Sachbuch 	 18
+Ganzheitliches Bewusstsein 	 10
+Glaube & Ethik 	 7
+Ratgeber 	 12
+Künste 	 4
+Architektur & Garten 	 5
+Kinderbuch & Jugendbuch 	 22
+
+
+Level 1
+=======
+Romane & Erzählungen 	 18
+Krimi & Thriller 	 19
+Frauenunterhaltung 	 4
+Historische Romane 	 0
+Romance 	 0
+Erotik 	 0
+Klassiker & Lyrik 	 5
+Fantasy 	 9
+Romantasy 	 0
+Mystery 	 0
+Horror 	 0
+Science Fiction 	 15
+Literatur & Unterhaltung Satire 	 0
+Comic & Cartoon 	 0
+Musik 	 0
+Biographien & Autobiographien 	 5
+Schicksalsberichte 	 4
+Politik & Gesellschaft 	 5
+Briefe, Essays, Gespräche 	 0
+(Zeit-) Geschichte 	 8
+Kunst & Kultur 	 4
+Infotainment & erzählendes Sachbuch 	 0
+Lifestyle 	 0
+Wirtschaft & Recht 	 2
+Natur, Wissenschaft, Technik 	 6
+Sachbuch Philosophie 	 0
+Psychologie 	 4
+Lebensgestaltung 	 0
+Glaube und Grenzerfahrungen 	 0
+Abenteuer, Reisen, fremde Kulturen 	 2
+Sport 	 0
+Regionalia 	 0
+Kabarett & Satire 	 0
+Ganzheitlich Leben 	 0
+Ganzheitliche Psychologie 	 5
+Weisheiten der Welt 	 3
+Übernatürliches 	 3
+Körper & Seele 	 2
+Energieheilung 	 2
+Schicksalsdeutung 	 2
+Mondkräfte 	 0
+Naturheilweisen 	 2
+Esoterische Romane 	 0
+Psychologie & Spiritualität 	 0
+Spiritualität & Religion 	 7
+Sterben, Tod und Trauer 	 2
+Religionsunterricht 	 0
+Gemeindearbeit 	 10
+Theologie 	 10
+Religiöse Literatur 	 0
+Essen & Trinken 	 4
+Gesundheit & Ernährung 	 7
+Lebenshilfe & Psychologie 	 9
+Eltern & Familie 	 10
+Ratgeber Partnerschaft & Sexualität 	 4
+Beauty & Wellness 	 3
+Fitness & Sport 	 5
+Kommunikation & Beruf 	 7
+Geld & Investment 	 0
+Recht & Steuern 	 0
+Freizeit & Hobby 	 5
+Wissen & Nachschlagewerke 	 2
+Kunst 	 4
+Design 	 0
+Fotografie 	 0
+Mode & Lifestyle 	 0
+Architektur 	 10
+Wohnen & Innenarchitektur 	 4
+Garten & Landschaftsarchitektur 	 4
+Handwerk Holz 	 3
+Handwerk Farbe 	 3
+Beschäftigung, Malen, Rätseln 	 0
+Lyrik, Anthologien, Jahrbücher 	 0
+Natur, Tiere, Umwelt, Mensch 	 0
+Geschichte, Politik 	 0
+Kunst, Musik 	 0
+Biographien 	 0
+Echtes Leben, Realistischer Roman 	 0
+Abenteuer 	 0
+Geister- und Gruselgeschichten 	 0
+Fantasy und Science Fiction 	 0
+Liebe, Beziehung und Freundschaft 	 0
+Familie 	 0
+Tiergeschichten 	 0
+Lustige Geschichten, Witze 	 0
+Sportgeschichten 	 0
+Schulgeschichten 	 0
+Historische Romane, Zeitgeschichte 	 0
+Religion, Glaube, Ethik, Philosophie 	 0
+Krimis und Thriller 	 0
+Detektivgeschichten 	 0
+Märchen, Sagen 	 0
+Schullektüre 	 0
