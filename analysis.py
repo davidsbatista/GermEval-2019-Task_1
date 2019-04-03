@@ -1,9 +1,11 @@
+from collections import defaultdict
+
 from utils import load_data
 
 
 def data_analysis(train_data_x, train_data_y, labels):
-    # TODO: top-words per class
 
+    # TODO: top-words per class
     author_topic = defaultdict(int)
 
     # for sample_x, sample_y in zip(train_data_x, train_data_y):
@@ -26,7 +28,7 @@ def data_analysis(train_data_x, train_data_y, labels):
     #     if v > 1:
     #         print(k, v)
 
-    # extract hierachichal structure
+    # extract hierarchical structure
     level_0 = ['Architektur & Garten',
                'Ganzheitliches Bewusstsein',
                'Glaube & Ethik',
