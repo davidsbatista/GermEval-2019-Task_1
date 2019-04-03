@@ -123,8 +123,6 @@ def train_baseline(train_data_x, train_data_y):
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
-    print("Best parameters set:")
-    print(grid_search_tune.best_estimator_.steps)
 
     # measuring performance on test set
     print("Applying best classifier on test data:")
@@ -139,6 +137,11 @@ def train_baseline(train_data_x, train_data_y):
     print("Training classifier with best parameters on all data")
     best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
     clf = grid_search_tune.best_estimator_.steps[1][1]
+
+    print(best_tf_idf)
+    print()
+    print(clf)
+
     best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
     best_pipeline.fit(new_data_x, data_y)
 
@@ -364,18 +367,54 @@ def data_analysis(train_data_x, train_data_y, labels):
     #     print(len(sample_y))
     #     print()
 
-    for sample_x, sample_y in zip(train_data_x, train_data_y):
-        # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
-        print(sample_x['authors'].split(","))
-        print(sample_y)
-        print()
+    # for sample_x, sample_y in zip(train_data_x, train_data_y):
+    #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+    #     print(sample_x['authors'].split(","))
+    #     print(sample_y)
+    #     print()
+    #
+    #     for x in sample_x['authors'].split(","):
+    #         author_topic[x.strip()] += 1
+    #
+    # for k, v in author_topic.items():
+    #     if v > 1:
+    #         print(k, v)
 
-        for x in sample_x['authors'].split(","):
-            author_topic[x.strip()] += 1
+    # extract hierachichal structure
+    level_0 = ['Architektur & Garten',
+               'Ganzheitliches Bewusstsein',
+               'Glaube & Ethik',
+               'Kinderbuch & Jugendbuch',
+               'Künste',
+               'Literatur & Unterhaltung',
+               'Ratgeber',
+               'Sachbuch']
 
-    for k, v in author_topic.items():
-        if v > 1:
-            print(k, v)
+    hierarchical_level_0 = defaultdict(list)
+    hierarchical_level_1 = defaultdict(list)
+    all_lines = []
+
+    with open('blurbs_dev_participants/hierarchy.txt', 'rt') as f_in:
+        for line in f_in:
+            all_lines.append(line)
+            parts = line.split('\t')
+            if any(x == parts[0].strip() for x in level_0):
+                hierarchical_level_1[parts[1].strip()] = []
+                hierarchical_level_0[parts[0].strip()].append(parts[1].strip())
+
+    level_1 = list(hierarchical_level_1.keys())
+    for line in all_lines:
+        parts = line.split('\t')
+        if any(x == parts[0].strip() for x in level_1):
+            hierarchical_level_1[parts[0].strip()].append(parts[1].strip())
+
+    print("\nLevel 0")
+    for k, v in hierarchical_level_0.items():
+        print(k, '\t', len(v))
+
+    print("\nLevel 1")
+    for k, v in hierarchical_level_1.items():
+        print(k, '\t', len(v))
 
     """
     from pandas import DataFrame
@@ -408,9 +447,8 @@ def main():
 
     # do some data analysis
     # data_analysis(train_data_x, train_data_y, labels)
-    # exit(-1)
 
-    # # train subtask_a
+    # train subtask_a
     data_y_level_0 = []
     for y_labels in train_data_y:
         labels_0 = set()
