@@ -391,7 +391,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
-                                                        test_size=0.20)
+                                                        test_size=0.30)
     print(train_x.shape)
     print(train_y.shape)
 
@@ -414,6 +414,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
                                 weights=[embedding_matrix], input_length=max_sent_len,
                                 trainable=True, name='embeddings')
     model_2 = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, 8)
+
+    history = model_2.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, split=0.3)
 
     predictions = model_2.predict(test_x, verbose=1)
 
