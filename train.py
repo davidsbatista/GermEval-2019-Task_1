@@ -115,7 +115,7 @@ def train_baseline(train_data_x, train_data_y):
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
         ('clf', OneVsRestClassifier(
-            LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
+            LogisticRegression(class_weight='balanced', solver='lbfgs', max_iter=5000),
             n_jobs=3))
     ])
     parameters = {
