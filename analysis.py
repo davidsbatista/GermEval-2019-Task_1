@@ -66,6 +66,7 @@ def data_analysis(train_data_x, train_data_y, labels):
     for k, v in hierarchical_level_1.items():
         print(k, '\t', len(v))
 
+    print()
     for k, v in hierarchical_level_0.items():
         print(k)
         print("-"*len(k))

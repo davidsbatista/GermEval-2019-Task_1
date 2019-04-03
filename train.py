@@ -23,6 +23,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import class_weight, compute_sample_weight
 
+from models.convnets_utils import get_cnn_rand
 from models.neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
 from utils import load_data, generate_submission_file
 
@@ -115,11 +116,10 @@ def train_baseline(train_data_x, train_data_y):
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
         ('clf', OneVsRestClassifier(
-            LogisticRegression(class_weight='balanced', solver='liblinear', max_iter=5000),
+            LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
             n_jobs=3))
     ])
     parameters = {
-        "clf__estimator__dual": [True, False],
         "clf__estimator__C": [200, 250, 300, 350]
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
@@ -253,23 +253,32 @@ def subtask_a(train_data_x, train_data_y, dev_data_x):
     :return:
     """
 
-    # Subtask-A: Level 0 multi-label classifier
-    model, ml_binarizer = train_baseline(train_data_x, train_data_y)
+    data_y_level_0 = []
+    for y_labels in train_data_y:
+        labels_0 = set()
+        for label in y_labels:
+            labels_0.add(label[0])
+        data_y_level_0.append(list(labels_0))
 
-    with open('models_subtask_a.pkl', 'wb') as f_out:
-        pickle.dump(model, f_out)
+    train_data_y = data_y_level_0
 
-    with open('ml_binarizer_subtask_a.pkl', 'wb') as f_out:
-        pickle.dump(ml_binarizer, f_out)
-
-    # apply on dev data
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-    predictions = model.predict(new_data_x)
-
-    with open('answer.txt', 'wt') as f_out:
-        f_out.write(str('subtask_a\n'))
-        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-            f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
+    # # Subtask-A: Level 0 multi-label classifier
+    # model, ml_binarizer = train_baseline(train_data_x, train_data_y)
+    #
+    # with open('results/models_subtask_a.pkl', 'wb') as f_out:
+    #     pickle.dump(model, f_out)
+    #
+    # with open('results/ml_binarizer_subtask_a.pkl', 'wb') as f_out:
+    #     pickle.dump(ml_binarizer, f_out)
+    #
+    # # apply on dev data
+    # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+    # predictions = model.predict(new_data_x)
+    #
+    # with open('answer.txt', 'wt') as f_out:
+    #     f_out.write(str('subtask_a\n'))
+    #     for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+    #         f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
 
     # # Subtask-A: Neural Networks Approach
     #
@@ -294,6 +303,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x):
     #     binary = [0 if i <= 0.5 else 1 for i in pred]
     #     binary_predictions.append(binary)
     # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
+
+    train_cnn_sent_class(train_data_x, train_data_y)
 
 
 def subtask_b(train_data_x, train_data_y, dev_data_x):
@@ -350,10 +361,53 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
                 classification[isbn][2] + '\n')
 
 
-# ToDo: functions w/ other ideas/models
-
 def train_cnn_sent_class(train_data_x, train_data_y):
-    pass
+
+    token2idx, max_sent_len = build_token_index(train_data_x)
+
+    # y_data: encode into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+
+    # x_data: vectorize, i.e. tokens to indexes and pad
+    print("Vectorizing input data\n")
+    vectors = []
+    for x in train_data_x:
+        tokens = []
+        text = x['title'] + " SEP " + x['body']
+        sentences = sent_tokenize(text, language='german')
+        for s in sentences:
+            tokens += word_tokenize(s)
+        vector = vectorizer(tokens)
+        vectors.append(vector)
+    vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+                                   truncating='post', value=token2idx['PADDED'])
+
+    train_data_x = vectors_padded
+    data_y = y_labels
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+                                                        random_state=42,
+                                                        test_size=0.20)
+    # print("Loading pre-trained Embeddings\n")
+    # static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+
+    print(train_x.shape)
+    print(train_y.shape)
+
+    model_1 = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
+    history = model_1.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True)
+
+    predictions = model_1.predict(test_x, verbose=1)
+
+    # ToDo: there must be a more efficient way to do this
+    binary_predictions = []
+    for pred in predictions:
+        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+    print(classification_report(test_y, np.array(binary_predictions),
+                                target_names=ml_binarizer.classes_))
 
 
 def main():
@@ -369,13 +423,7 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    data_y_level_0 = []
-    for y_labels in train_data_y:
-        labels_0 = set()
-        for label in y_labels:
-            labels_0.add(label[0])
-        data_y_level_0.append(list(labels_0))
-    subtask_a(train_data_x, data_y_level_0, dev_data_x)
+    subtask_a(train_data_x, train_data_y, dev_data_x)
 
     # train subtask_b
     # subtask_b(train_data_x, train_data_y, dev_data_x)
