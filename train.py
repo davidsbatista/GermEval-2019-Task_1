@@ -425,6 +425,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 
     model_3 = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
 
+    model_3.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
+
     predictions = model_3.predict(test_x, verbose=1)
 
     # ToDo: there must be a more efficient way to do this
