@@ -413,11 +413,11 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 
     embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
                                         weights=[embedding_matrix], input_length=max_sent_len,
-                                        trainable=True, name='embeddings')
+                                        trainable=True, name='embeddings_dynamic')
 
     embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
                                        weights=[embedding_matrix], input_length=max_sent_len,
-                                       trainable=False, name='embeddings')
+                                       trainable=False, name='embeddings_static')
 
     # model_2 = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, 8)
     # history = model_2.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True,
