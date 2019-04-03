@@ -119,7 +119,7 @@ def train_baseline(train_data_x, train_data_y):
             n_jobs=3))
     ])
     parameters = {
-        "clf__estimator__C": [1, 10, 50, 100],
+        "clf__estimator__C": [100, 150, 200],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
@@ -446,7 +446,8 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # do some data analysis
-    # data_analysis(train_data_x, train_data_y, labels)
+    #data_analysis(train_data_x, train_data_y, labels)
+    #exit(-1)
 
     # train subtask_a
     data_y_level_0 = []
