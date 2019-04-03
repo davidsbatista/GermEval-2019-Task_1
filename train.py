@@ -23,7 +23,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import class_weight, compute_sample_weight
 
-from neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
+from models.neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
 from utils import load_data, generate_submission_file
 
 
@@ -119,7 +119,7 @@ def train_baseline(train_data_x, train_data_y):
             n_jobs=3))
     ])
     parameters = {
-        "clf__estimator__C": [100, 150, 200],
+        "clf__estimator__C": [100, 150, 200, 250],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
@@ -358,6 +358,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 def main():
     # ToDo: produce a run for subtask-B
     # ToDo: explore the hierarchical structure and enforce it in the classifiers
+    # ToDo: ver os que nao foram atribuidos nenhuma label, forcar uma com base nas palavras ?
+    # ToDo: confusion-matrix ?
 
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
