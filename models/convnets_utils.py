@@ -5,7 +5,7 @@ from sklearn.metrics import classification_report
 
 from keras.models import Model
 from keras.activations import relu
-from keras.layers import Input, Dense, Embedding, Flatten, Conv1D, MaxPooling1D
+from keras.layers import Input, Dense, Embedding, Flatten, Conv1D, MaxPooling1D, GlobalMaxPooling1D
 from keras.layers import Dropout, concatenate
 
 
@@ -63,7 +63,8 @@ def get_conv_pool(x_input, suffix, n_grams=[3,4,5], feature_maps=100):
     branches = []
     for n in n_grams:
         branch = Conv1D(filters=feature_maps, kernel_size=n, activation=relu, name='Conv_'+suffix+'_'+str(n))(x_input)
-        branch = MaxPooling1D(pool_size=2, strides=None, padding='valid', name='MaxPooling_'+suffix+'_'+str(n))(branch)
+        # branch = MaxPooling1D(pool_size=2, strides=None, padding='valid', name='MaxPooling_'+suffix+'_'+str(n))(branch)
+        branch = GlobalMaxPooling1D(pool_size=2, strides=None, padding='valid', name='MaxPooling_'+suffix+'_'+str(n))(branch)
         branch = Flatten(name='Flatten_'+suffix+'_'+str(n))(branch)
         branches.append(branch)
     return branches
@@ -129,7 +130,7 @@ def get_cnn_multichannel(embedding_layer_channel_1, embedding_layer_channel_2, m
     # concatenate both models and pass to classification layer
     z = concatenate([z_static,z_dynamic], axis=-1)
 
-    # pass the concatenated vector to the predition layer
+    # pass the concatenated vector to the prediction layer
     o = Dense(num_classes, activation='sigmoid', name='output')(z)
 
     model = Model(inputs=[input_dynamic, input_static], outputs=o)

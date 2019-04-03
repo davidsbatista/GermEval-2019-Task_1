@@ -24,7 +24,7 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import class_weight, compute_sample_weight
 
 from models.convnets_utils import get_cnn_rand, get_cnn_pre_trained_embeddings, \
-    create_embeddings_matrix, get_embeddings_layer, load_fasttext_embeddings
+    create_embeddings_matrix, get_embeddings_layer, load_fasttext_embeddings, get_cnn_multichannel
 from models.neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
 from utils import load_data, generate_submission_file
 
@@ -411,15 +411,21 @@ def train_cnn_sent_class(train_data_x, train_data_y):
         except KeyError:
             not_found += 1
 
-    embedding_layer = Embedding(len(token2idx), static_embeddings.vector_size,
-                                weights=[embedding_matrix], input_length=max_sent_len,
-                                trainable=True, name='embeddings')
-    model_2 = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, 8)
+    embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
+                                        weights=[embedding_matrix], input_length=max_sent_len,
+                                        trainable=True, name='embeddings')
 
-    history = model_2.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True,
-                          validation_split=0.2)
+    embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
+                                       weights=[embedding_matrix], input_length=max_sent_len,
+                                       trainable=False, name='embeddings')
 
-    predictions = model_2.predict(test_x, verbose=1)
+    # model_2 = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, 8)
+    # history = model_2.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True,
+    #                      validation_split=0.2)
+
+    model_3 = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
+
+    predictions = model_3.predict(test_x, verbose=1)
 
     # ToDo: there must be a more efficient way to do this
     binary_predictions = []
