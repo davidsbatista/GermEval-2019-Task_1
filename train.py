@@ -119,7 +119,7 @@ def train_baseline(train_data_x, train_data_y):
             n_jobs=3))
     ])
     parameters = {
-        "clf__estimator__C": [1, 10],
+        "clf__estimator__C": [1, 10, 50, 100],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
@@ -437,7 +437,7 @@ def data_analysis(train_data_x, train_data_y, labels):
 
 def main():
     # ToDo: produce a run for subtask-B
-    # ToDo: explore the hiearchical structure and enforce it in the classifiers
+    # ToDo: explore the hierarchical structure and enforce it in the classifiers
 
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
