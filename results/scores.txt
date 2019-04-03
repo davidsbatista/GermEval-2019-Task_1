@@ -184,3 +184,20 @@ wget https://s3.eu-central-1.amazonaws.com/alan-nlp/resources/embeddings-v0.4/de
 pip install gensim
 python -m nltk.downloader punkt
 
+
+
+                            precision    recall  f1-score   support
+
+      Architektur & Garten       1.00      0.51      0.68        41
+Ganzheitliches Bewusstsein       0.68      0.71      0.70       213
+            Glaube & Ethik       0.80      0.62      0.70       162
+   Kinderbuch & Jugendbuch       0.83      0.68      0.75       625
+                    Künste       0.90      0.54      0.68        35
+  Literatur & Unterhaltung       0.89      0.91      0.90      2402
+                  Ratgeber       0.76      0.81      0.78       567
+                  Sachbuch       0.69      0.63      0.66       646
+
+                 micro avg       0.83      0.81      0.82      4691
+                 macro avg       0.82      0.68      0.73      4691
+              weighted avg       0.83      0.81      0.81      4691
+               samples avg       0.80      0.83      0.80      4691

@@ -1,5 +1,7 @@
-from collections import defaultdict
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+from collections import defaultdict
 from utils import load_data
 
 
