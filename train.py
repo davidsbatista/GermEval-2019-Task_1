@@ -7,7 +7,7 @@ from copy import deepcopy
 
 from gensim.models import KeyedVectors
 
-from keras.layers import np
+from keras.layers import np, Embedding
 from keras_preprocessing.sequence import pad_sequences
 
 from nltk.corpus import stopwords
@@ -23,7 +23,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 from sklearn.utils import class_weight, compute_sample_weight
 
-from models.convnets_utils import get_cnn_rand
+from models.convnets_utils import get_cnn_rand, get_cnn_pre_trained_embeddings, \
+    create_embeddings_matrix, get_embeddings_layer, load_fasttext_embeddings
 from models.neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
 from utils import load_data, generate_submission_file
 
@@ -391,16 +392,30 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
                                                         test_size=0.20)
-    # print("Loading pre-trained Embeddings\n")
-    # static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
-
     print(train_x.shape)
     print(train_y.shape)
 
-    model_1 = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
-    history = model_1.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True)
+    # model_1 = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
+    # history = model_1.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, split=0.3)
 
-    predictions = model_1.predict(test_x, verbose=1)
+    print("Loading pre-trained Embeddings\n")
+    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
+    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
+    not_found = 0
+    for word, i in token2idx.items():
+        try:
+            embedding_vector = static_embeddings[word.lower()]
+            embedding_matrix[i] = embedding_vector
+        except KeyError:
+            not_found += 1
+
+    embedding_layer = Embedding(len(token2idx), static_embeddings.vector_size,
+                                weights=[embedding_matrix], input_length=max_sent_len,
+                                trainable=True, name='embeddings')
+    model_2 = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, 8)
+
+    predictions = model_2.predict(test_x, verbose=1)
 
     # ToDo: there must be a more efficient way to do this
     binary_predictions = []

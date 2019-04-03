@@ -74,6 +74,14 @@ def data_analysis(train_data_x, train_data_y, labels):
             print(label)
         print()
 
+    print()
+    for k, v in hierarchical_level_1.items():
+        print(k)
+        print("-" * len(k))
+        for label in v:
+            print(label)
+        print()
+
     """
     from pandas import DataFrame
     df_stats_level_0 = DataFrame.from_dict(labels['0'], orient='index', columns=['counts'])
