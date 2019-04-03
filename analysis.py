@@ -62,15 +62,16 @@ def data_analysis(train_data_x, train_data_y, labels):
     for k, v in hierarchical_level_0.items():
         print(k, '\t', len(v))
 
-    for k, v in hierarchical_level_0.items():
-        print(k)
-        for label in v:
-            print(label)
-        print()
-
     print("\nLevel 1")
     for k, v in hierarchical_level_1.items():
         print(k, '\t', len(v))
+
+    for k, v in hierarchical_level_0.items():
+        print(k)
+        print("-"*len(k))
+        for label in v:
+            print(label)
+        print()
 
     """
     from pandas import DataFrame
