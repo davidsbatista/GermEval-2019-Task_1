@@ -395,9 +395,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_x.shape)
     print(train_y.shape)
 
-    # model_1 = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
-    # history = model_1.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True,
-    #                      validation_split=0.3)
+    # model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
+    # model.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.3)
 
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
@@ -419,15 +418,13 @@ def train_cnn_sent_class(train_data_x, train_data_y):
                                        weights=[embedding_matrix], input_length=max_sent_len,
                                        trainable=False, name='embeddings_static')
 
-    # model_2 = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, 8)
-    # history = model_2.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True,
-    #                      validation_split=0.2)
+    model= get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
+    model.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
 
-    model_3 = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
+    #model= get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
+    #model.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
 
-    model_3.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
-
-    predictions = model_3.predict(test_x, verbose=1)
+    predictions = model.predict(test_x, verbose=1)
 
     # ToDo: there must be a more efficient way to do this
     binary_predictions = []
