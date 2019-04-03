@@ -396,7 +396,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_y.shape)
 
     # model_1 = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
-    # history = model_1.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, split=0.3)
+    # history = model_1.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True,
+    #                      validation_split=0.3)
 
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
@@ -415,7 +416,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
                                 trainable=True, name='embeddings')
     model_2 = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, 8)
 
-    history = model_2.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True, split=0.3)
+    history = model_2.fit(x=train_x, y=train_y, batch_size=32, epochs=10, verbose=True,
+                          validation_split=0.2)
 
     predictions = model_2.predict(test_x, verbose=1)
 
