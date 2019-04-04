@@ -10,12 +10,11 @@ from utils import load_data
 
 def data_analysis(train_data_x, train_data_y, labels):
 
-    author_topic = defaultdict(int)
-
     # top-words per class
     top_words_label = defaultdict(list)
     for sample_x, sample_y in zip(train_data_x, train_data_y):
-        new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+        new_data_x = sample_x['title'] + " SEP " + sample_x['body']
+        print(sample_y[0][0], len(top_words_label[sample_y[0][0]]))
         top_words_label[sample_y[0][0]].append(new_data_x)
 
     # compute TF-IDF vectorizer for each label
@@ -44,6 +43,8 @@ def data_analysis(train_data_x, train_data_y, labels):
     #         print(k, v)
 
     # extract_hierarchy()
+
+    author_topic = defaultdict(int)
 
     """
     from pandas import DataFrame
