@@ -65,7 +65,7 @@ def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2], feature_maps=300):
 
     for n in n_grams:
         branch = Conv1D(filters=feature_maps, kernel_size=n, activation=relu,
-                        kernel_regularizer=regularizers.l2(0.01),
+                        # kernel_regularizer=regularizers.l2(0.01),
                         name='Conv_'+suffix+'_'+str(n))(x_input)
 
         branch = MaxPooling1D(pool_size=(max_len-n+1),

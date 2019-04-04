@@ -294,7 +294,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     # ToDo: there must be a more efficient way to do this
     binary_predictions = []
     for pred in predictions:
-        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+        binary_predictions.append([0 if i <= 0.4 else 1 for i in pred])
     print(classification_report(test_y, np.array(binary_predictions),
                                 target_names=ml_binarizer.classes_))
 

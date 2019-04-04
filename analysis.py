@@ -17,16 +17,22 @@ def data_analysis(train_data_x, train_data_y, labels):
         top_words_label[sample_y[0][0]].append(new_data_x)
 
     # compute TF-IDF vectorizer for each label
-    print("Computing TF-IDF vectors for each label")
+    print("\nComputing TF-IDF vectors for each label")
     tf_idf_labels = defaultdict()
     for k, v in top_words_label.items():
         print(k)
         tfidf = TfidfVectorizer()
-        tfidf.fit_transform(top_words_label[v])
+        tfidf.fit_transform(v)
         tf_idf_labels[k] = tfidf
 
     for k, v in tf_idf_labels.items():
         print(k, v)
+        indices = np.argsort(vectorizer.idf_)[::-1]
+        features = vectorizer.get_feature_names()
+        top_n = 2
+        top_features = [features[i] for i in indices[:top_n]]
+        print
+        top_features
 
     # for sample_x, sample_y in zip(train_data_x, train_data_y):
     #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
