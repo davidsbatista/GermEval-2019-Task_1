@@ -282,31 +282,31 @@ def subtask_a(train_data_x, train_data_y, dev_data_x):
     #     for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
     #         f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
 
-    # Subtask-A: Neural Networks Approach
+    # # Subtask-A: Neural Networks Approach
+    #
+    # model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
+    #
+    # print("Vectorizing dev data\n")
+    # # dev_data_x: vectorize, i.e. tokens to indexes and pad
+    # vectors = []
+    # for x in dev_data_x:
+    #     tokens = []
+    #     text = x['title'] + " SEP " + x['body']
+    #     sentences = sent_tokenize(text, language='german')
+    #     for s in sentences:
+    #         tokens += word_tokenize(s)
+    #     vector = vectorizer(tokens)
+    #     vectors.append(vector)
+    # test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+    #                              truncating='post', value=token2idx['PADDED'])
+    # predictions = model.predict(test_vectors)
+    # binary_predictions = []
+    # for pred in predictions:
+    #     binary = [0 if i <= 0.5 else 1 for i in pred]
+    #     binary_predictions.append(binary)
+    # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
-    model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
-
-    print("Vectorizing dev data\n")
-    # dev_data_x: vectorize, i.e. tokens to indexes and pad
-    vectors = []
-    for x in dev_data_x:
-        tokens = []
-        text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
-        vectors.append(vector)
-    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                 truncating='post', value=token2idx['PADDED'])
-    predictions = model.predict(test_vectors)
-    binary_predictions = []
-    for pred in predictions:
-        binary = [0 if i <= 0.5 else 1 for i in pred]
-        binary_predictions.append(binary)
-    generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
-
-    # train_cnn_sent_class(train_data_x, train_data_y)
+    train_cnn_sent_class(train_data_x, train_data_y)
 
 
 def subtask_b(train_data_x, train_data_y, dev_data_x):
