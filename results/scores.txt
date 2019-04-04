@@ -185,4 +185,21 @@ pip install gensim
 python -m nltk.downloader punkt
 
 
+                            precision    recall  f1-score   support
+
+      Architektur & Garten       0.95      0.46      0.62        41
+Ganzheitliches Bewusstsein       0.79      0.59      0.68       213
+            Glaube & Ethik       0.88      0.60      0.71       162
+   Kinderbuch & Jugendbuch       0.89      0.59      0.71       625
+                    Künste       1.00      0.20      0.33        35
+  Literatur & Unterhaltung       0.89      0.92      0.90      2402
+                  Ratgeber       0.80      0.68      0.73       567
+                  Sachbuch       0.82      0.50      0.62       646
+
+                 micro avg       0.87      0.75      0.81      4691
+                 macro avg       0.88      0.57      0.66      4691
+              weighted avg       0.86      0.75      0.79      4691
+               samples avg       0.78      0.78      0.77      4691
+
+
 
