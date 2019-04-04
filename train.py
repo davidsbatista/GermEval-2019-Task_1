@@ -232,7 +232,6 @@ def train_bi_lstm(train_data_x, train_data_y):
 
 
 def train_cnn_sent_class(train_data_x, train_data_y):
-
     token2idx, max_sent_len = build_token_index(train_data_x)
 
     # y_data: encode into one-hot vectors
@@ -302,21 +301,27 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def subtask_a(train_data_x, train_data_y, dev_data_x):
+def vectorize_dev_data(dev_data_x, max_sent_len, token2idx):
+    print("Vectorizing dev data\n")
+    vectors = []
+    for x in dev_data_x:
+        tokens = []
+        text = x['title'] + " SEP " + x['body']
+        sentences = sent_tokenize(text, language='german')
+        for s in sentences:
+            tokens += word_tokenize(s)
+        vector = vectorizer(tokens)
+        vectors.append(vector)
+    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+                                 truncating='post', value=token2idx['PADDED'])
+    return test_vectors
+
+
+def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
     """
     Subtask A
-    =========
-    The task is to classify german books into one or multiple most general writing genres (d=0).
-    Therfore, it can be considered a multi-label classification task. In total, there are 8 classes.
-    - Literatur & Unterhaltung,
-    - Ratgeber,
-    - Kinderbuch & Jugendbuch,
-    - Sachbuch,
-    - Ganzheitliches Bewusstsein,
-    - Glaube & Ethik,
-    - Künste,
-    - Architektur & Garten.
 
+    :param clf:
     :param dev_data_x:
     :param train_data_x:
     :param train_data_y:
@@ -331,51 +336,36 @@ def subtask_a(train_data_x, train_data_y, dev_data_x):
         data_y_level_0.append(list(labels_0))
     train_data_y = data_y_level_0
 
-    # Subtask-A: Level 0 multi-label classifier
-    model, ml_binarizer = train_baseline(train_data_x, train_data_y)
+    if clf == 'logit':
+        # TF-IDF w/ logistic regression
+        model, ml_binarizer = train_baseline(train_data_x, train_data_y)
 
-    with open('results/models_subtask_a.pkl', 'wb') as f_out:
-        pickle.dump(model, f_out)
+        # apply on dev data
+        new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+        predictions = model.predict(new_data_x)
 
-    with open('results/ml_binarizer_subtask_a.pkl', 'wb') as f_out:
-        pickle.dump(ml_binarizer, f_out)
+        with open('answer.txt', 'wt') as f_out:
+            f_out.write(str('subtask_a\n'))
+            for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+                f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
+    else:
+        # Subtask-A: Neural Networks Approach
+        if clf == 'lstm':
+            model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
+            test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+            predictions = model.predict(test_vectors)
 
-    # apply on dev data
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-    predictions = model.predict(new_data_x)
+        if clf == 'cnn':
+            model, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
+                                                                                train_data_y)
+            test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+            predictions = model.predict([test_vectors, test_vectors])
 
-    with open('answer.txt', 'wt') as f_out:
-        f_out.write(str('subtask_a\n'))
-        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-            f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
-
-    # Subtask-A: Neural Networks Approach
-
-    # model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
-    # model, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, train_data_y)
-    #
-    # print("Vectorizing dev data\n")
-    # vectors = []
-    # for x in dev_data_x:
-    #     tokens = []
-    #     text = x['title'] + " SEP " + x['body']
-    #     sentences = sent_tokenize(text, language='german')
-    #     for s in sentences:
-    #         tokens += word_tokenize(s)
-    #     vector = vectorizer(tokens)
-    #     vectors.append(vector)
-    # test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-    #                              truncating='post', value=token2idx['PADDED'])
-    #
-    # #predictions = model.predict(test_vectors)
-    #
-    # predictions = model.predict([test_vectors, test_vectors])
-    #
-    # binary_predictions = []
-    # for pred in predictions:
-    #     binary = [0 if i <= 0.5 else 1 for i in pred]
-    #     binary_predictions.append(binary)
-    # generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
+        binary_predictions = []
+        for pred in predictions:
+            binary = [0 if i <= 0.5 else 1 for i in pred]
+            binary_predictions.append(binary)
+        generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
 def subtask_b(train_data_x, train_data_y, dev_data_x):
@@ -436,7 +426,8 @@ def main():
     # ToDo: produce a run for subtask-B
     # ToDo: explore the hierarchical structure and enforce it in the classifiers
 
-    # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras mais raras
+    # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras
+    # mais raras
     # ToDo: confusion-matrix ?
 
     # load train data
@@ -446,7 +437,7 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x)
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
 
     # train subtask_b
     # subtask_b(train_data_x, train_data_y, dev_data_x)

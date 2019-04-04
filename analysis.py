@@ -10,12 +10,14 @@ def data_analysis(train_data_x, train_data_y, labels):
     # TODO: top-words per class
     author_topic = defaultdict(int)
 
-    # for sample_x, sample_y in zip(train_data_x, train_data_y):
-    #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
-    #     print(len(sample_x['title'].split()))
-    #     print(len(sample_x['body'].split()))
-    #     print(len(sample_y))
-    #     print()
+    top_words_label = defaultdict(list)
+
+    for sample_x, sample_y in zip(train_data_x, train_data_y):
+        new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+        #print(len(sample_x['title'].split()))
+        #print(len(sample_x['body'].split()))
+        print(len(sample_y))
+        print()
 
     # for sample_x, sample_y in zip(train_data_x, train_data_y):
     #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
@@ -30,6 +32,28 @@ def data_analysis(train_data_x, train_data_y, labels):
     #     if v > 1:
     #         print(k, v)
 
+    # extract_hierarchy()
+
+    """
+    from pandas import DataFrame
+    df_stats_level_0 = DataFrame.from_dict(labels['0'], orient='index', columns=['counts'])
+
+    print(df_stats_level_0)
+    df_stats_level_0.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
+    print()
+
+    df_stats_level_1 = DataFrame.from_dict(labels['1'], orient='index', columns=['counts'])
+    print(df_stats_level_1)
+    df_stats_level_1.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
+    print()
+
+    df_stats_level_2 = DataFrame.from_dict(labels['2'], orient='index', columns=['counts'])
+    print(df_stats_level_2)
+    df_stats_level_2.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
+    """
+
+
+def extract_hierarchy():
     # extract hierarchical structure
     level_0 = ['Architektur & Garten',
                'Ganzheitliches Bewusstsein',
@@ -51,8 +75,8 @@ def data_analysis(train_data_x, train_data_y, labels):
             if any(x == parts[0].strip() for x in level_0):
                 hierarchical_level_1[parts[1].strip()] = []
                 hierarchical_level_0[parts[0].strip()].append(parts[1].strip())
-
     level_1 = list(hierarchical_level_1.keys())
+
     for line in all_lines:
         parts = line.split('\t')
         if any(x == parts[0].strip() for x in level_1):
@@ -61,44 +85,26 @@ def data_analysis(train_data_x, train_data_y, labels):
     print("\nLevel 0")
     for k, v in hierarchical_level_0.items():
         print(k, '\t', len(v))
-
     print("\nLevel 1")
+
     for k, v in hierarchical_level_1.items():
         print(k, '\t', len(v))
-
     print()
+
     for k, v in hierarchical_level_0.items():
         print(k)
-        print("-"*len(k))
+        print("-" * len(k))
         for label in v:
             print(label)
         print()
-
     print()
+
     for k, v in hierarchical_level_1.items():
         print(k)
         print("-" * len(k))
         for label in v:
             print(label)
         print()
-
-    """
-    from pandas import DataFrame
-    df_stats_level_0 = DataFrame.from_dict(labels['0'], orient='index', columns=['counts'])
-
-    print(df_stats_level_0)
-    df_stats_level_0.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
-    print()
-
-    df_stats_level_1 = DataFrame.from_dict(labels['1'], orient='index', columns=['counts'])
-    print(df_stats_level_1)
-    df_stats_level_1.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
-    print()
-
-    df_stats_level_2 = DataFrame.from_dict(labels['2'], orient='index', columns=['counts'])
-    print(df_stats_level_2)
-    df_stats_level_2.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
-    """
 
 
 def main():
