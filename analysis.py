@@ -16,7 +16,7 @@ def data_analysis(train_data_x, train_data_y, labels):
         new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
         #print(len(sample_x['title'].split()))
         #print(len(sample_x['body'].split()))
-        print(len(sample_y))
+        print(sample_y)
         print()
 
     # for sample_x, sample_y in zip(train_data_x, train_data_y):
