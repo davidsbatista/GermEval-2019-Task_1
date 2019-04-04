@@ -66,7 +66,7 @@ def get_conv_pool(x_input, suffix, max_len, n_grams=[3, 4, 5], feature_maps=100)
         branch = Conv1D(filters=feature_maps, kernel_size=n, activation=relu,
                         name='Conv_'+suffix+'_'+str(n))(x_input)
 
-        branch = MaxPooling1D(pool_size=(max_len-n+1, 1),
+        branch = MaxPooling1D(pool_size=(max_len-n+1),
                               strides=None, padding='valid',
                               name='MaxPooling_'+suffix+'_'+str(n))(branch)
 
@@ -137,7 +137,7 @@ def get_cnn_multichannel(embedding_layer_channel_1, embedding_layer_channel_2, m
     z_static = concatenate(branches_static, axis=-1)
 
     # concatenate both models and pass to classification layer
-    z = concatenate([z_static,z_dynamic], axis=-1)
+    z = concatenate([z_static, z_dynamic], axis=-1)
 
     # pass the concatenated vector to the prediction layer
     o = Dense(num_classes, activation='sigmoid', name='output')(z)
