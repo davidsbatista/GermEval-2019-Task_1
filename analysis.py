@@ -14,19 +14,18 @@ def data_analysis(train_data_x, train_data_y, labels):
     top_words_label = defaultdict(list)
     for sample_x, sample_y in zip(train_data_x, train_data_y):
         new_data_x = sample_x['title'] + " SEP " + sample_x['body']
-        print(sample_y[0][0], len(top_words_label[sample_y[0][0]]))
         top_words_label[sample_y[0][0]].append(new_data_x)
 
     # compute TF-IDF vectorizer for each label
     print("Computing TF-IDF vectors for each label")
     tf_idf_labels = defaultdict()
-    for k, v in top_words_label:
+    for k, v in top_words_label.items():
         print(k)
         tfidf = TfidfVectorizer()
         tfidf.fit_transform(top_words_label[v])
         tf_idf_labels[k] = tfidf
 
-    for k, v in tf_idf_labels:
+    for k, v in tf_idf_labels.items():
         print(k, v)
 
     # for sample_x, sample_y in zip(train_data_x, train_data_y):
