@@ -110,6 +110,70 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
     return classifiers, ml_binarizers
 
 
+def train_baseline(train_data_x, train_data_y):
+    """
+    Set a simple baseline,
+
+    - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
+
+    :param train_data_x:
+    :param train_data_y:
+    :return: tuned classifier
+
+    """
+    # encode y labels into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+
+    data_y = y_labels
+
+    # TODO: use author as feature, what about unseen authors ?
+
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
+                                                        random_state=42,
+                                                        test_size=0.30)
+
+    stop_words = set(stopwords.words('german'))
+    pipeline = Pipeline([
+        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
+        ('clf', OneVsRestClassifier(
+            LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
+            n_jobs=3))
+    ])
+    parameters = {
+        "clf__estimator__C": [300]
+    }
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
+    grid_search_tune.fit(train_x, train_y)
+
+    # measuring performance on test set
+    print("Applying best classifier on test data:")
+    best_clf = grid_search_tune.best_estimator_
+    predictions = best_clf.predict(test_x)
+    report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
+    print(report)
+    with open('results/models_subtask_a_report.txt', 'wt') as f_out:
+        f_out.write(report)
+
+    # train a classifier on all data using the parameters that yielded best result
+    print("Training classifier with best parameters on all data")
+    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
+    clf = grid_search_tune.best_estimator_.steps[1][1]
+
+    print(best_tf_idf)
+    print()
+    print(clf)
+
+    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
+    best_pipeline.fit(new_data_x, data_y)
+
+    return best_pipeline, ml_binarizer
+
+
 def train_bi_lstm(train_data_x, train_data_y):
     """
     Trains a biLSTM classifier, message is represented by the concatenation of the two last
@@ -236,70 +300,6 @@ def train_cnn_sent_class(train_data_x, train_data_y):
                                 target_names=ml_binarizer.classes_))
 
     return model, ml_binarizer, max_sent_len, token2idx
-
-
-def train_baseline(train_data_x, train_data_y):
-    """
-    Set a simple baseline,
-
-    - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
-
-    :param train_data_x:
-    :param train_data_y:
-    :return: tuned classifier
-
-    """
-    # encode y labels into one-hot vectors
-    ml_binarizer = MultiLabelBinarizer()
-    y_labels = ml_binarizer.fit_transform(train_data_y)
-    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-
-    data_y = y_labels
-
-    # TODO: use author as feature, what about unseen authors ?
-
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
-
-    # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
-                                                        random_state=42,
-                                                        test_size=0.30)
-
-    stop_words = set(stopwords.words('german'))
-    pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
-        ('clf', OneVsRestClassifier(
-            LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
-            n_jobs=3))
-    ])
-    parameters = {
-        "clf__estimator__C": [200, 250, 300, 350]
-    }
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
-    grid_search_tune.fit(train_x, train_y)
-
-    # measuring performance on test set
-    print("Applying best classifier on test data:")
-    best_clf = grid_search_tune.best_estimator_
-    predictions = best_clf.predict(test_x)
-    report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
-    print(report)
-    with open('results/models_subtask_a_report.txt', 'wt') as f_out:
-        f_out.write(report)
-
-    # train a classifier on all data using the parameters that yielded best result
-    print("Training classifier with best parameters on all data")
-    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
-    clf = grid_search_tune.best_estimator_.steps[1][1]
-
-    print(best_tf_idf)
-    print()
-    print(clf)
-
-    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
-    best_pipeline.fit(new_data_x, data_y)
-
-    return best_pipeline, ml_binarizer
 
 
 def subtask_a(train_data_x, train_data_y, dev_data_x):
@@ -435,7 +435,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 def main():
     # ToDo: produce a run for subtask-B
     # ToDo: explore the hierarchical structure and enforce it in the classifiers
-    # ToDo: ver os que nao foram atribuidos nenhuma label, forcar uma com base nas palavras ?
+
+    # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras mais raras
     # ToDo: confusion-matrix ?
 
     # load train data

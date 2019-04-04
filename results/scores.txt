@@ -1,9 +1,13 @@
----------------------------------------------------------------------------------------------------
+Subtask_a detailed scores:
+Recall: '0.8350'
+Precision: '0.8224'
+F1_micro: '0.8287'
+Subset_acc: '0.7297'
 
                             precision    recall  f1-score   support
 
       Architektur & Garten       1.00      0.51      0.68        41
-Ganzheitliches Bewusstsein       0.68      0.71      0.70       213
+Ganzheitliches Bewusstsein       0.68      0.72      0.70       213
             Glaube & Ethik       0.80      0.62      0.70       162
    Kinderbuch & Jugendbuch       0.83      0.68      0.75       625
                     Künste       0.90      0.54      0.68        35
@@ -14,7 +18,22 @@ Ganzheitliches Bewusstsein       0.68      0.71      0.70       213
                  micro avg       0.83      0.81      0.82      4691
                  macro avg       0.82      0.68      0.73      4691
               weighted avg       0.83      0.81      0.81      4691
-               samples avg       0.80      0.83      0.80      4691
+               samples avg       0.80      0.82      0.80      4691
+
+TfidfVectorizer(analyzer='word', binary=False, decode_error='strict',
+        dtype=<class 'numpy.float64'>, encoding='utf-8', input='content',
+        lowercase=True, max_df=0.75, max_features=None, min_df=1,
+        ngram_range=(1, 2), norm='l2', preprocessor=None, smooth_idf=True,
+        stop_words={'jeden', 'zu', 'einem', 'dein', 'über', 'waren', 'ander', 'diesem', 'musste', 'unseren', 'mich', 'hatten', 'für', 'daß', 'gewesen', 'ihres', 'mir', 'sondern', 'manches', 'seines', 'einigem', 'welcher', 'dieser', 'einmal', 'was', 'welches', 'einig', 'durch', 'bis', 'meinem', 'werde', 'wo'...m', 'im', 'dazu', 'hatte', 'von', 'hin', 'und', 'oder', 'derer', 'denn', 'als', 'derselbe', 'ihrer'},
+        strip_accents=None, sublinear_tf=False,
+        token_pattern='(?u)\\b\\w\\w+\\b', tokenizer=None, use_idf=True,
+        vocabulary=None)
+
+OneVsRestClassifier(estimator=LogisticRegression(C=300, class_weight='balanced', dual=False,
+          fit_intercept=True, intercept_scaling=1, max_iter=5000,
+          multi_class='warn', n_jobs=None, penalty='l2', random_state=None,
+          solver='sag', tol=0.0001, verbose=0, warm_start=False),
+          n_jobs=3)
 
 
 ---------------------------------------------------------------------------------------------------

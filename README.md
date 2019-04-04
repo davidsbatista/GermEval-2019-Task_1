@@ -6,4 +6,8 @@
     wget https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.de.300.bin.gz
 
     pip install gensim
+    pip install nltk
+    pip install keras
+    
     python -m nltk.downloader punkt
+    python -m nltk.downloader stopwords
