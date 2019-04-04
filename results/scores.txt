@@ -1,163 +1,3 @@
-                            precision    recall  f1-score   support
-
-      Architektur & Garten       0.42      1.00      0.59        32
-Ganzheitliches Bewusstsein       0.52      0.80      0.63       138
-            Glaube & Ethik       0.70      0.71      0.70       112
-   Kinderbuch & Jugendbuch       0.69      0.75      0.72       412
-                    Künste       0.36      0.77      0.49        22
-  Literatur & Unterhaltung       0.87      0.90      0.89      1608
-                  Ratgeber       0.67      0.89      0.76       394
-                  Sachbuch       0.56      0.75      0.64       412
-
-                 micro avg       0.73      0.85      0.79      3130
-                 macro avg       0.60      0.82      0.68      3130
-              weighted avg       0.75      0.85      0.79      3130
-               samples avg       0.77      0.87      0.80      3130
-
-
-Pipeline(memory=None,
-     steps=[('tfidf', TfidfVectorizer(analyzer='word', binary=False, decode_error='strict',
-        dtype=<class 'numpy.float64'>, encoding='utf-8', input='content',
-        lowercase=True, max_df=0.25, max_features=None, min_df=1,
-        ngram_range=(1, 1), norm='l2', preprocessor=None, smooth_idf=True..._state=None,
-          solver='sag', tol=0.0001, verbose=0, warm_start=False),
-          n_jobs=3))])
-
-
-Subtask_a detailed scores:
-Recall: '0.8534'
-Precision: '0.7356'
-F1_micro: '0.7901'
-Subset_acc: '0.6469'
-
-Subtask_b detailed scores:
-Recall: '0.0000'
-Precision: '0.0000'
-F1_micro: '0.0000'
-Subset_acc: '0.0000'
-
----------------------------------------------------------------------------------------------------
-
-                            precision    recall  f1-score   support
-
-      Architektur & Garten       1.00      0.41      0.58        32
-Ganzheitliches Bewusstsein       0.71      0.52      0.60       138
-            Glaube & Ethik       0.81      0.46      0.58       112
-   Kinderbuch & Jugendbuch       0.77      0.59      0.67       412
-                    Künste       0.82      0.41      0.55        22
-  Literatur & Unterhaltung       0.86      0.89      0.88      1608
-                  Ratgeber       0.75      0.69      0.72       394
-                  Sachbuch       0.68      0.46      0.55       412
-
-                 micro avg       0.81      0.73      0.77      3130
-                 macro avg       0.80      0.55      0.64      3130
-              weighted avg       0.80      0.73      0.76      3130
-               samples avg       0.79      0.76      0.77      3130
-
-
-network parameters
-==================
-hidden_units = 128
-dropout = 0.2
-recurrent_dropout = 0.3
-dense_dropout = 0.1
-learning_rate = 0.001
-
-
-training parameters
-===================
-batch_size=32
-epochs=10
-verbose=1
-validation_split=0.2
-
-
----------------------------------------------------------------------------------------------------
-
-
-                            precision    recall  f1-score   support
-
-      Architektur & Garten       0.93      0.44      0.60        32
-Ganzheitliches Bewusstsein       0.69      0.49      0.57       138
-            Glaube & Ethik       0.80      0.40      0.54       112
-   Kinderbuch & Jugendbuch       0.75      0.59      0.66       412
-                    Künste       0.86      0.55      0.67        22
-  Literatur & Unterhaltung       0.88      0.88      0.88      1608
-                  Ratgeber       0.76      0.63      0.69       394
-                  Sachbuch       0.67      0.56      0.61       412
-
-                 micro avg       0.82      0.73      0.77      3130
-                 macro avg       0.79      0.57      0.65      3130
-              weighted avg       0.81      0.73      0.76      3130
-               samples avg       0.78      0.75      0.76      3130
-
-
-network parameters
-==================
-hidden_units = 128
-dropout = 0.2
-recurrent_dropout = 0.3
-dense_dropout = 0.1
-learning_rate = 0.001
-
-
-training parameters
-===================
-batch_size=32
-epochs=5
-verbose=1
-validation_split=0.2
-
-
----------------------------------------------------------------------------------------------------
-
-
-                           precision    recall  f1-score   support
-
-      Architektur & Garten       1.00      0.28      0.44        32
-Ganzheitliches Bewusstsein       0.67      0.60      0.64       138
-            Glaube & Ethik       0.76      0.55      0.64       112
-   Kinderbuch & Jugendbuch       0.77      0.64      0.70       412
-                    Künste       0.73      0.50      0.59        22
-  Literatur & Unterhaltung       0.85      0.93      0.89      1608
-                  Ratgeber       0.79      0.69      0.74       394
-                  Sachbuch       0.66      0.57      0.61       412
-
-                 micro avg       0.81      0.78      0.79      3130
-                 macro avg       0.78      0.60      0.66      3130
-              weighted avg       0.80      0.78      0.78      3130
-               samples avg       0.79      0.80      0.79      3130
-
-
-network parameters
-==================
-hidden_units = 128
-dropout = 0.2
-recurrent_dropout = 0.3
-dense_dropout = 0.1
-learning_rate = 0.001
-
-
-training parameters
-===================
-batch_size=32
-epochs=5
-verbose=1
-validation_split=0.2
-
-
-Subtask_a detailed scores:
-Recall: '0.7529'
-Precision: '0.7734'
-F1_micro: '0.7630'
-Subset_acc: '0.6975'
-
-Subtask_b detailed scores:
-Recall: '0.0000'
-Precision: '0.0000'
-F1_micro: '0.0000'
-Subset_acc: '0.0000'
-
 ---------------------------------------------------------------------------------------------------
 
                             precision    recall  f1-score   support
@@ -177,13 +17,16 @@ Ganzheitliches Bewusstsein       0.68      0.71      0.70       213
                samples avg       0.80      0.83      0.80      4691
 
 
-wget https://s3.eu-central-1.amazonaws.com/alan-nlp/resources/embeddings-v0.4/de-wiki-fasttext-300d-1M.vectors.npy
-wget https://s3.eu-central-1.amazonaws.com/alan-nlp/resources/embeddings-v0.4/de-wiki-fasttext-300d-1M
-#wget https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.de.300.bin.gz
+---------------------------------------------------------------------------------------------------
 
-pip install gensim
-python -m nltk.downloader punkt
+ConvNets
+--------
 
+Subtask_a detailed scores:
+Recall: '0.7202'
+Precision: '0.8479'
+F1_micro: '0.7789'
+Subset_acc: '0.6883'
 
                             precision    recall  f1-score   support
 
