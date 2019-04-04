@@ -65,3 +65,20 @@ Ganzheitliches Bewusstsein       0.79      0.59      0.68       213
 
 
 
+n_grams=[1, 2]
+feature_maps=300
+                            precision    recall  f1-score   support
+
+      Architektur & Garten       0.88      0.56      0.69        41
+Ganzheitliches Bewusstsein       0.78      0.63      0.70       213
+            Glaube & Ethik       0.86      0.61      0.71       162
+   Kinderbuch & Jugendbuch       0.88      0.64      0.74       625
+                    Künste       0.90      0.51      0.65        35
+  Literatur & Unterhaltung       0.90      0.91      0.90      2402
+                  Ratgeber       0.79      0.70      0.74       567
+                  Sachbuch       0.81      0.51      0.63       646
+
+                 micro avg       0.87      0.76      0.81      4691
+                 macro avg       0.85      0.63      0.72      4691
+              weighted avg       0.86      0.76      0.80      4691
+               samples avg       0.79      0.79      0.78      4691
