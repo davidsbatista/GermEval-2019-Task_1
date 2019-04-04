@@ -2,6 +2,9 @@
 # -*- coding: utf-8 -*-
 
 from collections import defaultdict
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
 from utils import load_data
 
 
@@ -14,10 +17,11 @@ def data_analysis(train_data_x, train_data_y, labels):
 
     for sample_x, sample_y in zip(train_data_x, train_data_y):
         new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
-        #print(len(sample_x['title'].split()))
-        #print(len(sample_x['body'].split()))
-        print(sample_y)
-        print()
+        top_words_label[sample_y[0][0]].append(new_data_x)
+
+    # compute TF-IDF vectorizer for each label
+    TfidfVectorizer
+
 
     # for sample_x, sample_y in zip(train_data_x, train_data_y):
     #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
