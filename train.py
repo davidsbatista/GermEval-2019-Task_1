@@ -291,10 +291,10 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     model.fit([train_x, train_x], train_y, batch_size=32, epochs=5, validation_split=0.2)
     predictions = model.predict([test_x, test_x], verbose=1)
 
-    # ToDo: there must be a more efficient way to do this
+    # ToDo: there must be a more efficient way to do this, BucketEstimator
     binary_predictions = []
     for pred in predictions:
-        binary_predictions.append([0 if i <= 0.4 else 1 for i in pred])
+        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
     print(classification_report(test_y, np.array(binary_predictions),
                                 target_names=ml_binarizer.classes_))
 
@@ -423,12 +423,20 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
 
 def main():
-    # ToDo: produce a run for subtask-B
+    # subtask_b
+    # ToDo: produce a run for subtask-B!!!!
     # ToDo: explore the hierarchical structure and enforce it in the classifiers
 
+    # subtask_a
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras
-    # mais raras
     # ToDo: confusion-matrix ?
+    # ToDo: how many labels missing per sample?
+
+    # ToDo: grid-search Keras:
+    # https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
+
+    # ToDo: other embeddings? BRET, ELMo, Flair?
+    # ToDo: language model based on char?
 
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
@@ -437,10 +445,10 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
 
     # train subtask_b
-    # subtask_b(train_data_x, train_data_y, dev_data_x)
+    subtask_b(train_data_x, train_data_y, dev_data_x)
 
 
 if __name__ == '__main__':

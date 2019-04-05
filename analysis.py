@@ -100,24 +100,9 @@ def extract_hierarchy():
 
 def data_analysis(train_data_x, train_data_y, labels):
 
-    top_words_per_class(train_data_x, train_data_y)
+    # top_words_per_class(train_data_x, train_data_y)
 
-    # for sample_x, sample_y in zip(train_data_x, train_data_y):
-    #     # new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
-    #     print(sample_x['authors'].split(","))
-    #     print(sample_y)
-    #     print()
-    #
-    #     for x in sample_x['authors'].split(","):
-    #         author_topic[x.strip()] += 1
-    #
-    # for k, v in author_topic.items():
-    #     if v > 1:
-    #         print(k, v)
-
-    # extract_hierarchy()
-
-    author_topic = defaultdict(int)
+    extract_hierarchy()
 
     """
     from pandas import DataFrame
