@@ -155,6 +155,11 @@ def train_baseline(train_data_x, train_data_y):
     best_clf = grid_search_tune.best_estimator_
     predictions = best_clf.predict(test_x)
 
+    for pred, true in zip(predictions, test_y):
+        print(pred)
+        all_zeros = not np.any(pred)
+        if all_zeros:
+            print(true)
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
