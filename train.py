@@ -158,7 +158,7 @@ def train_baseline(train_data_x, train_data_y):
     for pred, true, text in zip(predictions, test_y, test_x):
         all_zeros = not np.any(pred)
         if all_zeros:
-            print(true)
+            print(pred)
             print(ml_binarizer.inverse_transform(true))
             print(text)
             print()
