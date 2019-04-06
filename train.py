@@ -362,9 +362,14 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             predictions = model.predict([test_vectors, test_vectors])
 
         binary_predictions = []
-        for pred in predictions:
+        for pred, true in predictions, dev_data_x:
             binary = [0 if i <= 0.5 else 1 for i in pred]
             binary_predictions.append(binary)
+
+            all_zeros = not np.any(binary_predictions)
+            if all_zeros:
+                print(dev_data_x)
+
         generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
@@ -376,7 +381,62 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     In addition to the very general writing genres additional genres of different specificity can
     be assigned to a book. In total, there are 343 different classes that are hierarchically
     structured.
+    """
 
+    """
+    stop at level_1, don't need to train a classifier for level_2
+    
+    Historische Romane
+    Romance
+    Erotik
+    Romantasy
+    Mystery
+    Horror
+    Literatur & Unterhaltung Satire
+    Comic & Cartoon
+    Musik    
+    Briefe, Essays, Gespräche    
+    Infotainment & erzählendes Sachbuch
+    Lifestyle
+    Sachbuch Philosophie
+    Lebensgestaltung
+    Glaube und Grenzerfahrungen
+    Sport
+    Regionalia    
+    Kabarett & Satire    
+    Ganzheitlich Leben
+    Mondkräfte    
+    Esoterische Romane
+    Psychologie & Spiritualität
+    Religionsunterricht
+    Religiöse Literatur
+    Geld & Investment
+    Recht & Steuern    
+    Design
+    Fotografie
+    Mode & Lifestyle
+    Beschäftigung, Malen, Rätseln    
+    Lyrik, Anthologien, Jahrbücher    
+    Natur, Tiere, Umwelt, Mensch    
+    Geschichte, Politik    
+    Kunst, Musik    
+    Biographien    
+    Echtes Leben, Realistischer Roman    
+    Abenteuer    
+    Geister- und Gruselgeschichten   
+    Fantasy und Science Fiction    
+    Liebe, Beziehung und Freundschaft    
+    Familie    
+    Tiergeschichten    
+    Lustige Geschichten, Witze    
+    Sportgeschichten    
+    Schulgeschichten    
+    Historische Romane, Zeitgeschichte   
+    Religion, Glaube, Ethik, Philosophie   
+    Krimis und Thriller
+    Detektivgeschichten    
+    Märchen, Sagen    
+    Schullektüre    
     """
 
     # sub-task B Train 3 classifiers, one for each level, random forests
@@ -424,14 +484,15 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
 def main():
     # subtask_b
-    # ToDo: produce a run for subtask-B!!!!
+    # ToDo: use the classifier of subtask_a for level_0 of subtask_b
     # ToDo: explore the hierarchical structure and enforce it in the classifiers
+    # ToDo: produce a run for subtask-B!!!!
 
     # subtask_a
+    # ToDo: how many labels missing per sample?
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras
     # ToDo: confusion-matrix ?
-    # ToDo: how many labels missing per sample?
-
+    
     # ToDo: grid-search Keras:
     # https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
 
