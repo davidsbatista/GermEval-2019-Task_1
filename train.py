@@ -154,6 +154,8 @@ def train_baseline(train_data_x, train_data_y):
     print("Applying best classifier on test data:")
     best_clf = grid_search_tune.best_estimator_
     predictions = best_clf.predict(test_x)
+
+
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
     with open('results/models_subtask_a_report.txt', 'wt') as f_out:
@@ -344,6 +346,12 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
         predictions = model.predict(new_data_x)
 
+        for pred, true in zip(predictions, dev_data_x):
+            print(pred)
+            all_zeros = not np.any(pred)
+            if all_zeros:
+                print(true)
+
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
             for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
@@ -361,7 +369,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             predictions = model.predict([test_vectors, test_vectors])
 
         binary_predictions = []
-        for pred, true in predictions, dev_data_x:
+        for pred, true in zip(predictions, dev_data_x):
             binary = [0 if i <= 0.5 else 1 for i in pred]
             binary_predictions.append(binary)
 
