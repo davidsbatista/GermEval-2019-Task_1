@@ -160,11 +160,11 @@ def train_baseline(train_data_x, train_data_y):
         if all_zeros:
             print("pred: ", pred)
             print("true: ", true)
-            print("true.shape: ", np.array(true.shape))
-            print("true.shape[1]: ", true.shape[1])
-            print("ml_binarizer.classes_: ", ml_binarizer.classes_)
+            # print("true.shape: ", np.array(true).shape)
+            # print("true.shape[1]: ", np.array(true).shape[1])
+            # print("ml_binarizer.classes_: ", ml_binarizer.classes_)
             print("len(ml_binarizer.classes_): ", len(ml_binarizer.classes_))
-            print(ml_binarizer.inverse_transform([true]))
+            print(ml_binarizer.inverse_transform(np.array(true)))
             print(text)
             print()
 
