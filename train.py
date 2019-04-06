@@ -506,7 +506,7 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
 
     # train subtask_b
     # subtask_b(train_data_x, train_data_y, dev_data_x)
