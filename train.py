@@ -161,7 +161,7 @@ def train_baseline(train_data_x, train_data_y):
         print("pred: ", pred)
         print("true: ", true)
         print(len(pred))
-        print(text)
+        print(sum(true))
         print()
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
