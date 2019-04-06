@@ -160,7 +160,7 @@ def train_baseline(train_data_x, train_data_y):
     for pred, true, text in zip(pred_labels, test_y, test_x):
         print("pred: ", pred)
         print("true: ", true)
-        print(len(true))
+        print(len(pred))
         print(text)
         print()
 
