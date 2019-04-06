@@ -155,19 +155,14 @@ def train_baseline(train_data_x, train_data_y):
     best_clf = grid_search_tune.best_estimator_
     predictions = best_clf.predict(test_x)
 
-    for pred, true, text in zip(predictions, test_y, test_x):
-        all_zeros = not np.any(pred)
-        if all_zeros:
-            print("pred: ", pred)
-            print("true: ", true)
-            #p rint("true.shape: ", np.array(true).shape)
-            # print("true.shape[1]: ", np.array(true).shape[1])
-            print("ml_binarizer.classes_: ", ml_binarizer.classes_)
-            print("len(ml_binarizer.classes_): ", len(ml_binarizer.classes_))
-            print(type(true))
-            print(ml_binarizer.inverse_transform(true))
-            print(text)
-            print()
+    pred_labels = ml_binarizer.inverse_transform(predictions)
+
+    for pred, true, text in zip(pred_labels, test_y, test_x):
+        print("pred: ", pred)
+        print("true: ", true)
+        print(len(true))
+        print(text)
+        print()
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
