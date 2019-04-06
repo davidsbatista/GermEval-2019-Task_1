@@ -349,7 +349,6 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
                 f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
     else:
-        # Subtask-A: Neural Networks Approach
         if clf == 'lstm':
             model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
