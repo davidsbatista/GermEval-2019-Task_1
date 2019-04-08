@@ -171,8 +171,8 @@ def train_baseline(train_data_x, train_data_y):
         if len(pred) == 0:
             top_missed[true] += 1
 
-    for t in top_missed:
-        print(t)
+    for k,v in top_missed.items():
+        print(k, v)
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
