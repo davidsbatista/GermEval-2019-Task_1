@@ -164,6 +164,8 @@ def train_baseline(train_data_x, train_data_y):
         if len(pred) == 0:
             top_missed[true] += 1
             print(text)
+            print(len(text))
+            print()
 
     print("Missing labels for samples")
     for k, v in top_missed.items():
