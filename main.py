@@ -40,7 +40,7 @@ def main():
                                                         random_state=42,
                                                         test_size=0.30)
     data_raw = []
-    for x, y in zip(train_x[:100], train_y[:100]):
+    for x, y in zip(train_x, train_y):
         data_raw.append((y, x))
     data = np.array(data_raw)
     training_data = Data(data_source='',
@@ -53,7 +53,7 @@ def main():
 
     # Load validation data
     data_raw = []
-    for x, y in zip(train_x[:50], train_y[:50]):
+    for x, y in zip(train_x, train_y):
         data_raw.append((y, x))
     data = np.array(data_raw)
     validation_data = Data(data_source='',
