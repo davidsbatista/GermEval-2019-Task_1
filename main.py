@@ -76,8 +76,6 @@ def main():
                        dropout_p=config["char_cnn_kim"]["dropout_p"],
                        optimizer=config["char_cnn_kim"]["optimizer"],
                        loss=config["char_cnn_kim"]["loss"])
-   """
-
     model = CharTCN(input_size=config["data"]["input_size"],
                     alphabet_size=config["data"]["alphabet_size"],
                     embedding_size=config["char_tcn"]["embedding_size"],
@@ -100,7 +98,6 @@ def main():
                          dropout_p=config["char_cnn_zhang"]["dropout_p"],
                          optimizer=config["char_cnn_zhang"]["optimizer"],
                          loss=config["char_cnn_zhang"]["loss"])
-     """
 
     # Train model
     model.train(training_inputs=training_inputs,

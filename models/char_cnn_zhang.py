@@ -102,7 +102,8 @@ class CharCNNZhang(object):
         # Start training
         print("Training CharCNNZhang model: ")
         self.model.fit(training_inputs, training_labels,
-                       validation_data=(validation_inputs, validation_labels),
+                       # validation_data=(validation_inputs, validation_labels),
+                       validation_split=0.2,
                        epochs=epochs,
                        batch_size=batch_size,
                        verbose=2,
@@ -121,5 +122,6 @@ class CharCNNZhang(object):
 
         """
         # Evaluate inputs
-        self.model.evaluate(testing_inputs, testing_labels, batch_size=batch_size, verbose=1)
-        # self.model.predict(testing_inputs, batch_size=batch_size, verbose=1)
+        # self.model.evaluate(testing_inputs, testing_labels, batch_size=batch_size, verbose=1)
+        preds = self.model.predict(testing_inputs, batch_size=batch_size, verbose=1)
+        return preds
