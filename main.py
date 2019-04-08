@@ -88,7 +88,7 @@ def main():
 
     preds = np.where(preds > 0.5, 1, 0)
     preds_labels = ml_binarizer.inverse_transform(preds)
-    print(classification_report(train_y, preds))
+    print(classification_report(train_y, preds_labels))
 
 
 if __name__ == "__main__":
