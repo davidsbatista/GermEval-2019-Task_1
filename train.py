@@ -161,18 +161,19 @@ def train_baseline(train_data_x, train_data_y):
     top_missed = defaultdict(int)
 
     for pred, true, text in zip(pred_labels, true_labels, test_x):
-        print("pred: ", pred)
-        print("true: ", true)
-        print(len(pred))
-        print(len(true))
-        print(set(pred).intersection(set(true_labels)))
-        print()
-        print()
         if len(pred) == 0:
             top_missed[true] += 1
+            print("pred: ", pred)
+            print("true: ", true)
+            print(len(pred))
+            print(len(true))
+            print(set(pred).intersection(set(true_labels)))
+            print()
+            print()
 
-    for k,v in top_missed.items():
+    for k, v in top_missed.items():
         print(k, v)
+    print()
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
