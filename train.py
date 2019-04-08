@@ -158,6 +158,8 @@ def train_baseline(train_data_x, train_data_y):
     pred_labels = ml_binarizer.inverse_transform(predictions)
     true_labels = ml_binarizer.inverse_transform(test_y)
 
+    top_missed = []
+
     for pred, true, text in zip(pred_labels, true_labels, test_x):
         print("pred: ", pred)
         print("true: ", true)
@@ -166,6 +168,8 @@ def train_baseline(train_data_x, train_data_y):
         print(set(pred).intersection(set(true_labels)))
         print()
         print()
+        if len(pred) == 0:
+            top_missed.append(pred)
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
