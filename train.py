@@ -162,7 +162,7 @@ def train_baseline(train_data_x, train_data_y):
         print("pred: ", pred)
         print("true: ", true_labels)
         print(len(pred))
-        print(sum(true))
+        print(len(true))
         print(set(pred).intersection(set(true_labels)))
         print()
 
