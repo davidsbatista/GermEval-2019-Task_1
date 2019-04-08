@@ -106,8 +106,8 @@ class CharCNNZhang(object):
                        validation_split=0.2,
                        epochs=epochs,
                        batch_size=batch_size,
-                       verbose=2,
-                       callbacks=[tensorboard])
+                       verbose=2)
+                       # callbacks=[tensorboard])
 
     def test(self, testing_inputs, testing_labels, batch_size):
         """
