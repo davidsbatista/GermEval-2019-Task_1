@@ -155,7 +155,9 @@ def train_baseline(train_data_x, train_data_y):
     best_clf = grid_search_tune.best_estimator_
 
     print(type(best_clf))
-    
+
+    print(dir(best_clf))
+
     predictions_prob = best_clf.predict_prob(test_x)
 
     predictions = [0 if i <= 0.5 else 1 for i in predictions_prob]
