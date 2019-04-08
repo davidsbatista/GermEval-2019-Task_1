@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pickle
-from collections import defaultdict
+from collections import defaultdict, Counter
 from copy import deepcopy
 
 from gensim.models import KeyedVectors
@@ -170,6 +170,8 @@ def train_baseline(train_data_x, train_data_y):
         print()
         if len(pred) == 0:
             top_missed.append(pred)
+
+    print(Counter(top_missed))
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
