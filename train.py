@@ -156,12 +156,14 @@ def train_baseline(train_data_x, train_data_y):
     predictions = best_clf.predict(test_x)
 
     pred_labels = ml_binarizer.inverse_transform(predictions)
+    true_labels = ml_binarizer.inverse_transform(test_y)
 
-    for pred, true, text in zip(pred_labels, test_y, test_x):
+    for pred, true, text in zip(pred_labels, true_labels, test_x):
         print("pred: ", pred)
-        print("true: ", true)
+        print("true: ", true_labels)
         print(len(pred))
         print(sum(true))
+        print(set(pred).intersection(set(true_labels)))
         print()
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
