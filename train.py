@@ -515,7 +515,7 @@ def main():
     # ToDo: produce a run for subtask-B!!!!
 
     # subtask_a
-    # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras
+    # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
     
     # ToDo: grid-search Keras:

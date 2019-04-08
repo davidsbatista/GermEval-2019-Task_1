@@ -1,6 +1,7 @@
 import numpy as np
 import json
 
+from sklearn.metrics import classification_report
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
@@ -39,7 +40,7 @@ def main():
                                                         random_state=42,
                                                         test_size=0.30)
     data_raw = []
-    for x, y in zip(train_x, train_y):
+    for x, y in zip(train_x[:100], train_y[:100]):
         data_raw.append((y, x))
     data = np.array(data_raw)
     training_data = Data(data_source='',
@@ -52,7 +53,7 @@ def main():
 
     # Load validation data
     data_raw = []
-    for x, y in zip(train_x, train_y):
+    for x, y in zip(train_x[:50], train_y[:50]):
         data_raw.append((y, x))
     data = np.array(data_raw)
     validation_data = Data(data_source='',
@@ -68,7 +69,7 @@ def main():
                        embedding_size=config["char_cnn_kim"]["embedding_size"],
                        conv_layers=config["char_cnn_kim"]["conv_layers"],
                        fully_connected_layers=config["char_cnn_kim"]["fully_connected_layers"],
-                       num_of_classes=config["data"]["num_of_classes"],
+                       num_of_classes=8,
                        dropout_p=config["char_cnn_kim"]["dropout_p"],
                        optimizer=config["char_cnn_kim"]["optimizer"],
                        loss=config["char_cnn_kim"]["loss"])
@@ -76,13 +77,19 @@ def main():
     # Train model
     model.train(training_inputs=training_inputs,
                 training_labels=training_labels,
-                validation_inputs=validation_inputs,
-                validation_labels=validation_labels,
-                epochs=config["training"]["epochs"],
+                validation_inputs=[],
+                validation_labels=[],
+                epochs=100,
                 batch_size=config["training"]["batch_size"],
                 checkpoint_every=config["training"]["checkpoint_every"])
 
-    # model.test()
+    preds = model.test(testing_inputs=validation_inputs, testing_labels=validation_labels,
+                       batch_size=32)
+
+    preds = np.where(preds > 0.5, 1, 0)
+    preds_labels = ml_binarizer.inverse_transform(preds)
+    print(classification_report(train_y[:50], preds))
+
 
 if __name__ == "__main__":
     main()
