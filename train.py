@@ -162,7 +162,7 @@ def train_baseline(train_data_x, train_data_y):
 
     top_missed = defaultdict(int)
     missed = 0
-    for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_probs):
+    for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_prob):
         if len(pred) == 0:
             missed += 1
             top_missed[true] += 1
@@ -179,7 +179,7 @@ def train_baseline(train_data_x, train_data_y):
         print(k, v)
     print("total missed: ", missed)
 
-    report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
+    report = classification_report(test_y, pred_labels, target_names=ml_binarizer.classes_)
     print(report)
     with open('results/models_subtask_a_report.txt', 'wt') as f_out:
         f_out.write(report)
