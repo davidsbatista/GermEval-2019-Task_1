@@ -53,7 +53,7 @@ def main():
 
     # Load validation data
     data_raw = []
-    for x, y in zip(train_x, train_y):
+    for x, y in zip(test_x, test_y):
         data_raw.append((y, x))
     data = np.array(data_raw)
     validation_data = Data(data_source='',
