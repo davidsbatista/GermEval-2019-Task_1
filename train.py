@@ -158,7 +158,7 @@ def train_baseline(train_data_x, train_data_y):
     pred_labels = ml_binarizer.inverse_transform(predictions)
     true_labels = ml_binarizer.inverse_transform(test_y)
 
-    top_missed = defaultdict()
+    top_missed = defaultdict(int)
 
     for pred, true, text in zip(pred_labels, true_labels, test_x):
         print("pred: ", pred)
