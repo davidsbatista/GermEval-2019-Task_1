@@ -109,7 +109,8 @@ class CharTCN(object):
         # Start training
         print("Training CharTCN model: ")
         self.model.fit(training_inputs, training_labels,
-                       validation_data=(validation_inputs, validation_labels),
+                       # validation_data=(validation_inputs, validation_labels),
+                       validation_split=0.2,
                        epochs=epochs,
                        batch_size=batch_size,
                        verbose=2)
