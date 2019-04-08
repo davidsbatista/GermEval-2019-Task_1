@@ -87,7 +87,9 @@ def main():
                        batch_size=32)
 
     preds = np.where(preds > 0.5, 1, 0)
+    print(preds)
     preds_labels = ml_binarizer.inverse_transform(preds)
+    print(preds_labels)
     print(classification_report(train_y, preds_labels))
 
 
