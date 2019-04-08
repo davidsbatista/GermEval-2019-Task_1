@@ -163,14 +163,9 @@ def train_baseline(train_data_x, train_data_y):
     for pred, true, text in zip(pred_labels, true_labels, test_x):
         if len(pred) == 0:
             top_missed[true] += 1
-            print("pred: ", pred)
-            print("true: ", true)
-            print(len(pred))
-            print(len(true))
-            print(set(pred).intersection(set(true_labels)))
-            print()
-            print()
+            print(text)
 
+    print("Missing labels for samples")
     for k, v in top_missed.items():
         print(k, v)
     print()
@@ -511,7 +506,6 @@ def main():
     # ToDo: produce a run for subtask-B!!!!
 
     # subtask_a
-    # ToDo: how many labels missing per sample?
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras
     # ToDo: confusion-matrix ?
     
