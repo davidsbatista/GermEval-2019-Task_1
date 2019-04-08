@@ -7,6 +7,8 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 from data_utils import Data
 from models.char_cnn_kim import CharCNNKim
+from models.char_cnn_zhang import CharCNNZhang
+from models.char_tcn import CharTCN
 from utils import load_data
 
 
@@ -64,6 +66,7 @@ def main():
     validation_inputs, validation_labels = validation_data.get_all_data()
 
     # Load model configurations and build model
+    """
     model = CharCNNKim(input_size=config["data"]["input_size"],
                        alphabet_size=config["data"]["alphabet_size"],
                        embedding_size=config["char_cnn_kim"]["embedding_size"],
@@ -73,6 +76,31 @@ def main():
                        dropout_p=config["char_cnn_kim"]["dropout_p"],
                        optimizer=config["char_cnn_kim"]["optimizer"],
                        loss=config["char_cnn_kim"]["loss"])
+   """
+
+    model = CharTCN(input_size=config["data"]["input_size"],
+                    alphabet_size=config["data"]["alphabet_size"],
+                    embedding_size=config["char_tcn"]["embedding_size"],
+                    conv_layers=config["char_tcn"]["conv_layers"],
+                    fully_connected_layers=config["char_tcn"]["fully_connected_layers"],
+                    num_of_classes=8,
+                    dropout_p=config["char_tcn"]["dropout_p"],
+                    optimizer=config["char_tcn"]["optimizer"],
+                    loss=config["char_tcn"]["loss"])
+
+    """
+    model = CharCNNZhang(input_size=config["data"]["input_size"],
+                         alphabet_size=config["data"]["alphabet_size"],
+                         embedding_size=config["char_cnn_zhang"]["embedding_size"],
+                         conv_layers=config["char_cnn_zhang"]["conv_layers"],
+                         fully_connected_layers=config["char_cnn_zhang"][
+                             "fully_connected_layers"],
+                         num_of_classes=8,
+                         threshold=config["char_cnn_zhang"]["threshold"],
+                         dropout_p=config["char_cnn_zhang"]["dropout_p"],
+                         optimizer=config["char_cnn_zhang"]["optimizer"],
+                         loss=config["char_cnn_zhang"]["loss"])
+     """
 
     # Train model
     model.train(training_inputs=training_inputs,
