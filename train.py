@@ -155,14 +155,14 @@ def train_baseline(train_data_x, train_data_y):
     best_clf = grid_search_tune.best_estimator_
     predictions_prob = best_clf.predict_proba(test_x)
 
-    predictions = np.where(predictions_prob >= 0.5, 1, 0)
+    predictions_probs = np.where(predictions_prob >= 0.5, 1, 0)
 
-    pred_labels = ml_binarizer.inverse_transform(predictions)
+    pred_labels = ml_binarizer.inverse_transform(predictions_probs)
     true_labels = ml_binarizer.inverse_transform(test_y)
 
     top_missed = defaultdict(int)
     missed = 0
-    for pred, true, text in zip(pred_labels, true_labels, test_x):
+    for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_probs):
         if len(pred) == 0:
             missed += 1
             top_missed[true] += 1
@@ -170,7 +170,7 @@ def train_baseline(train_data_x, train_data_y):
             print(len(text.split()))
             print(true)
             print(ml_binarizer.classes_)
-            print(predictions_prob)
+            print(probs)
             print()
             print()
 
