@@ -153,15 +153,18 @@ def train_baseline(train_data_x, train_data_y):
     # measuring performance on test set
     print("Applying best classifier on test data:")
     best_clf = grid_search_tune.best_estimator_
-    predictions = best_clf.predict_proba(test_x)
+    predictions = best_clf.predict(test_x)
+
+    # A = [0 if i <= 0.5 else 1 for i in A]
 
     pred_labels = ml_binarizer.inverse_transform(predictions)
     true_labels = ml_binarizer.inverse_transform(test_y)
 
     top_missed = defaultdict(int)
-
+    missed = 0
     for pred, true, text in zip(pred_labels, true_labels, test_x):
         if len(pred) == 0:
+            missed += 1
             top_missed[true] += 1
             print(text)
             print(len(text.split()))
@@ -171,7 +174,7 @@ def train_baseline(train_data_x, train_data_y):
     print("Missing labels for samples")
     for k, v in top_missed.items():
         print(k, v)
-    print()
+    print("total missed: ", missed)
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
     print(report)
