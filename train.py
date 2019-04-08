@@ -153,14 +153,9 @@ def train_baseline(train_data_x, train_data_y):
     # measuring performance on test set
     print("Applying best classifier on test data:")
     best_clf = grid_search_tune.best_estimator_
-
-    print(type(best_clf))
-
-    print(dir(best_clf))
-
     predictions_prob = best_clf.predict_proba(test_x)
 
-    predictions = [0 if i <= 0.5 else 1 for i in predictions_prob]
+    predictions = np.where(predictions_prob >= 0.5, 1, 0)
 
     pred_labels = ml_binarizer.inverse_transform(predictions)
     true_labels = ml_binarizer.inverse_transform(test_y)
