@@ -88,6 +88,11 @@ def main():
 
     preds = np.where(preds > 0.5, 1, 0)
     preds_labels = ml_binarizer.inverse_transform(preds)
+
+    print(train_y)
+    print("---------------------------------------")
+    print(preds_labels)
+
     print(classification_report(train_y, preds_labels))
 
 
