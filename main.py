@@ -79,7 +79,7 @@ def main():
                 training_labels=training_labels,
                 validation_inputs=[],
                 validation_labels=[],
-                epochs=100,
+                epochs=10,
                 batch_size=config["training"]["batch_size"],
                 checkpoint_every=config["training"]["checkpoint_every"])
 
@@ -88,7 +88,7 @@ def main():
 
     preds = np.where(preds > 0.5, 1, 0)
     preds_labels = ml_binarizer.inverse_transform(preds)
-    print(classification_report(train_y[:50], preds))
+    print(classification_report(train_y, preds_labels))
 
 
 if __name__ == "__main__":
