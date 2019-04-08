@@ -160,10 +160,11 @@ def train_baseline(train_data_x, train_data_y):
 
     for pred, true, text in zip(pred_labels, true_labels, test_x):
         print("pred: ", pred)
-        print("true: ", true_labels)
+        print("true: ", true)
         print(len(pred))
         print(len(true))
         print(set(pred).intersection(set(true_labels)))
+        print()
         print()
 
     report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
