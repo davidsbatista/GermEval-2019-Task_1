@@ -35,7 +35,7 @@
     "loss": "categorical_crossentropy"
   },
   "char_cnn_kim": {
-    "embedding_size": 64,
+    "embedding_size": 128,
     "conv_layers": [
       [
         256,
