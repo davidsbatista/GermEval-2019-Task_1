@@ -9,6 +9,7 @@ from keras.layers import Dropout
 from keras.callbacks import TensorBoard
 from keras.layers.merge import Add
 
+
 class CharTCN(object):
     """
     Class to implement the Character Level Temporal Convolutional Network (TCN)
@@ -16,8 +17,7 @@ class CharTCN(object):
     """
     def __init__(self, input_size, alphabet_size, embedding_size,
                  conv_layers, fully_connected_layers, num_of_classes,
-                 threshold, dropout_p,
-                 optimizer='adam', loss='categorical_crossentropy'):
+                 dropout_p, optimizer='adam', loss='categorical_crossentropy'):
         """
         Initialization for the Character Level CNN model.
 
@@ -112,8 +112,8 @@ class CharTCN(object):
                        validation_data=(validation_inputs, validation_labels),
                        epochs=epochs,
                        batch_size=batch_size,
-                       verbose=2,
-                       callbacks=[tensorboard])
+                       verbose=2)
+                       # callbacks=[tensorboard])
 
     def test(self, testing_inputs, testing_labels, batch_size):
         """
@@ -128,5 +128,6 @@ class CharTCN(object):
 
         """
         # Evaluate inputs
-        self.model.evaluate(testing_inputs, testing_labels, batch_size=batch_size, verbose=1)
-        # self.model.predict(testing_inputs, batch_size=batch_size, verbose=1)
+        # self.model.evaluate(testing_inputs, testing_labels, batch_size=batch_size, verbose=1)
+        preds = self.model.predict(testing_inputs, batch_size=batch_size, verbose=1)
+        return preds
