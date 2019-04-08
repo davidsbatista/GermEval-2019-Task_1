@@ -170,7 +170,7 @@ def train_baseline(train_data_x, train_data_y):
         print()
         if len(pred) == 0:
             for t in true:
-                top_missed[p] += 1
+                top_missed[t] += 1
 
     print(top_missed)
 
