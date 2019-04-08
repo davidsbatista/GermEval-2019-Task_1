@@ -79,7 +79,7 @@ def main():
                 training_labels=training_labels,
                 validation_inputs=[],
                 validation_labels=[],
-                epochs=25,
+                epochs=20,
                 batch_size=config["training"]["batch_size"],
                 checkpoint_every=config["training"]["checkpoint_every"])
 
