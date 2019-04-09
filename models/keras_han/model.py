@@ -9,10 +9,8 @@ from .layers import AttentionLayer
 
 class HAN(Model):
     def __init__(
-            self, max_words, max_sentences, output_size,
-            embedding_matrix, word_encoding_dim=200,
-            sentence_encoding_dim=200, inputs=None,
-            outputs=None, name='han-for-docla'
+            self, max_words, max_sentences, output_size, embedding_matrix, word_encoding_dim=200,
+            sentence_encoding_dim=200, inputs=None, outputs=None, name='han-for-docla'
     ):
         """
         A Keras implementation of Hierarchical Attention networks
@@ -112,9 +110,7 @@ class HAN(Model):
             self.max_words, self.embedding_matrix, self.word_encoding_dim
         )
 
-        word_rep = TimeDistributed(
-            word_encoder, name='word_encoder'
-        )(in_tensor)
+        word_rep = TimeDistributed(word_encoder, name='word_encoder')(in_tensor)
 
         # Sentence Rep is a 3d-tensor (batch_size, max_sentences, word_encoding_dim)
         sentence_rep = TimeDistributed(
@@ -129,9 +125,8 @@ class HAN(Model):
         # to the encoded sentences
         doc_summary = AttentionLayer(name='sentence_attention')(doc_rep)
 
-        out_tensor = Dense(
-            self.output_size, activation='softmax', name='class_prediction'
-        )(doc_summary)
+        out_tensor = Dense(self.output_size, activation='sigmoid',
+                           name='class_prediction')(doc_summary)
 
         return in_tensor, out_tensor
 

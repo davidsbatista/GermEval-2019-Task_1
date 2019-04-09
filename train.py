@@ -495,7 +495,7 @@ def train_han(train_data_x, train_data_y):
                     word_encoding_dim=100, sentence_encoding_dim=100)
 
     han_model.summary()
-    han_model.compile(optimizer='adagrad', loss='categorical_crossentropy',metrics=['acc'])
+    han_model.compile(optimizer='adagrad', loss='binary_crossentropy', metrics=['acc'])
 
     han_model.fit(train_x, train_y, batch_size=20, epochs=10, validation_split=0.2)
 
