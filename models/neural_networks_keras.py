@@ -1,4 +1,5 @@
 import numpy as np
+from keras_preprocessing.sequence import pad_sequences
 
 from nltk import sent_tokenize, word_tokenize
 
@@ -106,3 +107,19 @@ def build_lstm_based_model(embeddings, label_encoder, max_sent_length):
     print('{} out of {} words randomly initialized'.format(not_found, len(token2idx)))
 
     return model
+
+
+def vectorize_dev_data(dev_data_x, max_sent_len, token2idx):
+    print("Vectorizing dev data\n")
+    vectors = []
+    for x in dev_data_x:
+        tokens = []
+        text = x['title'] + " SEP " + x['body']
+        sentences = sent_tokenize(text, language='german')
+        for s in sentences:
+            tokens += word_tokenize(s)
+        vector = vectorizer(tokens)
+        vectors.append(vector)
+    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+                                 truncating='post', value=token2idx['PADDED'])
+    return test_vectors

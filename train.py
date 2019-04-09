@@ -2,11 +2,12 @@
 # -*- coding: utf-8 -*-
 
 import pickle
-from collections import defaultdict, Counter
+from collections import defaultdict
 from copy import deepcopy
 
 from gensim.models import KeyedVectors
-from keras.layers import np, Embedding
+
+from keras.layers import Embedding, np
 from keras_preprocessing.sequence import pad_sequences
 
 from nltk.corpus import stopwords
@@ -20,11 +21,12 @@ from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
-from sklearn.utils import class_weight, compute_sample_weight
 
-from models.convnets_utils import get_cnn_rand, get_cnn_pre_trained_embeddings, get_cnn_multichannel
-from models.neural_networks_keras import build_lstm_based_model, build_token_index, vectorizer
-from utils import load_data, generate_submission_file
+from models.convnets_utils import get_cnn_multichannel
+from models.keras_han.model import HAN
+from models.neural_networks_keras import build_lstm_based_model, build_token_index, \
+    vectorize_dev_data, vectorizer
+from utils import generate_submission_file, load_data
 
 
 def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
@@ -326,20 +328,187 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def vectorize_dev_data(dev_data_x, max_sent_len, token2idx):
-    print("Vectorizing dev data\n")
-    vectors = []
-    for x in dev_data_x:
-        tokens = []
-        text = x['title'] + " SEP " + x['body']
+def keras_grid_search():
+
+    def create_model(num_filters, kernel_size, vocab_size, embedding_dim, maxlen):
+        model = Sequential()
+        model.add(layers.Embedding(vocab_size, embedding_dim, input_length=maxlen))
+        model.add(layers.Conv1D(num_filters, kernel_size, activation='relu'))
+        model.add(layers.GlobalMaxPooling1D())
+        model.add(layers.Dense(10, activation='relu'))
+        model.add(layers.Dense(1, activation='sigmoid'))
+        model.compile(optimizer='adam',
+                      loss='binary_crossentropy',
+                      metrics=['accuracy'])
+        return model
+
+    param_grid = dict(num_filters=[32, 64, 128],
+                      kernel_size=[3, 5, 7],
+                      vocab_size=[5000],
+                      embedding_dim=[50],
+                      maxlen=[100])
+
+    from keras.wrappers.scikit_learn import KerasClassifier
+    from sklearn.model_selection import RandomizedSearchCV
+
+    # Main settings
+    epochs = 20
+    embedding_dim = 50
+    maxlen = 100
+    output_file = 'data/output.txt'
+
+    # Run grid search for each source (yelp, amazon, imdb)
+    for source, frame in df.groupby('source'):
+        print('Running grid search for data set :', source)
+        sentences = df['sentence'].values
+        y = df['label'].values
+
+        # Train-test split
+        sentences_train, sentences_test, y_train, y_test = train_test_split(
+            sentences, y, test_size=0.25, random_state=1000)
+
+        # Tokenize words
+        tokenizer = Tokenizer(num_words=5000)
+        tokenizer.fit_on_texts(sentences_train)
+        X_train = tokenizer.texts_to_sequences(sentences_train)
+        X_test = tokenizer.texts_to_sequences(sentences_test)
+
+        # Adding 1 because of reserved 0 index
+        vocab_size = len(tokenizer.word_index) + 1
+
+        # Pad sequences with zeros
+        X_train = pad_sequences(X_train, padding='post', maxlen=maxlen)
+        X_test = pad_sequences(X_test, padding='post', maxlen=maxlen)
+
+        # Parameter grid for grid search
+        param_grid = dict(num_filters=[32, 64, 128],
+                          kernel_size=[3, 5, 7],
+                          vocab_size=[vocab_size],
+                          embedding_dim=[embedding_dim],
+                          maxlen=[maxlen])
+        model = KerasClassifier(build_fn=create_model,
+                                epochs=epochs, batch_size=10,
+                                verbose=False)
+        grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
+                                  cv=4, verbose=1, n_iter=5)
+        grid_result = grid.fit(X_train, y_train)
+
+        # Evaluate testing set
+        test_accuracy = grid.score(X_test, y_test)
+
+        # Save and evaluate results
+        prompt = input(f'finished {source}; write to file and proceed? [y/n]')
+        if prompt.lower() not in {'y', 'true', 'yes'}:
+            break
+        with open(output_file, 'a') as f:
+            s = ('Running {} data set\nBest Accuracy : '
+                 '{:.4f}\n{}\nTest Accuracy : {:.4f}\n\n')
+            output_string = s.format(
+                source,
+                grid_result.best_score_,
+                grid_result.best_params_,
+                test_accuracy)
+            print(output_string)
+            f.write(output_string)
+
+
+def train_han(train_data_x, train_data_y):
+    token2idx, max_sent_len = build_token_index(train_data_x)
+
+    # y_data: encode into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+
+    # Construct the input matrix. This should be a nd-array of
+    # shape (n_samples, MAX_SENT, MAX_WORDS_PER_SENT).
+    # We zero-pad this matrix (this does not influence
+    # any predictions due to the attention mechanism.
+
+    max_sent = 0
+    max_tokens = 0
+    for x in train_data_x:
+        sentences = sent_tokenize(x['body'], language='german')
+        if len(sentences) > max_sent:
+            max_sent = len(sentences)
+        for sentence in sentences:
+            tokens = word_tokenize(sentence, language='german')
+            if len(tokens) > max_tokens:
+                max_tokens = len(tokens)
+
+    print(max_sent)
+    print(max_tokens)
+
+    processed_x = np.zeros((len(train_data_x), max_sent, max_tokens), dtype='int32')
+
+    for i, x in enumerate(train_data_x):
+        vectorized_sentences = []
+        text = x['title'] + " . " + x['body']
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
-            tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
-        vectors.append(vector)
-    test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                 truncating='post', value=token2idx['PADDED'])
-    return test_vectors
+            vectorized_sentences.append(vectorizer(word_tokenize(s, language='german')))
+
+        padded_sentences = pad_sequences(vectorized_sentences,  padding='post',
+                                         truncating='post', maxlen=max_tokens,
+                                         value=token2idx['PADDED'])
+
+        pad_size = max_sent - padded_sentences.shape[0]
+
+        if pad_size < 0:
+            padded_sentences = padded_sentences[0:max_sent]
+        else:
+            padded_sentences = np.pad(padded_sentences, ((0, pad_size), (0, 0)), mode='constant',
+                                      constant_values=0)
+
+        # Store this observation as the i-th observation in the data matrix
+        processed_x[i] = padded_sentences[None, ...]
+
+    print(processed_x.shape)
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(processed_x, y_labels,
+                                                        random_state=42,
+                                                        test_size=0.30)
+    print(train_x.shape)
+    print(train_y.shape)
+
+    MAX_WORDS_PER_SENT = max_tokens
+    MAX_SENT = max_sent
+    MAX_VOC_SIZE = 20000
+    GLOVE_DIM = 100
+
+    print("Loading pre-trained Embeddings\n")
+    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+    # build a word embeddings matrix, out-of-vocabulary words will be initialized randomly
+    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
+    not_found = 0
+    for word, i in token2idx.items():
+        try:
+            embedding_vector = static_embeddings[word.lower()]
+            embedding_matrix[i] = embedding_vector
+        except KeyError:
+            not_found += 1
+
+    print(embedding_matrix)
+
+    han_model = HAN(MAX_WORDS_PER_SENT, MAX_SENT, 8, embedding_matrix,
+                    word_encoding_dim=100, sentence_encoding_dim=100)
+
+    han_model.summary()
+    han_model.compile(optimizer='adagrad', loss='categorical_crossentropy',metrics=['acc'])
+
+    han_model.fit(train_x, train_y, batch_size=20, epochs=10, validation_split=0.2)
+
+    predictions = han_model.predict([test_x, test_x], verbose=1)
+
+    # ToDo: there must be a more efficient way to do this, BucketEstimator
+    binary_predictions = []
+    for pred in predictions:
+        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+    print(classification_report(test_y, np.array(binary_predictions),
+                                target_names=ml_binarizer.classes_))
+
+    return han_model, ml_binarizer, max_sent_len, token2idx
 
 
 def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
@@ -380,6 +549,9 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
                 f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
     else:
+        if clf == 'han':
+            model, ml_binarizer, max_sent_len, token2idx = train_han(train_data_x, train_data_y)
+
         if clf == 'lstm':
             model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
@@ -515,10 +687,21 @@ def main():
     # ToDo: produce a run for subtask-B!!!!
 
     # subtask_a
+    # ToDo: HAN
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
     
     # ToDo: grid-search Keras:
+    """
+    - Grid search across different kernel sizes to find the optimal configuration for your problem,
+    in the range 1-10.
+
+    - Search the number of filters from 100-600 and explore a dropout of 0.0-0.5 as part of the
+    same search.
+
+    - Explore using tanh, relu, and linear activation functions.
+    :return:
+    """
     # https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
 
     # ToDo: other embeddings? BRET, ELMo, Flair?
@@ -531,7 +714,7 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
 
     # train subtask_b
     # subtask_b(train_data_x, train_data_y, dev_data_x)
