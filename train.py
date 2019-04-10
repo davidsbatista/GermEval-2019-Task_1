@@ -270,13 +270,8 @@ def train_bi_lstm(train_data_x, train_data_y):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
-
-    print(train_x)
-    print()
-    print(train_y)
-
-    token2idx, max_sent_len = build_token_index(train_x)
+def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer,
+                                    token2idx, max_sent_len, level=None):
 
     """
     # y_data: encode into one-hot vectors
@@ -288,12 +283,13 @@ def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binariz
     # x_data: vectorize, i.e. tokens to indexes and pad
     print("Vectorizing input data\n")
     vectors = []
-    for x in train_x:
+    for text in train_x:
         tokens = []
-        text = x['title'] + " SEP " + x['body']
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
             tokens += word_tokenize(s)
+        print(tokens)
+        print()
         vector = vectorizer(tokens)
         vectors.append(vector)
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
@@ -626,9 +622,11 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     classifiers = []
     ml_binarizers = []
 
+    token2idx, max_sent_len = build_token_index(train_data_x)
+
     level = 0
     for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
-        
+
         # encode y labels into one-hot vectors
         ml_binarizer = MultiLabelBinarizer()
         y_labels = ml_binarizer.fit_transform(train_data_y)
@@ -642,7 +640,8 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
                                                             random_state=42,
                                                             test_size=0.30)
-        clf = train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer, level)
+        clf = train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer,
+                                              token2idx, max_sent_len, level)
         classifiers.append(clf)
         ml_binarizers.append(ml_binarizer)
         level += 1
