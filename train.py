@@ -270,7 +270,85 @@ def train_bi_lstm(train_data_x, train_data_y):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_cnn_sent_class(train_data_x, train_data_y, level=None):
+def train_cnn_sent_class(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
+
+    token2idx, max_sent_len = build_token_index(train_x)
+
+    print(train_x)
+    print()
+    print(train_y)
+
+    """
+    # y_data: encode into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+    """
+
+    # x_data: vectorize, i.e. tokens to indexes and pad
+    print("Vectorizing input data\n")
+    vectors = []
+    for x in train_x:
+        tokens = []
+        text = x['title'] + " SEP " + x['body']
+        sentences = sent_tokenize(text, language='german')
+        for s in sentences:
+            tokens += word_tokenize(s)
+        vector = vectorizer(tokens)
+        vectors.append(vector)
+    vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
+                                   truncating='post', value=token2idx['PADDED'])
+
+    train_data_x = vectors_padded
+    data_y = y_labels
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+                                                        random_state=42,
+                                                        test_size=0.30)
+    print(train_x.shape)
+    print(train_y.shape)
+
+    print("Loading pre-trained Embeddings\n")
+    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
+    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
+    not_found = 0
+    for word, i in token2idx.items():
+        try:
+            embedding_vector = static_embeddings[word.lower()]
+            embedding_matrix[i] = embedding_vector
+        except KeyError:
+            not_found += 1
+
+    embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
+                                        weights=[embedding_matrix], input_length=max_sent_len,
+                                        trainable=True, name='embeddings_dynamic')
+
+    embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
+                                       weights=[embedding_matrix], input_length=max_sent_len,
+                                       trainable=False, name='embeddings_static')
+
+    # model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
+    # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
+    # model.fit(train_x, train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
+
+    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
+    model.fit([train_x, train_x], train_y, batch_size=32, epochs=5, validation_split=0.2)
+    predictions = model.predict([test_x, test_x], verbose=1)
+
+    # ToDo: there must be a more efficient way to do this, BucketEstimator
+    binary_predictions = []
+    for pred in predictions:
+        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+    report = classification_report(test_y, np.array(binary_predictions),
+                                   target_names=ml_binarizer.classes_)
+    print(report)
+
+    return model, ml_binarizer, max_sent_len, token2idx
+
+
+def train_cnn_sent_class(train_data_x, train_data_y):
     token2idx, max_sent_len = build_token_index(train_data_x)
 
     # y_data: encode into one-hot vectors
@@ -337,10 +415,9 @@ def train_cnn_sent_class(train_data_x, train_data_y, level=None):
     report = classification_report(test_y, np.array(binary_predictions),
                                    target_names=ml_binarizer.classes_)
     print(report)
-    with open('results/models_subtask_b_report_{}.txt'.format(level), 'wt') as f_out:
-        f_out.write(report)
 
     return model, ml_binarizer, max_sent_len, token2idx
+
 
 """
 def keras_grid_search():
@@ -551,6 +628,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
     level = 0
     for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
+        
         # encode y labels into one-hot vectors
         ml_binarizer = MultiLabelBinarizer()
         y_labels = ml_binarizer.fit_transform(train_data_y)
