@@ -270,7 +270,7 @@ def train_bi_lstm(train_data_x, train_data_y):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_cnn_sent_class(train_data_x, train_data_y):
+def train_cnn_sent_class(train_data_x, train_data_y, level=None):
     token2idx, max_sent_len = build_token_index(train_data_x)
 
     # y_data: encode into one-hot vectors
@@ -334,8 +334,11 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     binary_predictions = []
     for pred in predictions:
         binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
-    print(classification_report(test_y, np.array(binary_predictions),
-                                target_names=ml_binarizer.classes_))
+    report = classification_report(test_y, np.array(binary_predictions),
+                                   target_names=ml_binarizer.classes_)
+    print(report)
+    with open('results/models_subtask_b_report_{}.txt'.format(level), 'wt') as f_out:
+        f_out.write(report)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
@@ -422,6 +425,7 @@ def keras_grid_search():
             print(output_string)
             f.write(output_string)
 """
+
 
 def train_han(train_data_x, train_data_y):
     token2idx, max_sent_len = build_token_index(train_data_x)
@@ -560,7 +564,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
                                                             random_state=42,
                                                             test_size=0.30)
-        clf = train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level)
+        clf = train_cnn_sent_class(train_x, train_y, test_x, test_y, ml_binarizer, level)
         classifiers.append(clf)
         ml_binarizers.append(ml_binarizer)
         level += 1
