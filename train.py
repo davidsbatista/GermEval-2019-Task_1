@@ -42,9 +42,9 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
         "clf__n_estimators": [250, 300, 500],
     }
 
-    parameters = {"gbt__learning_rate": stats.uniform(0.05, 0.35),
-                  "gbt__n_estimators": stats.randint(300, 1500),
-                  "gbt__min_samples_split": stats.randint(2, 64),
+    parameters = {"clf__learning_rate": stats.uniform(0.05, 0.35),
+                  "clf__n_estimators": stats.randint(300, 1500),
+                  "clf__min_samples_split": stats.randint(2, 64),
               }
 
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
