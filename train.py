@@ -270,7 +270,7 @@ def train_bi_lstm(train_data_x, train_data_y):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_cnn_sent_class(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
+def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
 
     token2idx, max_sent_len = build_token_index(train_x)
 
@@ -642,7 +642,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
                                                             random_state=42,
                                                             test_size=0.30)
-        clf = train_cnn_sent_class(train_x, train_y, test_x, test_y, ml_binarizer, level)
+        clf = train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer, level)
         classifiers.append(clf)
         ml_binarizers.append(ml_binarizer)
         level += 1
