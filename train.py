@@ -12,6 +12,7 @@ from keras_preprocessing.sequence import pad_sequences
 
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
+from scipy.stats import stats
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -38,8 +39,14 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
 
     parameters = {
         # "clf__n_estimators": [10, 100, 1000],
-        "clf__n_estimators": [250, 300],
+        "clf__n_estimators": [250, 300, 500],
     }
+
+    parameters = {"gbt__learning_rate": stats.uniform(0.05, 0.35),
+                  "gbt__n_estimators": stats.randint(300, 1500),
+                  "gbt__min_samples_split": stats.randint(2, 64),
+              }
+
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
     print("Best parameters set:")
@@ -687,7 +694,6 @@ def main():
     # ToDo: produce a run for subtask-B!!!!
 
     # subtask_a
-    # ToDo: HAN
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
     
@@ -706,6 +712,8 @@ def main():
 
     # ToDo: other embeddings? BRET, ELMo, Flair?
     # ToDo: language model based on char?
+    # ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification
+    # ToDo: https://github.com/locuslab/TCN
 
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
@@ -714,10 +722,10 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
 
     # train subtask_b
-    # subtask_b(train_data_x, train_data_y, dev_data_x)
+    subtask_b(train_data_x, train_data_y, dev_data_x)
 
 
 if __name__ == '__main__':
