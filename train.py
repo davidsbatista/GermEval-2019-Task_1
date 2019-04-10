@@ -12,7 +12,7 @@ from keras_preprocessing.sequence import pad_sequences
 
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-from scipy.stats import stats
+from scipy import stats
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
