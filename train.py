@@ -272,11 +272,11 @@ def train_bi_lstm(train_data_x, train_data_y):
 
 def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
 
-    token2idx, max_sent_len = build_token_index(train_x)
-
     print(train_x)
     print()
     print(train_y)
+
+    token2idx, max_sent_len = build_token_index(train_x)
 
     """
     # y_data: encode into one-hot vectors
