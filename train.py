@@ -859,12 +859,13 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                     classification[isbn][2] + '\n')
 
 
-
 def main():
     # subtask_b
     # ToDo: use the classifier of subtask_a for level_0 of subtask_b
     # ToDo: explore the hierarchical structure and enforce it in the classifiers
+
     # ToDo: produce a run for subtask-B!!!! usar uma CNN-simples para cada nível! =)
+    # ler os clf treinados e gerar uma run
 
     # subtask_a
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
