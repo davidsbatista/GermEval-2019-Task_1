@@ -497,7 +497,7 @@ def train_han(train_data_x, train_data_y):
     han_model.summary()
     han_model.compile(optimizer='adagrad', loss='binary_crossentropy', metrics=['acc'])
 
-    han_model.fit(train_x, train_y, batch_size=64, epochs=5, validation_split=0.2)
+    han_model.fit(train_x, train_y, batch_size=16, epochs=10, validation_split=0.2)
 
     predictions = han_model.predict(test_x, verbose=1)
 
