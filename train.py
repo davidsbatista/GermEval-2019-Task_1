@@ -38,13 +38,9 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
     ])
 
     parameters = {
-        # "clf__n_estimators": [10, 100, 1000],
+        "clf__min_samples_split": [10, 100, 1000],
         "clf__n_estimators": [250, 300, 500],
     }
-
-    parameters = {"clf__n_estimators": stats.randint(300, 1500),
-                  "clf__min_samples_split": stats.randint(2, 64),
-              }
 
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
