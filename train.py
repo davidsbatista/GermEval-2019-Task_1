@@ -12,7 +12,6 @@ from keras_preprocessing.sequence import pad_sequences
 
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
-from scipy import stats
 
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -40,7 +39,18 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
     parameters = {
         "clf__min_samples_split": [10, 100, 1000],
         "clf__n_estimators": [250, 300, 500],
+        "clf__class_weight": ['balanced',None]
     }
+
+    """
+    class_weight=None, criterion='gini',
+                           max_depth=None, max_features='auto', max_leaf_nodes=None,
+                           min_impurity_decrease=0.0, min_impurity_split=None,
+                           min_samples_leaf=1, min_samples_split=10,
+                           min_weight_fraction_leaf=0.0, n_estimators=250, n_jobs=None,
+                           oob_score=False, random_state=None, verbose=0,
+                           warm_start=False))
+    """
 
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
     grid_search_tune.fit(train_x, train_y)
