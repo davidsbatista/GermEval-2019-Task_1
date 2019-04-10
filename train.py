@@ -288,18 +288,13 @@ def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binariz
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
             tokens += word_tokenize(s)
-        print(tokens)
-        print()
         vector = vectorizer(tokens)
         vectors.append(vector)
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                    truncating='post', value=token2idx['PADDED'])
 
-    train_data_x = vectors_padded
-    data_y = y_labels
-
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+    train_x, test_x, train_y, test_y = train_test_split(vectors_padded, train_y,
                                                         random_state=42,
                                                         test_size=0.30)
     print(train_x.shape)
