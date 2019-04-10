@@ -324,7 +324,8 @@ def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binariz
     # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
     # model.fit(train_x, train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
 
-    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
+    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
+                                 train_y.shape[1])
     model.fit([train_x, train_x], train_y, batch_size=32, epochs=5, validation_split=0.2)
     predictions = model.predict([test_x, test_x], verbose=1)
 
