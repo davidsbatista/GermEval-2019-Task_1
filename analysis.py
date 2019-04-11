@@ -45,6 +45,7 @@ def top_words_per_class(train_data_x, train_data_y):
 
 
 def extract_hierarchy():
+
     # extract hierarchical structure
     level_0 = ['Architektur & Garten',
                'Ganzheitliches Bewusstsein',
@@ -54,7 +55,6 @@ def extract_hierarchy():
                'Literatur & Unterhaltung',
                'Ratgeber',
                'Sachbuch']
-
     hierarchical_level_0 = defaultdict(list)
     hierarchical_level_1 = defaultdict(list)
     all_lines = []
@@ -73,29 +73,17 @@ def extract_hierarchy():
         if any(x == parts[0].strip() for x in level_1):
             hierarchical_level_1[parts[0].strip()].append(parts[1].strip())
 
-    print("\nLevel 0")
+    hierarchy = defaultdict(lambda x: defaultdict(list))
+
+    # build first level
     for k, v in hierarchical_level_0.items():
-        print(k, '\t', len(v))
-    print("\nLevel 1")
+        hierarchy[k] = [label for label in v]
 
+    # build second level
     for k, v in hierarchical_level_1.items():
-        print(k, '\t', len(v))
-    print()
+        hierarchy[k] = [label for label in v]
 
-    for k, v in hierarchical_level_0.items():
-        print(k)
-        print("-" * len(k))
-        for label in v:
-            print(label)
-        print()
-    print()
-
-    for k, v in hierarchical_level_1.items():
-        print(k)
-        print("-" * len(k))
-        for label in v:
-            print(label)
-        print()
+    return hierarchical_level_0, hierarchical_level_1
 
 
 def data_analysis(train_data_x, train_data_y, labels):
@@ -125,13 +113,14 @@ def data_analysis(train_data_x, train_data_y, labels):
 
 def main():
     # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
+    # train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
 
     # load dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
+    # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # do some data analysis
-    data_analysis(train_data_x, train_data_y, labels)
+    # data_analysis(train_data_x, train_data_y, labels)
+    data_analysis(None, None, None)
 
 if __name__ == '__main__':
     main()

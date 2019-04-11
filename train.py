@@ -22,6 +22,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
+from analysis import extract_hierarchy
 from models.convnets_utils import get_cnn_multichannel
 from models.keras_han.model import HAN
 from models.neural_networks_keras import build_lstm_based_model, build_token_index, \
@@ -79,6 +80,7 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
 
 
 def train_random_forests_multilabel(train_data_x, train_data_y):
+
     # aggregate data for 3-independent classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -596,6 +598,7 @@ def train_han(train_data_x, train_data_y):
 
 
 def train_cnn_multilabel(train_data_x, train_data_y):
+
     # aggregate data for 3-independent classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -615,34 +618,50 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         data_y_level_1.append(labels_1)
         data_y_level_2.append(labels_2)
 
-    classifiers = []
-    ml_binarizers = []
+    hierarchical_level_0, hierarchical_level_1 = extract_hierarchy()
 
-    token2idx, max_sent_len = build_token_index(train_data_x)
+    nr_classifiers = 1
 
-    level = 0
-    for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
+    # level 0: train main classifier which outputs 8 possible labels
+    print("\n\n=== LEVEL 0 ===")
+    print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
+    print(sorted(hierarchical_level_0.keys()))
+    print(f'samples {len(data_y_level_0)}')
+    print()
 
-        # encode y labels into one-hot vectors
-        ml_binarizer = MultiLabelBinarizer()
-        y_labels = ml_binarizer.fit_transform(train_data_y)
-        print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-        data_y = y_labels
+    # level 1
+    print("\n\n=== LEVEL 1 ===")
+    for k, v in sorted(hierarchical_level_0.items()):
+        if len(v) == 0:
+            continue
+        print(f'classifier {k} on {len(v)} labels')
+        print(v)
+        samples = [sample for sample in data_y_level_1
+                   if any(label in sample for label in v)]
+        print(len(samples))
+        print()
+        print("----------------------------")
+        # ToDo: train a classifier on each loop
+        nr_classifiers += 1
 
-        # text representation: merge title and body
-        new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+    # level 2
+    print("\n\n=== LEVEL 2 ===")
+    for k, v in sorted(hierarchical_level_1.items()):
+        if len(v) == 0:
+            continue
+        print(f'classifier {k} on {len(v)} labels')
+        print(v)
+        samples = [sample for sample in data_y_level_2
+                   if any(label in sample for label in v)]
+        print(len(samples))
+        print()
+        print("----------------------------")
+        # ToDo: train a classifier on each loop
+        nr_classifiers += 1
 
-        # split into train and hold out set
-        train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
-                                                            random_state=42,
-                                                            test_size=0.30)
-        clf = train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer,
-                                              token2idx, max_sent_len, level)
-        classifiers.append(clf)
-        ml_binarizers.append(ml_binarizer)
-        level += 1
+    print("total classifiers: ", nr_classifiers)
 
-    return classifiers, ml_binarizers
+    exit(-1)
 
 
 def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
@@ -713,62 +732,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
     In addition to the very general writing genres additional genres of different specificity can
     be assigned to a book. In total, there are 343 different classes that are hierarchically
     structured.
-    """
-
-    """
-    stop at level_1, don't need to train a classifier for level_2
-    
-    Historische Romane
-    Romance
-    Erotik
-    Romantasy
-    Mystery
-    Horror
-    Literatur & Unterhaltung Satire
-    Comic & Cartoon
-    Musik    
-    Briefe, Essays, Gespräche    
-    Infotainment & erzählendes Sachbuch
-    Lifestyle
-    Sachbuch Philosophie
-    Lebensgestaltung
-    Glaube und Grenzerfahrungen
-    Sport
-    Regionalia    
-    Kabarett & Satire    
-    Ganzheitlich Leben
-    Mondkräfte    
-    Esoterische Romane
-    Psychologie & Spiritualität
-    Religionsunterricht
-    Religiöse Literatur
-    Geld & Investment
-    Recht & Steuern    
-    Design
-    Fotografie
-    Mode & Lifestyle
-    Beschäftigung, Malen, Rätseln    
-    Lyrik, Anthologien, Jahrbücher    
-    Natur, Tiere, Umwelt, Mensch    
-    Geschichte, Politik    
-    Kunst, Musik    
-    Biographien    
-    Echtes Leben, Realistischer Roman    
-    Abenteuer    
-    Geister- und Gruselgeschichten   
-    Fantasy und Science Fiction    
-    Liebe, Beziehung und Freundschaft    
-    Familie    
-    Tiergeschichten    
-    Lustige Geschichten, Witze    
-    Sportgeschichten    
-    Schulgeschichten    
-    Historische Romane, Zeitgeschichte   
-    Religion, Glaube, Ethik, Philosophie   
-    Krimis und Thriller
-    Detektivgeschichten    
-    Märchen, Sagen    
-    Schullektüre    
     """
 
     if clf == 'tree':
@@ -862,9 +825,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 def main():
     # subtask_b
     # ToDo: use the classifier of subtask_a for level_0 of subtask_b
-    # ToDo: explore the hierarchical structure and enforce it in the classifiers
 
     # ToDo: produce a run for subtask-B!!!! usar uma CNN-simples para cada nível! =)
+    # ToDo: explore the hierarchical structure and enforce it in the classifiers
     # ler os clf treinados e gerar uma run
 
     # subtask_a
@@ -886,6 +849,7 @@ def main():
 
     # ToDo: other embeddings? BRET, ELMo, Flair?
     # ToDo: language model based on char?
+    # ToDO: https://github.com/cambridgeltl/multilabel-nn
     # ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification
     # ToDo: https://github.com/locuslab/TCN
 
