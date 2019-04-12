@@ -663,43 +663,41 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
         print("samples: ", len(samples_x))
 
-        """
-        # y_data: encode into one-hot vectors
-        ml_binarizer = MultiLabelBinarizer()
-        y_labels = ml_binarizer.fit_transform(samples_y)
-        print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-        print(sorted(ml_binarizer.classes_))
-        print()
-        """
-
         clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
         classifiers['level_1'][k]['clf'] = clf
         classifiers['level_1'][k]['binarizer'] = ml_binarizer
         print("----------------------------")
         nr_classifiers += 1
 
-    print(classifiers)
-
-
     # level 2
     print("\n\n=== LEVEL 2 ===")
-    level_2_clfs = dict()
     for k, v in sorted(hierarchical_level_1.items()):
         if len(v) == 0:
             continue
         print(f'classifier {k} on {len(v)} labels')
-        print(v)
-        samples = [sample for sample in data_y_level_2
-                   if any(label in sample for label in v)]
-        print(len(samples))
-        print()
+
+        samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
+                     if any(label in y for label in v)]
+        samples_y = []
+        for y in data_y_level_1:
+            target = []
+            if any(label in y for label in v):
+                for label in y:
+                    if label in v:
+                        target.append(label)
+                samples_y.append(target)
+
+        print("samples: ", len(samples_x))
+
+        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+        classifiers['level_2'][k]['clf'] = clf
+        classifiers['level_2'][k]['binarizer'] = ml_binarizer
         print("----------------------------")
-        # ToDo: train a classifier on each loop
         nr_classifiers += 1
 
     print("total classifiers: ", nr_classifiers)
 
-    exit(-1)
+    return classifiers
 
 
 def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
@@ -818,25 +816,24 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
     elif clf == 'cnn':
         # sub-task B Train 3 classifiers, one for each level, random forests
-        classifiers, ml_binarizers = train_cnn_multilabel(train_data_x, train_data_y)
+        classifiers = train_cnn_multilabel(train_data_x, train_data_y)
 
-        with open('results/models_3_labels.pkl', 'wb') as f_out:
+        with open('results/classifiers.pkl', 'wb') as f_out:
             pickle.dump(classifiers, f_out)
 
-        with open('results/ml_binarizers_3_labels.pkl', 'wb') as f_out:
-            pickle.dump(ml_binarizers, f_out)
+        print(classifiers)
 
         # apply on dev data
         levels = {0: defaultdict(list),
                   1: defaultdict(list),
                   2: defaultdict(list)}
-
         classification = {}
-
         for data in dev_data_x:
             classification[data['isbn']] = deepcopy(levels)
 
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+
+        """
         level = 0
         for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
             predictions = clf_level.predict(new_data_x)
@@ -844,6 +841,11 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
                 classification[data['isbn']][level] = '\t'.join([p for p in pred])
             level += 1
+        """
+
+        for k, v in classifiers:
+            print(k, v)
+        
         with open('answer_b.txt', 'wt') as f_out:
             """
             f_out.write(str('subtask_a\n'))
