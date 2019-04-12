@@ -343,12 +343,17 @@ def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binariz
 
 
 def train_cnn_sent_class(train_data_x, train_data_y):
+
+    # ToDo: do a proper cv validation
+
     token2idx, max_sent_len = build_token_index(train_data_x)
 
     # y_data: encode into one-hot vectors
     ml_binarizer = MultiLabelBinarizer()
     y_labels = ml_binarizer.fit_transform(train_data_y)
     print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+
+    n_classes = len(ml_binarizer.classes_)
 
     # x_data: vectorize, i.e. tokens to indexes and pad
     print("Vectorizing input data\n")
@@ -370,7 +375,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
-                                                        test_size=0.30)
+                                                        test_size=0.25)
     print(train_x.shape)
     print(train_y.shape)
 
@@ -398,7 +403,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
     # model.fit(train_x, train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
 
-    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len, 8)
+    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
+                                 n_classes)
     model.fit([train_x, train_x], train_y, batch_size=32, epochs=5, validation_split=0.2)
     predictions = model.predict([test_x, test_x], verbose=1)
 
@@ -623,6 +629,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     nr_classifiers = 1
 
     # level 0: train main classifier which outputs 8 possible labels
+    top_clf = []
     print("\n\n=== LEVEL 0 ===")
     print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
     print(sorted(hierarchical_level_0.keys()))
@@ -630,22 +637,46 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     print()
 
     # level 1
+    level_1_clfs = dict()
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_0.items()):
         if len(v) == 0:
             continue
         print(f'classifier {k} on {len(v)} labels')
         print(v)
-        samples = [sample for sample in data_y_level_1
-                   if any(label in sample for label in v)]
-        print(len(samples))
+
+        samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
+                     if any(label in y for label in v)]
+        samples_y = []
+        for y in data_y_level_1:
+            target = []
+            if any(label in y for label in v):
+                for label in y:
+                    if label in v:
+                        target.append(label)
+                samples_y.append(target)
+
+        print("samples: ", len(samples_x))
+        print("samples: ", len(samples_y))
+
+        # y_data: encode into one-hot vectors
+        ml_binarizer = MultiLabelBinarizer()
+        y_labels = ml_binarizer.fit_transform(samples_y)
+        print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+        print(sorted(ml_binarizer.classes_))
         print()
+
+        train_cnn_sent_class(samples_x, samples_y)
+
         print("----------------------------")
         # ToDo: train a classifier on each loop
         nr_classifiers += 1
 
+    exit(-1)
+
     # level 2
     print("\n\n=== LEVEL 2 ===")
+    level_2_clfs = dict()
     for k, v in sorted(hierarchical_level_1.items()):
         if len(v) == 0:
             continue
