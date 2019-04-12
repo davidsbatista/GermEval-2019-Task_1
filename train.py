@@ -669,6 +669,10 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
     # level 2
     print("\n\n=== LEVEL 2 ===")
+
+    for k, v in sorted(hierarchical_level_1.items()):
+        print(k, v)
+    
     for k, v in sorted(hierarchical_level_1.items()):
         print(len(v))
         if len(v) == 0:
