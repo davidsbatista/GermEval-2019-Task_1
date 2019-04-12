@@ -673,7 +673,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         print()
 
         clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
-        classifers['level_1']['k'] = clf
+        classifers['level_1'][k] = clf
         print("----------------------------")
         nr_classifiers += 1
 
