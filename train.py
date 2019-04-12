@@ -628,9 +628,9 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
     nr_classifiers = 1
 
-    classifers = {'top_level': None,
-                  'level_1': defaultdict(),
-                  'level_2': defaultdict()}
+    classifiers = {'top_level': None,
+                   'level_1': defaultdict(dict),
+                   'level_2': defaultdict(dict)}
 
     # level 0: train main classifier which outputs 8 possible labels
     print("\n\n=== LEVEL 0 ===")
@@ -642,14 +642,13 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     samples_y = [list(y) for y in data_y_level_0]
     top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
 
-    classifers['top_level'] = top_clf
+    classifiers['top_level'] = top_clf
 
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_0.items()):
         if len(v) == 0:
             continue
         print(f'classifier {k} on {len(v)} labels')
-        print(v)
 
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
@@ -663,23 +662,24 @@ def train_cnn_multilabel(train_data_x, train_data_y):
                 samples_y.append(target)
 
         print("samples: ", len(samples_x))
-        print("samples: ", len(samples_y))
 
+        """
         # y_data: encode into one-hot vectors
         ml_binarizer = MultiLabelBinarizer()
         y_labels = ml_binarizer.fit_transform(samples_y)
         print('Total of {} classes'.format(len(ml_binarizer.classes_)))
         print(sorted(ml_binarizer.classes_))
         print()
+        """
 
         clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
-        classifers['level_1'][k] = clf
+        classifiers['level_1'][k]['clf'] = clf
+        classifiers['level_1'][k]['binarizer'] = ml_binarizer
         print("----------------------------")
         nr_classifiers += 1
 
-    print(classifers)
+    print(classifiers)
 
-    exit(-1)
 
     # level 2
     print("\n\n=== LEVEL 2 ===")
