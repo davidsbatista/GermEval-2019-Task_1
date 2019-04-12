@@ -55,8 +55,8 @@ def extract_hierarchy():
                'Literatur & Unterhaltung',
                'Ratgeber',
                'Sachbuch']
-    hierarchical_level_0 = defaultdict(list)
     hierarchical_level_1 = defaultdict(list)
+    hierarchical_level_2 = defaultdict(list)
     all_lines = []
 
     with open('blurbs_dev_participants/hierarchy.txt', 'rt') as f_in:
@@ -64,26 +64,16 @@ def extract_hierarchy():
             all_lines.append(line)
             parts = line.split('\t')
             if any(x == parts[0].strip() for x in level_0):
-                hierarchical_level_1[parts[1].strip()] = []
-                hierarchical_level_0[parts[0].strip()].append(parts[1].strip())
-    level_1 = list(hierarchical_level_1.keys())
+                hierarchical_level_1[parts[0].strip()].append(parts[1].strip())
+                hierarchical_level_2[parts[1].strip()] = []
+    level_2 = list(hierarchical_level_2.keys())
 
     for line in all_lines:
         parts = line.split('\t')
-        if any(x == parts[0].strip() for x in level_1):
-            hierarchical_level_1[parts[0].strip()].append(parts[1].strip())
+        if any(x == parts[0].strip() for x in level_2):
+            hierarchical_level_2[parts[0].strip()].append(parts[1].strip())
 
-    hierarchy = defaultdict(lambda x: defaultdict(list))
-
-    # build first level
-    for k, v in hierarchical_level_0.items():
-        hierarchy[k] = [label for label in v]
-
-    # build second level
-    for k, v in hierarchical_level_1.items():
-        hierarchy[k] = [label for label in v]
-
-    return hierarchical_level_0, hierarchical_level_1
+    return hierarchical_level_1, hierarchical_level_2
 
 
 def data_analysis(train_data_x, train_data_y, labels):

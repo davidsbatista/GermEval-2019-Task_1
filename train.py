@@ -272,76 +272,6 @@ def train_bi_lstm(train_data_x, train_data_y):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_cnn_sent_class_multilabel(train_x, train_y, test_x, test_y, ml_binarizer,
-                                    token2idx, max_sent_len, level=None):
-
-    """
-    # y_data: encode into one-hot vectors
-    ml_binarizer = MultiLabelBinarizer()
-    y_labels = ml_binarizer.fit_transform(train_data_y)
-    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-    """
-
-    # x_data: vectorize, i.e. tokens to indexes and pad
-    print("Vectorizing input data\n")
-    vectors = []
-    for text in train_x:
-        tokens = []
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
-        vectors.append(vector)
-    vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                   truncating='post', value=token2idx['PADDED'])
-
-    # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(vectors_padded, train_y,
-                                                        random_state=42,
-                                                        test_size=0.30)
-    print(train_x.shape)
-    print(train_y.shape)
-
-    print("Loading pre-trained Embeddings\n")
-    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
-    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
-    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
-    not_found = 0
-    for word, i in token2idx.items():
-        try:
-            embedding_vector = static_embeddings[word.lower()]
-            embedding_matrix[i] = embedding_vector
-        except KeyError:
-            not_found += 1
-
-    embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
-                                        weights=[embedding_matrix], input_length=max_sent_len,
-                                        trainable=True, name='embeddings_dynamic')
-
-    embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
-                                       weights=[embedding_matrix], input_length=max_sent_len,
-                                       trainable=False, name='embeddings_static')
-
-    # model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
-    # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
-    # model.fit(train_x, train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
-
-    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
-                                 train_y.shape[1])
-    model.fit([train_x, train_x], train_y, batch_size=32, epochs=5, validation_split=0.2)
-    predictions = model.predict([test_x, test_x], verbose=1)
-
-    # ToDo: there must be a more efficient way to do this, BucketEstimator
-    binary_predictions = []
-    for pred in predictions:
-        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
-    report = classification_report(test_y, np.array(binary_predictions),
-                                   target_names=ml_binarizer.classes_)
-    print(report)
-
-    return model, ml_binarizer, max_sent_len, token2idx
-
-
 def train_cnn_sent_class(train_data_x, train_data_y):
 
     # ToDo: do a proper cv validation
@@ -378,6 +308,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
                                                         test_size=0.25)
     print(train_x.shape)
     print(train_y.shape)
+
+    return None, None, None, None
 
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
@@ -624,64 +556,28 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         data_y_level_1.append(labels_1)
         data_y_level_2.append(labels_2)
 
-    hierarchical_level_0, hierarchical_level_1 = extract_hierarchy()
-
-    nr_classifiers = 1
-
+    hierarchical_level_1, hierarchical_level_2 = extract_hierarchy()
     classifiers = {'top_level': defaultdict(dict),
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
-    # level 0: train main classifier which outputs 8 possible labels
-    # print("\n\n=== LEVEL 0 ===")
-    # print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
-    # print(f'samples {len(data_y_level_0)}')
-    # print()
-    # samples_y = [list(y) for y in data_y_level_0]
-    # top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
-    # classifiers['top_level']['clf'] = top_clf
-    # classifiers['top_level']['binarizer'] = ml_binarizer
+    print("\n\n=== LEVEL 0 ===")
+    print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
+    print(f'samples {len(data_y_level_0)}')
+    print()
+    samples_y = [list(y) for y in data_y_level_0]
+    top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
+    classifiers['top_level']['clf'] = top_clf
+    classifiers['top_level']['binarizer'] = ml_binarizer
 
-    # print("\n\n=== LEVEL 1 ===")
-    # for k, v in sorted(hierarchical_level_0.items()):
-    #     if len(v) == 0:
-    #         continue
-    #     print(f'classifier {k} on {len(v)} labels')
-    #
-    #     samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
-    #                  if any(label in y for label in v)]
-    #     samples_y = []
-    #     for y in data_y_level_1:
-    #         target = []
-    #         if any(label in y for label in v):
-    #             for label in y:
-    #                 if label in v:
-    #                     target.append(label)
-    #             samples_y.append(target)
-    #
-    #     print("samples: ", len(samples_x))
-    #
-    #     clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
-    #     classifiers['level_1'][k]['clf'] = clf
-    #     classifiers['level_1'][k]['binarizer'] = ml_binarizer
-    #     print("----------------------------")
-    #     nr_classifiers += 1
-
-    # level 2
-    print("\n\n=== LEVEL 2 ===")
-
+    print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
-        print(k, v)
-    
-    for k, v in sorted(hierarchical_level_1.items()):
-        print(len(v))
         if len(v) == 0:
             continue
         print(f'classifier {k} on {len(v)} labels')
 
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
-
         samples_y = []
         for y in data_y_level_1:
             target = []
@@ -692,14 +588,38 @@ def train_cnn_multilabel(train_data_x, train_data_y):
                 samples_y.append(target)
 
         print("samples: ", len(samples_x))
+        print("samples: ", len(samples_y))
+
+        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+        classifiers['level_1'][k]['clf'] = clf
+        classifiers['level_1'][k]['binarizer'] = ml_binarizer
+        print("----------------------------")
+
+    print("\n\n=== LEVEL 2 ===")
+    for k, v in sorted(hierarchical_level_2.items()):
+        if len(v) == 0:
+            continue
+        print(f'classifier {k} on {len(v)} labels')
+
+        samples_x = [x for x, y in zip(train_data_x, data_y_level_2)
+                     if any(label in y for label in v)]
+
+        samples_y = []
+        for y in data_y_level_2:
+            target = []
+            if any(label in y for label in v):
+                for label in y:
+                    if label in v:
+                        target.append(label)
+                samples_y.append(target)
+
+        print("samples: ", len(samples_x))
+        print("samples: ", len(samples_y))
 
         clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
         classifiers['level_2'][k]['clf'] = clf
         classifiers['level_2'][k]['binarizer'] = ml_binarizer
         print("----------------------------")
-        nr_classifiers += 1
-
-    print("total classifiers: ", nr_classifiers)
 
     return classifiers
 
@@ -824,7 +744,11 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         with open('results/classifiers.pkl', 'wb') as f_out:
             pickle.dump(classifiers, f_out)
 
-        print(classifiers)
+        for k, v in classifiers.items():
+            print()
+            print(k, v)
+
+        exit(-1)
 
         # apply on dev data
         levels = {0: defaultdict(list),
@@ -845,9 +769,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 classification[data['isbn']][level] = '\t'.join([p for p in pred])
             level += 1
         """
-
-        for k, v in classifiers:
-            print(k, v)
 
         with open('answer_b.txt', 'wt') as f_out:
             """
