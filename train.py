@@ -629,8 +629,8 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     nr_classifiers = 1
 
     classifers = {'top_level': None,
-                  'level_1': dict(),
-                  'level_2': dict()}
+                  'level_1': defaultdict(),
+                  'level_2': defaultdict()}
 
     # level 0: train main classifier which outputs 8 possible labels
     print("\n\n=== LEVEL 0 ===")
