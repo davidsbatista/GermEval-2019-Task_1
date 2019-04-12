@@ -405,7 +405,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 
     model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
                                  n_classes)
-    model.fit([train_x, train_x], train_y, batch_size=32, epochs=5, validation_split=0.2)
+    model.fit([train_x, train_x], train_y, batch_size=128, epochs=1, validation_split=0.2)
     predictions = model.predict([test_x, test_x], verbose=1)
 
     # ToDo: there must be a more efficient way to do this, BucketEstimator
@@ -628,21 +628,21 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
     nr_classifiers = 1
 
-    classifiers = {'top_level': None,
+    classifiers = {'top_level': dict,
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
     # level 0: train main classifier which outputs 8 possible labels
     print("\n\n=== LEVEL 0 ===")
     print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
-    print(sorted(hierarchical_level_0.keys()))
     print(f'samples {len(data_y_level_0)}')
     print()
 
     samples_y = [list(y) for y in data_y_level_0]
     top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
 
-    classifiers['top_level'] = top_clf
+    classifiers['top_level']['clf'] = top_clf
+    classifiers['top_level']['binarizer'] = ml_binarizer
 
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_0.items()):
