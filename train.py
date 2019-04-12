@@ -628,7 +628,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
     nr_classifiers = 1
 
-    classifiers = {'top_level': dict,
+    classifiers = {'top_level': defaultdict(dict),
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
