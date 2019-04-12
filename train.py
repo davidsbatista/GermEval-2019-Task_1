@@ -635,10 +635,11 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     print(f'samples {len(data_y_level_0)}')
     print()
 
-    for y in data_y_level_0:
-        print(y)
+    samples_y = [list(y) for y in data_y_level_0]
+    top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
 
-    # top_clf = train_cnn_sent_class(samples_x, samples_y)
+    print(top_clf)
+
     exit(-1)
 
     # level 1
