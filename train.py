@@ -633,51 +633,53 @@ def train_cnn_multilabel(train_data_x, train_data_y):
                    'level_2': defaultdict(dict)}
 
     # level 0: train main classifier which outputs 8 possible labels
-    print("\n\n=== LEVEL 0 ===")
-    print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
-    print(f'samples {len(data_y_level_0)}')
-    print()
+    # print("\n\n=== LEVEL 0 ===")
+    # print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
+    # print(f'samples {len(data_y_level_0)}')
+    # print()
+    # samples_y = [list(y) for y in data_y_level_0]
+    # top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
+    # classifiers['top_level']['clf'] = top_clf
+    # classifiers['top_level']['binarizer'] = ml_binarizer
 
-    samples_y = [list(y) for y in data_y_level_0]
-    top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
-
-    classifiers['top_level']['clf'] = top_clf
-    classifiers['top_level']['binarizer'] = ml_binarizer
-
-    print("\n\n=== LEVEL 1 ===")
-    for k, v in sorted(hierarchical_level_0.items()):
-        if len(v) == 0:
-            continue
-        print(f'classifier {k} on {len(v)} labels')
-
-        samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
-                     if any(label in y for label in v)]
-        samples_y = []
-        for y in data_y_level_1:
-            target = []
-            if any(label in y for label in v):
-                for label in y:
-                    if label in v:
-                        target.append(label)
-                samples_y.append(target)
-
-        print("samples: ", len(samples_x))
-
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
-        classifiers['level_1'][k]['clf'] = clf
-        classifiers['level_1'][k]['binarizer'] = ml_binarizer
-        print("----------------------------")
-        nr_classifiers += 1
+    # print("\n\n=== LEVEL 1 ===")
+    # for k, v in sorted(hierarchical_level_0.items()):
+    #     if len(v) == 0:
+    #         continue
+    #     print(f'classifier {k} on {len(v)} labels')
+    #
+    #     samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
+    #                  if any(label in y for label in v)]
+    #     samples_y = []
+    #     for y in data_y_level_1:
+    #         target = []
+    #         if any(label in y for label in v):
+    #             for label in y:
+    #                 if label in v:
+    #                     target.append(label)
+    #             samples_y.append(target)
+    #
+    #     print("samples: ", len(samples_x))
+    #
+    #     clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+    #     classifiers['level_1'][k]['clf'] = clf
+    #     classifiers['level_1'][k]['binarizer'] = ml_binarizer
+    #     print("----------------------------")
+    #     nr_classifiers += 1
 
     # level 2
     print("\n\n=== LEVEL 2 ===")
     for k, v in sorted(hierarchical_level_1.items()):
+        print(len(v))
         if len(v) == 0:
             continue
         print(f'classifier {k} on {len(v)} labels')
 
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
+
+        if
+
         samples_y = []
         for y in data_y_level_1:
             target = []
@@ -817,7 +819,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
     elif clf == 'cnn':
         # sub-task B Train 3 classifiers, one for each level, random forests
         classifiers = train_cnn_multilabel(train_data_x, train_data_y)
-
         with open('results/classifiers.pkl', 'wb') as f_out:
             pickle.dump(classifiers, f_out)
 
@@ -845,7 +846,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
         for k, v in classifiers:
             print(k, v)
-        
+
         with open('answer_b.txt', 'wt') as f_out:
             """
             f_out.write(str('subtask_a\n'))
