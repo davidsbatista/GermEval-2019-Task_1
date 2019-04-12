@@ -678,8 +678,6 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
 
-        if
-
         samples_y = []
         for y in data_y_level_1:
             target = []
