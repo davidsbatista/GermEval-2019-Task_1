@@ -629,12 +629,17 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     nr_classifiers = 1
 
     # level 0: train main classifier which outputs 8 possible labels
-    top_clf = []
     print("\n\n=== LEVEL 0 ===")
     print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
     print(sorted(hierarchical_level_0.keys()))
     print(f'samples {len(data_y_level_0)}')
     print()
+
+    for y in data_y_level_0:
+        print(y)
+
+    # top_clf = train_cnn_sent_class(samples_x, samples_y)
+    exit(-1)
 
     # level 1
     level_1_clfs = dict()
