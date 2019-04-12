@@ -628,6 +628,10 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
     nr_classifiers = 1
 
+    classifers = {'top_level': None,
+                  'level_1': dict(),
+                  'level_2': dict()}
+
     # level 0: train main classifier which outputs 8 possible labels
     print("\n\n=== LEVEL 0 ===")
     print(f'top classifier on {len(hierarchical_level_0.keys())} labels')
@@ -638,12 +642,8 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     samples_y = [list(y) for y in data_y_level_0]
     top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
 
-    print(top_clf)
+    classifers['top_level'] = top_clf
 
-    exit(-1)
-
-    # level 1
-    level_1_clfs = dict()
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_0.items()):
         if len(v) == 0:
@@ -672,11 +672,12 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         print(sorted(ml_binarizer.classes_))
         print()
 
-        train_cnn_sent_class(samples_x, samples_y)
-
+        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+        classifers['level_1']['k'] = clf
         print("----------------------------")
-        # ToDo: train a classifier on each loop
         nr_classifiers += 1
+
+    print(classifers)
 
     exit(-1)
 
