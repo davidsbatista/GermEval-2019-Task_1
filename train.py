@@ -570,6 +570,8 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     print(max_sent_len)
     print(len(token2idx))
 
+    print(classifiers)
+
     classifiers['top_level']['clf'] = top_clf
     classifiers['top_level']['binarizer'] = ml_binarizer
     classifiers['top_level']['token2idx'] = token2idx
