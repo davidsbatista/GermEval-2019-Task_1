@@ -467,7 +467,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
             tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
+        vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                    truncating='post', value=token2idx['PADDED'])
