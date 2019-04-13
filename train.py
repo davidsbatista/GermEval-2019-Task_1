@@ -795,8 +795,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         max_sent_len = classifiers['top_level']['max_sent_len']
 
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
-        predictions = top_level_clf.predict(dev_vector)
+        predictions = top_level_clf.predict([dev_vector], verbose=1)
         print(predictions)
+
+
         exit(-1)
 
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
