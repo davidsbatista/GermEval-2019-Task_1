@@ -564,6 +564,12 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     print()
     samples_y = [list(y) for y in data_y_level_0]
     top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
+
+    print(top_clf)
+    print(ml_binarizer)
+    print(max_sent_len)
+    print(len(token2idx))
+
     classifiers['top_level']['clf'] = top_clf
     classifiers['top_level']['binarizer'] = ml_binarizer
     classifiers['top_level']['token2idx'] = token2idx
@@ -744,12 +750,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
     elif clf == 'cnn':
 
-        """
         # sub-task B Train 3 classifiers, one for each level, random forests
         classifiers = train_cnn_multilabel(train_data_x, train_data_y)
         with open('results/classifiers.pkl', 'wb') as f_out:
             pickle.dump(classifiers, f_out)
-        """
 
         with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
