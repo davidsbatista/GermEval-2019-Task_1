@@ -489,7 +489,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_y.shape)
 
     model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=15, verbose=True, validation_split=0.33)
+    model.fit(train_x, train_y, batch_size=32, epochs=5, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
     """
@@ -826,8 +826,7 @@ def main():
     # subtask_a
     # subtask_b
 
-    # ToDo: generate a run for a and b by exploring
-    #       the hierarchical structure and enforce it in the classifiers
+    # ToDo: generate a run for a) and b) by exploring
 
     # ToDo: Naive Bayes para low samples?
     # ToDo: ver bem os tokens, lower case? oov?
