@@ -794,22 +794,17 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         token2idx = classifiers['top_level']['token2idx']
         max_sent_len = classifiers['top_level']['max_sent_len']
 
-        print(dev_data_x)
-        print(token2idx)
-        print(max_sent_len)
-
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
-
-        print(dev_vector)
-
         predictions = top_level_clf.predict([dev_vector], verbose=1)
-        print(predictions)
+        pred_classes = ml_binarizer.inverse_transform(predictions)
 
-
-        exit(-1)
+        print(pred_classes)
 
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-                classification[data['isbn']][level] = '\t'.join([p for p in pred])
+                classification[data['isbn']][0] = '\t'.join([p for p in pred])
+                print('\t'.join([p for p in pred]))
+
+        exit(-1)
 
         with open('answer_b.txt', 'wt') as f_in:
             """
