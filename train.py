@@ -554,7 +554,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         data_y_level_2.append(labels_2)
 
     hierarchical_level_1, hierarchical_level_2 = extract_hierarchy()
-    classifiers = {'top_level': dict,
+    classifiers = {'top_level': defaultdict(dict),
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
