@@ -785,7 +785,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         for data in dev_data_x:
             classification[data['isbn']] = deepcopy(levels)
 
-        # top_level
+        # apply the top-level classifier
         top_level_clf = classifiers['top_level']['clf']
         ml_binarizer = classifiers['top_level']['ml_binarizer']
         token2idx = classifiers['top_level']['token2idx']
@@ -795,6 +795,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         predictions = top_level_clf.predict([dev_vector], verbose=1)
 
         print(predictions)
+
+        print(ml_binarizer)
 
         pred_classes = ml_binarizer.inverse_transform(predictions)
 
