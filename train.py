@@ -795,6 +795,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         max_sent_len = classifiers['top_level']['max_sent_len']
 
         print(dev_data_x)
+        print(token2idx)
+        print(max_sent_len)
 
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
 
