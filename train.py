@@ -794,7 +794,12 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         token2idx = classifiers['top_level']['token2idx']
         max_sent_len = classifiers['top_level']['max_sent_len']
 
+        print(dev_data_x)
+
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+
+        print(dev_vector)
+
         predictions = top_level_clf.predict([dev_vector], verbose=1)
         print(predictions)
 
