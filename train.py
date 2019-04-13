@@ -491,6 +491,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_y.shape)
 
     model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, n_classes)
+    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
     """
@@ -705,11 +706,11 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         # sub-task B Train 3 classifiers, one for each level, random forests
         classifiers, ml_binarizers = train_random_forests_multilabel(train_data_x, train_data_y)
 
-        with open('results/models_3_labels.pkl', 'wb') as f_out:
-            pickle.dump(classifiers, f_out)
+        with open('results/models_3_labels.pkl', 'wb') as f_in:
+            pickle.dump(classifiers, f_in)
 
-        with open('results/ml_binarizers_3_labels.pkl', 'wb') as f_out:
-            pickle.dump(ml_binarizers, f_out)
+        with open('results/ml_binarizers_3_labels.pkl', 'wb') as f_in:
+            pickle.dump(ml_binarizers, f_in)
 
         # apply on dev data
         levels = {0: defaultdict(list),
@@ -729,7 +730,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
                 classification[data['isbn']][level] = '\t'.join([p for p in pred])
             level += 1
-        with open('answer_b.txt', 'wt') as f_out:
+        with open('answer_b.txt', 'wt') as f_in:
             """
             f_out.write(str('subtask_a\n'))
             for x in dev_data_x:
@@ -737,22 +738,29 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
             """
 
-            f_out.write(str('subtask_b\n'))
+            f_in.write(str('subtask_b\n'))
             for x in dev_data_x:
                 isbn = x['isbn']
-                f_out.write(
+                f_in.write(
                     isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
                     classification[isbn][2] + '\n')
 
     elif clf == 'cnn':
+
+        """
         # sub-task B Train 3 classifiers, one for each level, random forests
         classifiers = train_cnn_multilabel(train_data_x, train_data_y)
         with open('results/classifiers.pkl', 'wb') as f_out:
             pickle.dump(classifiers, f_out)
+        """
+
+        with open('results/classifiers.pkl', 'ob') as f_in:
+            classifiers = pickle.load(f_in)
 
         for k, v in classifiers.items():
             print()
             print(k, v)
+            print("")
 
         exit(-1)
 
@@ -776,7 +784,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             level += 1
         """
 
-        with open('answer_b.txt', 'wt') as f_out:
+        with open('answer_b.txt', 'wt') as f_in:
             """
             f_out.write(str('subtask_a\n'))
             for x in dev_data_x:
@@ -784,10 +792,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
             """
 
-            f_out.write(str('subtask_b\n'))
+            f_in.write(str('subtask_b\n'))
             for x in dev_data_x:
                 isbn = x['isbn']
-                f_out.write(
+                f_in.write(
                     isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
                     classification[isbn][2] + '\n')
 
@@ -795,7 +803,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 def main():
     # subtask_a
     # subtask_b
-    # ToDo: explore the hierarchical structure and enforce it in the classifiers
+
+    # ToDo: generate a run for a and b by exploring
+    #       the hierarchical structure and enforce it in the classifiers
+
     # ToDo: Naive Bayes para low samples?
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
