@@ -23,7 +23,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from analysis import extract_hierarchy
-from models.convnets_utils import get_cnn_multichannel, get_cnn_rand
+from models.convnets_utils import get_cnn_multichannel, get_cnn_rand, get_cnn_pre_trained_embeddings
 from models.keras_han.model import HAN
 from models.neural_networks_keras import build_lstm_based_model, build_token_index, \
     vectorize_dev_data, vectorizer
@@ -490,6 +490,10 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_x.shape)
     print(train_y.shape)
 
+    model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, n_classes)
+    predictions = model.predict([test_x], verbose=1)
+
+    """
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     # build a word embeddings matrix, out of vocabulary words will be initialized randomly
@@ -501,11 +505,10 @@ def train_cnn_sent_class(train_data_x, train_data_y):
             embedding_matrix[i] = embedding_vector
         except KeyError:
             not_found += 1
-
-    model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, n_classes)
-    # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, n_classes)
+    model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
+    """
 
     """
     embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
