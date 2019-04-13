@@ -8,7 +8,6 @@ from keras.layers import Embedding, Bidirectional, LSTM, Dropout, Dense, CuDNNLS
 
 PADDED = 1
 UNKNOWN = 0
-token2idx = {}
 max_sent_length = 0
 
 
@@ -42,7 +41,7 @@ def build_token_index(x_data):
     return token2idx, max_sent_length
 
 
-def vectorizer(x_sample):
+def vectorizer(x_sample, token2idx):
     """
     Something like a Vectorizer, that converts your sentences into vectors,
     either one-hot-encodings or embeddings;
@@ -118,7 +117,7 @@ def vectorize_dev_data(dev_data_x, max_sent_len, token2idx):
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
             tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
+        vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
     test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                  truncating='post', value=token2idx['PADDED'])
