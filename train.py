@@ -488,7 +488,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_x.shape)
     print(train_y.shape)
 
-    model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, n_classes)
+    model = get_cnn_rand(2, len(token2idx) + 1, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
@@ -564,13 +564,6 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     print()
     samples_y = [list(y) for y in data_y_level_0]
     top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
-
-    print(top_clf)
-    print(ml_binarizer)
-    print(max_sent_len)
-    print(len(token2idx))
-
-    print(classifiers)
 
     classifiers['top_level']['clf'] = top_clf
     classifiers['top_level']['binarizer'] = ml_binarizer
@@ -754,9 +747,13 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
         # sub-task B Train 3 classifiers, one for each level, random forests
         classifiers = train_cnn_multilabel(train_data_x, train_data_y)
-        with open('results/classifiers.pkl', 'wb') as f_out:
+        out_file = 'results/classifiers.pkl'
+        print(f"Saving trained classifiers to {out_file} ...")
+        with open(out_file, 'wb') as f_out:
             pickle.dump(classifiers, f_out)
 
+        exit(-1)
+    
         with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
 

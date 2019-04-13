@@ -10,21 +10,6 @@ from keras.layers import Input, Dense, Embedding, Flatten, Conv1D, MaxPooling1D,
 from keras.layers import Dropout, concatenate
 
 
-def compute_metrics(raw_predictions, label_encoder):
-    # convert raw predictions to class indexes
-    threshold = 0.5
-    class_predictions = [(x > threshold).astype(int) for x in raw_predictions]
-
-    # select only one class (i.e., the dim in the vector with 1.0 all other are at 0.0)
-    class_index = ([np.argmax(x) for x in class_predictions])
-
-    # convert back to original class names
-    pred_classes = label_encoder.inverse_transform(class_index)
-
-    # print precision, recall, f1-score report
-    print(classification_report(y_test, pred_classes))
-
-
 def load_fasttext_embeddings():
     glove_dir = '/Users/dsbatista/resources/glove.6B'
     embeddings_index = {}
