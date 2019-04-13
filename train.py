@@ -488,8 +488,8 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     print(train_x.shape)
     print(train_y.shape)
 
-    model = get_cnn_rand(2, len(token2idx) + 1, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
+    model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
+    model.fit(train_x, train_y, batch_size=32, epochs=15, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
     """
