@@ -798,29 +798,26 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
         predictions = top_level_clf.predict([dev_vector], verbose=1)
 
-        pred_bin = ([0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5] > predictions).astype(int)
+        pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
 
         for pred, data in zip(ml_binarizer.inverse_transform(pred_bin), dev_data_x):
                 classification[data['isbn']][0] = '\t'.join([p for p in pred])
                 print('\t'.join([p for p in pred]))
 
-        exit(-1)
-
-        with open('answer_b.txt', 'wt') as f_in:
-            """
+        with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
             for x in dev_data_x:
                 isbn = x['isbn']
                 f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
-            """
 
-            f_in.write(str('subtask_b\n'))
+            """
+            f_out.write(str('subtask_b\n'))
             for x in dev_data_x:
                 isbn = x['isbn']
                 f_in.write(
                     isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
                     classification[isbn][2] + '\n')
-
+            """
 
 def main():
     # subtask_a
