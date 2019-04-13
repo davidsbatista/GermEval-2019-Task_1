@@ -754,11 +754,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
 
-        top_level_clf = classifiers['top_level']['clf']
-        ml_binarizer = classifiers['top_level']['ml_binarizer']
-        token2idx = classifiers['top_level']['token2idx']
-        max_sent_len = classifiers['top_level']['max_sent_len']
-
+        """
         for label in classifiers['level_1'].keys():
             print(label)
             clf = classifiers['level_1'][label]['clf']
@@ -778,6 +774,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             print(binarizer.classes_)
             print()
             print()
+        """
 
         # apply on dev data
         # structure to store predictions on dev_data
@@ -796,6 +793,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
         predictions = top_level_clf.predict([dev_vector], verbose=1)
+
+        print(predictions)
+
         pred_classes = ml_binarizer.inverse_transform(predictions)
 
         print(pred_classes)
