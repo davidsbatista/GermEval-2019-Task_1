@@ -23,7 +23,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from analysis import extract_hierarchy
-from models.convnets_utils import get_cnn_multichannel
+from models.convnets_utils import get_cnn_multichannel, get_cnn_rand
 from models.keras_han.model import HAN
 from models.neural_networks_keras import build_lstm_based_model, build_token_index, \
     vectorize_dev_data, vectorizer
@@ -458,16 +458,7 @@ def train_han(train_data_x, train_data_y):
 
 def train_cnn_sent_class(train_data_x, train_data_y):
 
-    # ToDo: do a proper cv validation
-
     token2idx, max_sent_len = build_token_index(train_data_x)
-
-    # y_data: encode into one-hot vectors
-    ml_binarizer = MultiLabelBinarizer()
-    y_labels = ml_binarizer.fit_transform(train_data_y)
-    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-
-    n_classes = len(ml_binarizer.classes_)
 
     # x_data: vectorize, i.e. tokens to indexes and pad
     print("Vectorizing input data\n")
@@ -483,9 +474,15 @@ def train_cnn_sent_class(train_data_x, train_data_y):
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                    truncating='post', value=token2idx['PADDED'])
 
+    # y_data: encode into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+    n_classes = len(ml_binarizer.classes_)
     train_data_x = vectors_padded
     data_y = y_labels
 
+    # ToDo: do a proper cv validation
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
@@ -505,22 +502,23 @@ def train_cnn_sent_class(train_data_x, train_data_y):
         except KeyError:
             not_found += 1
 
+    model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, n_classes)
+    # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, n_classes)
+    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
+    predictions = model.predict([test_x], verbose=1)
+
+    """
     embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
                                         weights=[embedding_matrix], input_length=max_sent_len,
                                         trainable=True, name='embeddings_dynamic')
-
     embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
                                        weights=[embedding_matrix], input_length=max_sent_len,
                                        trainable=False, name='embeddings_static')
-
-    # model = get_cnn_rand(300, len(token2idx) + 1, max_sent_len, 8)
-    # model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, 8)
-    # model.fit(train_x, train_y, batch_size=32, epochs=10, verbose=True, validation_split=0.2)
-
     model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
                                  n_classes)
     model.fit([train_x, train_x], train_y, batch_size=128, epochs=1, validation_split=0.2)
     predictions = model.predict([test_x, test_x], verbose=1)
+    """
 
     # ToDo: there must be a more efficient way to do this, BucketEstimator
     binary_predictions = []
@@ -535,7 +533,7 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 
 def train_cnn_multilabel(train_data_x, train_data_y):
 
-    # aggregate data for 3-independent classifiers
+    # aggregate data for 3-level classifiers
     data_y_level_0 = []
     data_y_level_1 = []
     data_y_level_2 = []
@@ -559,9 +557,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
-    # ToDo: token2idx only once for all data_x
-
-    print("\n\n=== LEVEL 0 ===")
+    print("\n\n=== TOP-LEVEL ===")
     print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
     print(f'samples {len(data_y_level_0)}')
     print()
@@ -569,6 +565,8 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
     classifiers['top_level']['clf'] = top_clf
     classifiers['top_level']['binarizer'] = ml_binarizer
+    classifiers['top_level']['token2idx'] = token2idx
+    classifiers['top_level']['max_sent_len'] = max_sent_len
 
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
@@ -593,6 +591,8 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
         classifiers['level_1'][k]['clf'] = clf
         classifiers['level_1'][k]['binarizer'] = ml_binarizer
+        classifiers['level_1'][k]['token2idx'] = token2idx
+        classifiers['level_1'][k]['max_sent_len'] = max_sent_len
         print("----------------------------")
 
     print("\n\n=== LEVEL 2 ===")
@@ -619,6 +619,9 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
         classifiers['level_2'][k]['clf'] = clf
         classifiers['level_2'][k]['binarizer'] = ml_binarizer
+        classifiers['level_2'][k]['token2idx'] = token2idx
+        classifiers['level_2'][k]['max_sent_len'] = max_sent_len
+
         print("----------------------------")
 
     return classifiers
@@ -787,17 +790,12 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
 
 def main():
-    # subtask_b
-    # ToDo: use the classifier of subtask_a for level_0 of subtask_b
-
-    # ToDo: produce a run for subtask-B!!!! usar uma CNN-simples para cada nível! =)
-    # ToDo: explore the hierarchical structure and enforce it in the classifiers
-    # ler os clf treinados e gerar uma run
-
     # subtask_a
+    # subtask_b
+    # ToDo: explore the hierarchical structure and enforce it in the classifiers
+    # ToDo: Naive Bayes para low samples?
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
-
     # ToDo: grid-search Keras:
     """
     - Grid search across different kernel sizes to find the optimal configuration for your problem,
