@@ -92,7 +92,7 @@ def get_cnn_rand(embedding_dim, vocab_size, max_len, num_classes):
 
     # generate several branches in the network, each for a different convolution+pooling operation,
     # and concatenate the result of each branch into a single vector
-    branches = get_conv_pool(x, 'dynamic')
+    branches = get_conv_pool(x, 'dynamic', max_len)
     z = concatenate(branches, axis=-1)
     z = Dropout(0.5)(z)
 
