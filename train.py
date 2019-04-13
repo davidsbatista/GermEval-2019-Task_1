@@ -745,9 +745,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
     elif clf == 'cnn':
 
-        # # sub-task B Train 3 classifiers, one for each level, random forests
+        # sub-task B Train 3 classifiers, one for each level, random forests
+        out_file = 'results/classifiers.pkl'
         # classifiers = train_cnn_multilabel(train_data_x, train_data_y)
-        # out_file = 'results/classifiers.pkl'
         # print(f"Saving trained classifiers to {out_file} ...")
         # with open(out_file, 'wb') as f_out:
         #     pickle.dump(classifiers, f_out)
