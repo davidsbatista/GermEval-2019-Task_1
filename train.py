@@ -780,15 +780,13 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             print()
 
         # apply on dev data
+        # structure to store predictions on dev_data
         levels = {0: defaultdict(list),
                   1: defaultdict(list),
                   2: defaultdict(list)}
         classification = {}
-
         for data in dev_data_x:
             classification[data['isbn']] = deepcopy(levels)
-
-        new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
 
         # top_level
         top_level_clf = classifiers['top_level']['clf']
@@ -796,7 +794,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         token2idx = classifiers['top_level']['token2idx']
         max_sent_len = classifiers['top_level']['max_sent_len']
 
-        dev_vector = vectorize_dev_data(new_data_x, max_sent_len, token2idx)
+        dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
         predictions = top_level_clf.predict(dev_vector)
         print(predictions)
         exit(-1)
