@@ -570,61 +570,61 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     classifiers['top_level']['token2idx'] = token2idx
     classifiers['top_level']['max_sent_len'] = max_sent_len
 
-    print("\n\n=== LEVEL 1 ===")
-    for k, v in sorted(hierarchical_level_1.items()):
-        if len(v) == 0:
-            continue
-        print(f'classifier {k} on {len(v)} labels')
-
-        samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
-                     if any(label in y for label in v)]
-        samples_y = []
-        for y in data_y_level_1:
-            target = []
-            if any(label in y for label in v):
-                for label in y:
-                    if label in v:
-                        target.append(label)
-                samples_y.append(target)
-
-        print("samples: ", len(samples_x))
-        print("samples: ", len(samples_y))
-
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
-        classifiers['level_1'][k]['clf'] = clf
-        classifiers['level_1'][k]['binarizer'] = ml_binarizer
-        classifiers['level_1'][k]['token2idx'] = token2idx
-        classifiers['level_1'][k]['max_sent_len'] = max_sent_len
-        print("----------------------------")
-
-    print("\n\n=== LEVEL 2 ===")
-    for k, v in sorted(hierarchical_level_2.items()):
-        if len(v) == 0:
-            continue
-        print(f'classifier {k} on {len(v)} labels')
-
-        samples_x = [x for x, y in zip(train_data_x, data_y_level_2)
-                     if any(label in y for label in v)]
-
-        samples_y = []
-        for y in data_y_level_2:
-            target = []
-            if any(label in y for label in v):
-                for label in y:
-                    if label in v:
-                        target.append(label)
-                samples_y.append(target)
-
-        print("samples: ", len(samples_x))
-        print("samples: ", len(samples_y))
-
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
-        classifiers['level_2'][k]['clf'] = clf
-        classifiers['level_2'][k]['binarizer'] = ml_binarizer
-        classifiers['level_2'][k]['token2idx'] = token2idx
-        classifiers['level_2'][k]['max_sent_len'] = max_sent_len
-
-        print("----------------------------")
+    # print("\n\n=== LEVEL 1 ===")
+    # for k, v in sorted(hierarchical_level_1.items()):
+    #     if len(v) == 0:
+    #         continue
+    #     print(f'classifier {k} on {len(v)} labels')
+    #
+    #     samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
+    #                  if any(label in y for label in v)]
+    #     samples_y = []
+    #     for y in data_y_level_1:
+    #         target = []
+    #         if any(label in y for label in v):
+    #             for label in y:
+    #                 if label in v:
+    #                     target.append(label)
+    #             samples_y.append(target)
+    #
+    #     print("samples: ", len(samples_x))
+    #     print("samples: ", len(samples_y))
+    #
+    #     clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+    #     classifiers['level_1'][k]['clf'] = clf
+    #     classifiers['level_1'][k]['binarizer'] = ml_binarizer
+    #     classifiers['level_1'][k]['token2idx'] = token2idx
+    #     classifiers['level_1'][k]['max_sent_len'] = max_sent_len
+    #     print("----------------------------")
+    #
+    # print("\n\n=== LEVEL 2 ===")
+    # for k, v in sorted(hierarchical_level_2.items()):
+    #     if len(v) == 0:
+    #         continue
+    #     print(f'classifier {k} on {len(v)} labels')
+    # 
+    #     samples_x = [x for x, y in zip(train_data_x, data_y_level_2)
+    #                  if any(label in y for label in v)]
+    #
+    #     samples_y = []
+    #     for y in data_y_level_2:
+    #         target = []
+    #         if any(label in y for label in v):
+    #             for label in y:
+    #                 if label in v:
+    #                     target.append(label)
+    #             samples_y.append(target)
+    #
+    #     print("samples: ", len(samples_x))
+    #     print("samples: ", len(samples_y))
+    #
+    #     clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+    #     classifiers['level_2'][k]['clf'] = clf
+    #     classifiers['level_2'][k]['binarizer'] = ml_binarizer
+    #     classifiers['level_2'][k]['token2idx'] = token2idx
+    #     classifiers['level_2'][k]['max_sent_len'] = max_sent_len
+    #
+    #     print("----------------------------")
 
     return classifiers
 
@@ -746,14 +746,15 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
     elif clf == 'cnn':
 
         # sub-task B Train 3 classifiers, one for each level, random forests
-        # classifiers = train_cnn_multilabel(train_data_x, train_data_y)
-        # out_file = 'results/classifiers.pkl'
-        # print(f"Saving trained classifiers to {out_file} ...")
-        # with open(out_file, 'wb') as f_out:
-        #     pickle.dump(classifiers, f_out)
-        #
-        # exit(-1)
+        classifiers = train_cnn_multilabel(train_data_x, train_data_y)
+        out_file = 'results/classifiers.pkl'
+        print(f"Saving trained classifiers to {out_file} ...")
+        with open(out_file, 'wb') as f_out:
+            pickle.dump(classifiers, f_out)
 
+        exit(-1)
+
+        print(f"Reading trained classifiers to {out_file} ...")
         with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
 
