@@ -80,7 +80,6 @@ def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=No
 
 
 def train_random_forests_multilabel(train_data_x, train_data_y):
-
     # aggregate data for 3-independent classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -457,7 +456,6 @@ def train_han(train_data_x, train_data_y):
 
 
 def train_cnn_sent_class(train_data_x, train_data_y):
-
     token2idx, max_sent_len = build_token_index(train_data_x)
 
     # x_data: vectorize, i.e. tokens to indexes and pad
@@ -536,7 +534,6 @@ def train_cnn_sent_class(train_data_x, train_data_y):
 
 
 def train_cnn_multilabel(train_data_x, train_data_y):
-
     # aggregate data for 3-level classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -557,7 +554,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         data_y_level_2.append(labels_2)
 
     hierarchical_level_1, hierarchical_level_2 = extract_hierarchy()
-    classifiers = {'top_level': defaultdict(dict),
+    classifiers = {'top_level': dict,
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
@@ -754,35 +751,58 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             pickle.dump(classifiers, f_out)
         """
 
-        with open('results/classifiers.pkl', 'ob') as f_in:
+        with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
 
-        for k, v in classifiers.items():
-            print()
-            print(k, v)
-            print("")
+        top_level_clf = classifiers['top_level']['clf']
+        ml_binarizer = classifiers['top_level']['ml_binarizer']
+        token2idx = classifiers['top_level']['token2idx']
+        max_sent_len = classifiers['top_level']['max_sent_len']
 
-        exit(-1)
+        for label in classifiers['level_1'].keys():
+            print(label)
+            clf = classifiers['level_1'][label]['clf']
+            binarizer = classifiers['level_1'][label]['binarizer']
+            print(binarizer.classes_)
+            token2idx = classifiers['level_1'][label]['token2idx']
+            max_sent_len = classifiers['top_level']['max_sent_len']
+            print()
+            print()
+
+        for label in classifiers['level_2'].keys():
+            print(label)
+            clf = classifiers['level_2'][label]['clf']
+            binarizer = classifiers['level_2'][label]['binarizer']
+            token2idx = classifiers['level_2'][label]['token2idx']
+            max_sent_len = classifiers['top_level']['max_sent_len']
+            print(binarizer.classes_)
+            print()
+            print()
 
         # apply on dev data
         levels = {0: defaultdict(list),
                   1: defaultdict(list),
                   2: defaultdict(list)}
         classification = {}
+
         for data in dev_data_x:
             classification[data['isbn']] = deepcopy(levels)
 
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
 
-        """
-        level = 0
-        for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
-            predictions = clf_level.predict(new_data_x)
+        # top_level
+        top_level_clf = classifiers['top_level']['clf']
+        ml_binarizer = classifiers['top_level']['ml_binarizer']
+        token2idx = classifiers['top_level']['token2idx']
+        max_sent_len = classifiers['top_level']['max_sent_len']
 
-            for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
+        dev_vector = vectorize_dev_data(new_data_x, max_sent_len, token2idx)
+        predictions = top_level_clf.predict(dev_vector)
+        print(predictions)
+        exit(-1)
+
+        for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
                 classification[data['isbn']][level] = '\t'.join([p for p in pred])
-            level += 1
-        """
 
         with open('answer_b.txt', 'wt') as f_in:
             """
@@ -808,6 +828,8 @@ def main():
     #       the hierarchical structure and enforce it in the classifiers
 
     # ToDo: Naive Bayes para low samples?
+    # ToDo: ver bem os tokens, lower case? oov?
+
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
     # ToDo: grid-search Keras:
