@@ -812,6 +812,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             if top_level_pred is None:
                 continue
             print("top_level_pred: ", top_level_pred)
+            print("top_level_pred: ", len(top_level_pred))
             for pred in top_level_pred.split('\t'):
                 # call level-1 classifier for each pred from top-level
                 print(pred)
@@ -830,7 +831,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                     classification[data['isbn']][0] = '\t'.join([p for p in pred])
                     print('\t'.join([p for p in pred]))
                 print("=====")
-
 
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
