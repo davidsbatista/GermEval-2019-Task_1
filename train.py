@@ -818,7 +818,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             for pred in top_level_pred:
                 # call level-1 classifier for each pred from top-level
                 print(pred)
-                print(classifiers['level_1'].keys())
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
                 token2idx = classifiers['level_1'][pred]['token2idx']
@@ -832,12 +831,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 indexes = pred_bin.nonzero()
                 for x in indexes:
                     print(binarizer.classes_[x]+'\t')
-                    print(classification[data['isbn']].keys())
                     print(classification[data['isbn']][1])
                     classification[data['isbn']][1].append(binarizer.classes_[x])
                 print("\n=====")
-
-        print(classification)
 
         #
         # apply level-2 classifiers for prediction from the top-level classifier
@@ -850,7 +846,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             for pred in top_level_pred:
                 # call level-2 classifier for each pred from top-level
                 print(pred)
-                print(classifiers['level_2'].keys())
                 clf = classifiers['level_2'][pred]['clf']
                 binarizer = classifiers['level_2'][pred]['binarizer']
                 token2idx = classifiers['level_2'][pred]['token2idx']
@@ -868,6 +863,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                     print(classification[data['isbn']][2])
                     classification[data['isbn']][2].append(binarizer.classes_[x])
                 print("\n=====")
+
+        print(classification)
 
         # ToDo: add tabs between each label of each level
         with open('answer.txt', 'wt') as f_out:
