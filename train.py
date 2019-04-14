@@ -843,7 +843,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             if len(level_1_pred) == 0:
                 continue
             print("level_1_pred: ", level_1_pred)
-            for pred in top_level_pred:
+            for pred in level_1_pred:
                 # call level-2 classifier for each pred from top-level
                 print(pred)
                 clf = classifiers['level_2'][pred]['clf']
@@ -876,7 +876,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             for x in dev_data_x:
                 isbn = x['isbn']
                 f_in.write(
-                    isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
+                    isbn + '\t' +
+                    classification[isbn][0] + '\t' +
+                    classification[isbn][1] + '\t' +
                     classification[isbn][2] + '\n')
 
 
