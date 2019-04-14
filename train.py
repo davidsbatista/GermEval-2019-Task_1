@@ -827,7 +827,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 predictions = clf.predict([dev_vector], verbose=1)
                 filter = np.array(len(binarizer.classes_)*[0.5])
                 pred_bin = (predictions > filter).astype(int)
-                indexes = pred_bin[0].nonzero()
+                indexes = pred_bin[0].nonzero()[0]
                 if indexes.any():
                     for x in np.nditer(indexes):
                         label = binarizer.classes_[int(x)]
@@ -855,7 +855,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 predictions = clf.predict([dev_vector], verbose=1)
                 filter_threshold = np.array(len(binarizer.classes_)*[0.5])
                 pred_bin = (predictions > filter_threshold).astype(int)
-                indexes = pred_bin.nonzero()
+                indexes = pred_bin[0].nonzero()[0]
                 if indexes.any():
                     for x in np.nditer(indexes):
                         label = binarizer.classes_[int(x)]
