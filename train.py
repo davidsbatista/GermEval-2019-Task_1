@@ -789,20 +789,42 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         for data in dev_data_x:
             classification[data['isbn']] = deepcopy(levels)
 
+        #
         # apply the top-level classifier
+        #
         top_level_clf = classifiers['top_level']['clf']
-        ml_binarizer = classifiers['top_level']['binarizer']
+        binarizer = classifiers['top_level']['binarizer']
         token2idx = classifiers['top_level']['token2idx']
         max_sent_len = classifiers['top_level']['max_sent_len']
-
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+        print("Predicting on dev data")
         predictions = top_level_clf.predict([dev_vector], verbose=1)
-
         pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
-
-        for pred, data in zip(ml_binarizer.inverse_transform(pred_bin), dev_data_x):
+        for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
                 classification[data['isbn']][0] = '\t'.join([p for p in pred])
                 print('\t'.join([p for p in pred]))
+            print("-----")
+        #
+        # apply level-1 classifiers for prediction from the top-level classifier
+        #
+        for data in dev_data_x:
+            top_level_pred = classification[data['isbn']][0]
+            for pred in top_level_pred.split('\t'):
+                # call level-1 classifier for each pred from top-level
+                clf = classifiers['level_1'][pred]['clf']
+                binarizer = classifiers['level_1'][pred]['binarizer']
+                token2idx = classifiers['level_1'][pred]['token2idx']
+                max_sent_len = classifiers['top_level'][pred]['max_sent_len']
+                dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+
+                print("Predicting on dev data")
+                predictions = clf.predict([dev_vector], verbose=1)
+                pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
+                for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
+                    classification[data['isbn']][0] = '\t'.join([p for p in pred])
+                    print('\t'.join([p for p in pred]))
+                print("=====")
+
 
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
@@ -810,14 +832,13 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 isbn = x['isbn']
                 f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
 
-            """
             f_out.write(str('subtask_b\n'))
             for x in dev_data_x:
                 isbn = x['isbn']
                 f_in.write(
                     isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
-                    classification[isbn][2] + '\n')
-            """
+                    classification[isbn][1] + '\n')
+
 
 def main():
     # subtask_a
