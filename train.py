@@ -825,20 +825,15 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
                 print("Predicting on dev data")
                 predictions = clf.predict([dev_vector], verbose=1)
-                print(predictions)
                 filter = np.array(len(binarizer.classes_)*[0.5])
                 pred_bin = (predictions > filter).astype(int)
-                print(pred_bin)
-                indexes = pred_bin.nonzero()
-                print(indexes)
-                print(type(indexes))
-                for x in np.nditer(indexes):
-                    label = binarizer.classes_[int(x)]
-                    print("label: ", label, type(label))
-                    print("label: ", str(label), type(str(label)))
-                    print(classification[data['isbn']][1])
-                    classification[data['isbn']][1].append(str(label))
-                print("\n=====")
+                indexes = pred_bin[0].nonzero()
+                if indexes.any():
+                    for x in np.nditer(indexes):
+                        label = binarizer.classes_[int(x)]
+                        print(classification[data['isbn']][1])
+                        classification[data['isbn']][1].append(str(label))
+                    print("\n=====")
 
         #
         # apply level-2 classifiers for prediction from the top-level classifier
@@ -850,7 +845,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             print("level_1_pred: ", level_1_pred)
             for pred in level_1_pred:
                 # call level-2 classifier for each pred from top-level
-                print(pred)
                 clf = classifiers['level_2'][pred]['clf']
                 binarizer = classifiers['level_2'][pred]['binarizer']
                 token2idx = classifiers['level_2'][pred]['token2idx']
@@ -862,11 +856,12 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 filter_threshold = np.array(len(binarizer.classes_)*[0.5])
                 pred_bin = (predictions > filter_threshold).astype(int)
                 indexes = pred_bin.nonzero()
-                for x in np.nditer(indexes):
-                    print(binarizer.classes_[x])
-                    print(classification[data['isbn']][2])
-                    classification[data['isbn']][2].append(binarizer.classes_[x])
-                print("\n=====")
+                if indexes.any():
+                    for x in np.nditer(indexes):
+                        label = binarizer.classes_[int(x)]
+                        print(classification[data['isbn']][2])
+                        classification[data['isbn']][2].append(str(label))
+                    print("\n=====")
 
         print(classification)
 
