@@ -122,3 +122,15 @@ def vectorize_dev_data(dev_data_x, max_sent_len, token2idx):
     test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                  truncating='post', value=token2idx['PADDED'])
     return test_vectors
+
+
+def vectorize_one_sample(x, max_sent_len, token2idx):
+    tokens = []
+    text = x['title'] + " SEP " + x['body']
+    sentences = sent_tokenize(text, language='german')
+    for s in sentences:
+        tokens += word_tokenize(s)
+    vector = vectorizer(tokens, token2idx)
+    padded_vector = pad_sequences([vector], padding='post', maxlen=max_sent_len,
+                                  truncating='post', value=token2idx['PADDED'])
+    return padded_vector

@@ -26,7 +26,7 @@ from analysis import extract_hierarchy
 from models.convnets_utils import get_cnn_multichannel, get_cnn_rand, get_cnn_pre_trained_embeddings
 from models.keras_han.model import HAN
 from models.neural_networks_keras import build_lstm_based_model, build_token_index, \
-    vectorize_dev_data, vectorizer
+    vectorize_dev_data, vectorizer, vectorize_one_sample
 from utils import generate_submission_file, load_data
 
 
@@ -820,15 +820,18 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 # call level-1 classifier for each pred from top-level
                 print(pred)
                 print(classifiers['level_1'].keys())
-                print(classifiers['level_1'][pred].keys())
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
                 token2idx = classifiers['level_1'][pred]['token2idx']
                 max_sent_len = classifiers['level_1'][pred]['max_sent_len']
-                dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+                dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
 
                 print("Predicting on dev data")
                 predictions = clf.predict([dev_vector], verbose=1)
+
+                print("predictions")
+                print(predictions)
+
                 pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
                 for pred_1 in binarizer.inverse_transform(pred_bin):
                     classification[data['isbn']][0] = '\t'.join([p for p in pred_1])
