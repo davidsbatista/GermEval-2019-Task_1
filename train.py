@@ -842,9 +842,34 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         #
         # apply level-2 classifiers for prediction from the top-level classifier
         #
-        # ToDo
+        for data in dev_data_x:
+            level_1_pred = classification[data['isbn']][1]
+            if len(level_1_pred) == 0:
+                continue
+            print("level_1_pred: ", level_1_pred)
+            for pred in top_level_pred:
+                # call level-2 classifier for each pred from top-level
+                print(pred)
+                print(classifiers['level_2'].keys())
+                clf = classifiers['level_2'][pred]['clf']
+                binarizer = classifiers['level_2'][pred]['binarizer']
+                token2idx = classifiers['level_2'][pred]['token2idx']
+                max_sent_len = classifiers['level_2'][pred]['max_sent_len']
+                dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
 
-        """
+                print("Predicting on dev data")
+                predictions = clf.predict([dev_vector], verbose=1)
+                filter_threshold = np.array(len(binarizer.classes_)*[0.5])
+                pred_bin = (predictions > filter_threshold).astype(int)[0]
+                indexes = pred_bin.nonzero()
+                for x in indexes:
+                    print(binarizer.classes_[x]+'\t')
+                    print(classification[data['isbn']].keys())
+                    print(classification[data['isbn']][2])
+                    classification[data['isbn']][2].append(binarizer.classes_[x])
+                print("\n=====")
+
+        # ToDo: add tabs between each label of each level
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
             for x in dev_data_x:
@@ -856,8 +881,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 isbn = x['isbn']
                 f_in.write(
                     isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
-                    classification[isbn][1] + '\n')
-        """
+                    classification[isbn][2] + '\n')
 
 
 def main():
