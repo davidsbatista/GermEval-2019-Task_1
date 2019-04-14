@@ -803,7 +803,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
                 classification[data['isbn']][0] = '\t'.join([p for p in pred])
                 print('\t'.join([p for p in pred]))
-            print("-----")
+                print("-----")
         #
         # apply level-1 classifiers for prediction from the top-level classifier
         #
