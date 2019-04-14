@@ -836,6 +836,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 indexes = pred_bin.nonzero()
                 print(pred_bin.nonzero())
                 print(binarizer.classes_)
+                for x in indexes:
+                    print(binarizer.classes_[x])
                 print()
                 for pred_1 in binarizer.inverse_transform(pred_bin):
                     classification[data['isbn']][0] = '\t'.join([p for p in pred_1])
