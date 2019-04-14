@@ -834,6 +834,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 indexes = pred_bin.nonzero()
                 for x in indexes:
                     print(binarizer.classes_[x]+'\t')
+                    print(classification[data['isbn']].keys())
+                    print(classification[data['isbn']][1])
                     classification[data['isbn']][1].append(binarizer.classes_[x])
                 print("\n=====")
 
