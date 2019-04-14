@@ -815,9 +815,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             if len(top_level_pred) == 0:
                 continue
             print("top_level_preds: ", top_level_pred)
+            # call level-1 classifier for each pred from top-level
             for pred in top_level_pred:
-                # call level-1 classifier for each pred from top-level
-                print(pred)
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
                 token2idx = classifiers['level_1'][pred]['token2idx']
@@ -830,9 +829,11 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 pred_bin = (predictions > filter).astype(int)[0]
                 indexes = pred_bin.nonzero()
                 for x in indexes:
-                    print(binarizer.classes_[x])
+                    label = binarizer.classes_[x]
+                    print("label: ", label, type(label))
+                    print("label: ", str(label), type(str(label)))
                     print(classification[data['isbn']][1])
-                    classification[data['isbn']][1].append(binarizer.classes_[x])
+                    classification[data['isbn']][1].append(str(label))
                 print("\n=====")
 
         #
