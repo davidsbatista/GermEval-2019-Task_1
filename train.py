@@ -826,7 +826,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 print("Predicting on dev data")
                 predictions = clf.predict([dev_vector], verbose=1)
                 filter = np.array(len(binarizer.classes_)*[0.5])
-                pred_bin = (predictions > filter).astype(int)[0]
+                pred_bin = (predictions > filter).astype(int)
                 indexes = pred_bin.nonzero()
                 print(indexes)
                 print(type(indexes))
