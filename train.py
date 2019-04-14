@@ -829,7 +829,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 pred_bin = (predictions > filter).astype(int)[0]
                 indexes = pred_bin.nonzero()
                 for x in indexes:
-                    label = binarizer.classes_[x]
+                    label = binarizer.classes_[int(x)]
                     print("label: ", label, type(label))
                     print("label: ", str(label), type(str(label)))
                     print(classification[data['isbn']][1])
