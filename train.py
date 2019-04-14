@@ -782,9 +782,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
         # apply on dev data
         # structure to store predictions on dev_data
-        levels = {0: defaultdict(list),
-                  1: defaultdict(list),
-                  2: defaultdict(list)}
+        levels = {0: [],
+                  1: [],
+                  2: []}
         classification = {}
         for data in dev_data_x:
             classification[data['isbn']] = deepcopy(levels)
@@ -803,8 +803,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
             if pred is None:
                 continue
-            print(pred)
-            classification[data['isbn']][0] = '\t'.join([p for p in pred])
+            classification[data['isbn']][0] = [p for p in pred]
             print('\t'.join([p for p in pred]))
             print("-----")
 
