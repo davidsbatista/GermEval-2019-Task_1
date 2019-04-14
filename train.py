@@ -809,7 +809,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         #
         for data in dev_data_x:
             top_level_pred = classification[data['isbn']][0]
-            print(top_level_pred)
+            if top_level_pred is None:
+                continue
+            print("top_level_pred: ", top_level_pred)
             for pred in top_level_pred.split('\t'):
                 # call level-1 classifier for each pred from top-level
                 print(pred)
