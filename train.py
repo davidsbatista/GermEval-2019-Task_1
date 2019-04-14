@@ -815,8 +815,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             if len(top_level_pred) == 0:
                 continue
             print("top_level_preds: ", top_level_pred)
-            for pred in top_level_pred.split('\t'):
-
+            for pred in top_level_pred:
                 # call level-1 classifier for each pred from top-level
                 print(pred)
                 print(classifiers['level_1'].keys())
