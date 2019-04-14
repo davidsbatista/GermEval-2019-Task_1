@@ -811,6 +811,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             top_level_pred = classification[data['isbn']][0]
             for pred in top_level_pred.split('\t'):
                 # call level-1 classifier for each pred from top-level
+                print(pred)
+                print(classifiers['level_1'].keys())
+                print(classifiers['level_1'][pred].keys())
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
                 token2idx = classifiers['level_1'][pred]['token2idx']
