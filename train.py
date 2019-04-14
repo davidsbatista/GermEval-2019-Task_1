@@ -831,7 +831,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 print("predictions")
                 print(predictions)
                 filter = np.array(len(binarizer.classes_)*[0.5])
-                pred_bin = (predictions > filter).astype(int)
+                pred_bin = (predictions > filter).astype(int)[0]
                 print(pred_bin)
                 print(len(pred_bin))
                 for pred_1 in binarizer.inverse_transform(pred_bin):
