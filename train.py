@@ -801,9 +801,12 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         predictions = top_level_clf.predict([dev_vector], verbose=1)
         pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
         for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
-                classification[data['isbn']][0] = '\t'.join([p for p in pred])
-                print('\t'.join([p for p in pred]))
-                print("-----")
+            if pred is None:
+                continue
+            classification[data['isbn']][0] = '\t'.join([p for p in pred])
+            print('\t'.join([p for p in pred]))
+            print("-----")
+
         #
         # apply level-1 classifiers for prediction from the top-level classifier
         #
@@ -832,6 +835,12 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                     print('\t'.join([p for p in pred]))
                 print("=====")
 
+        #
+        # apply level-2 classifiers for prediction from the top-level classifier
+        #
+        # ToDo
+
+        """
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
             for x in dev_data_x:
@@ -844,6 +853,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 f_in.write(
                     isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
                     classification[isbn][1] + '\n')
+        """
 
 
 def main():
