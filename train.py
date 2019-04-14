@@ -815,7 +815,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             top_level_pred = classification[data['isbn']][0]
             if len(top_level_pred) == 0:
                 continue
-            print("top_level_pred: ", top_level_pred)
+            print("top_level_preds: ", top_level_pred)
             for pred in top_level_pred.split('\t'):
                 # call level-1 classifier for each pred from top-level
                 print(pred)
@@ -828,13 +828,12 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
                 print("Predicting on dev data")
                 predictions = clf.predict([dev_vector], verbose=1)
-
                 print("predictions")
                 print(predictions)
-
                 filter = np.array(len(binarizer.classes_)*[0.5])
-
                 pred_bin = (predictions > filter).astype(int)
+                print(pred_bin)
+                print(len(pred_bin))
                 for pred_1 in binarizer.inverse_transform(pred_bin):
                     classification[data['isbn']][0] = '\t'.join([p for p in pred_1])
                     print('\t'.join([p for p in pred]))
