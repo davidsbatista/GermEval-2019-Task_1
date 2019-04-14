@@ -845,6 +845,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             print("level_1_pred: ", level_1_pred)
             for pred in level_1_pred:
                 # call level-2 classifier for each pred from top-level
+                if pred not in classifiers['level_2']:
+                    continue
                 clf = classifiers['level_2'][pred]['clf']
                 binarizer = classifiers['level_2'][pred]['binarizer']
                 token2idx = classifiers['level_2'][pred]['token2idx']
