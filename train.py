@@ -832,7 +832,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 print("predictions")
                 print(predictions)
 
-                pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
+                filter = np.array(len(binarizer.classes_)*[0.5])
+
+                pred_bin = (predictions > filter).astype(int)
                 for pred_1 in binarizer.inverse_transform(pred_bin):
                     classification[data['isbn']][0] = '\t'.join([p for p in pred_1])
                     print('\t'.join([p for p in pred]))
