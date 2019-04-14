@@ -817,6 +817,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 continue
             print("top_level_preds: ", top_level_pred)
             for pred in top_level_pred.split('\t'):
+
                 # call level-1 classifier for each pred from top-level
                 print(pred)
                 print(classifiers['level_1'].keys())
@@ -828,18 +829,15 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
                 print("Predicting on dev data")
                 predictions = clf.predict([dev_vector], verbose=1)
-                print("predictions")
-                print(predictions)
                 filter = np.array(len(binarizer.classes_)*[0.5])
                 pred_bin = (predictions > filter).astype(int)[0]
-                print(pred_bin)
                 indexes = pred_bin.nonzero()
-                print(pred_bin.nonzero())
-                print(binarizer.classes_)
                 for x in indexes:
                     print(binarizer.classes_[x]+'\t')
-                print()
-                print("=====")
+                    classification[data['isbn']][1].append(binarizer.classes_[x])
+                print("\n=====")
+
+        print(classification)
 
         #
         # apply level-2 classifiers for prediction from the top-level classifier
