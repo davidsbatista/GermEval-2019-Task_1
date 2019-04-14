@@ -828,6 +828,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 filter = np.array(len(binarizer.classes_)*[0.5])
                 pred_bin = (predictions > filter).astype(int)[0]
                 indexes = pred_bin.nonzero()
+                print(indexes)
+                print(type(indexes))
                 for x in np.nditer(indexes):
                     label = binarizer.classes_[int(x)]
                     print("label: ", label, type(label))
