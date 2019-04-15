@@ -563,12 +563,16 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     print(f'samples {len(data_y_level_0)}')
     print()
     samples_y = [list(y) for y in data_y_level_0]
-    top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
 
+    # top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
+    # classifiers['top_level']['clf'] = top_clf
+    # classifiers['top_level']['binarizer'] = ml_binarizer
+    # classifiers['top_level']['token2idx'] = token2idx
+    # classifiers['top_level']['max_sent_len'] = max_sent_len
+
+    top_clf, ml_binarizer, = train_baseline(train_data_x, samples_y)
     classifiers['top_level']['clf'] = top_clf
     classifiers['top_level']['binarizer'] = ml_binarizer
-    classifiers['top_level']['token2idx'] = token2idx
-    classifiers['top_level']['max_sent_len'] = max_sent_len
 
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
@@ -699,86 +703,20 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
     structured.
     """
 
-    if clf == 'tree':
-
-        # sub-task B Train 3 classifiers, one for each level, random forests
-        classifiers, ml_binarizers = train_random_forests_multilabel(train_data_x, train_data_y)
-
-        with open('results/models_3_labels.pkl', 'wb') as f_in:
-            pickle.dump(classifiers, f_in)
-
-        with open('results/ml_binarizers_3_labels.pkl', 'wb') as f_in:
-            pickle.dump(ml_binarizers, f_in)
-
-        # apply on dev data
-        levels = {0: defaultdict(list),
-                  1: defaultdict(list),
-                  2: defaultdict(list)}
-
-        classification = {}
-
-        for data in dev_data_x:
-            classification[data['isbn']] = deepcopy(levels)
-
-        new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-        level = 0
-        for clf_level, ml_binarizer in zip(classifiers, ml_binarizers):
-            predictions = clf_level.predict(new_data_x)
-
-            for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-                classification[data['isbn']][level] = '\t'.join([p for p in pred])
-            level += 1
-        with open('answer_b.txt', 'wt') as f_in:
-            """
-            f_out.write(str('subtask_a\n'))
-            for x in dev_data_x:
-                isbn = x['isbn']
-                f_out.write(isbn + '\t' + classification[isbn][0] + '\n')
-            """
-
-            f_in.write(str('subtask_b\n'))
-            for x in dev_data_x:
-                isbn = x['isbn']
-                f_in.write(
-                    isbn + '\t' + classification[isbn][0] + '\t' + classification[isbn][1] + '\t' +
-                    classification[isbn][2] + '\n')
-
-    elif clf == 'cnn':
+    if clf == 'cnn':
 
         # sub-task B Train 3 classifiers, one for each level, random forests
         out_file = 'results/classifiers.pkl'
-        # classifiers = train_cnn_multilabel(train_data_x, train_data_y)
-        # print(f"Saving trained classifiers to {out_file} ...")
-        # with open(out_file, 'wb') as f_out:
-        #     pickle.dump(classifiers, f_out)
-        #
-        # exit(-1)
+        classifiers = train_cnn_multilabel(train_data_x, train_data_y)
+        print(f"Saving trained classifiers to {out_file} ...")
+        with open(out_file, 'wb') as f_out:
+            pickle.dump(classifiers, f_out)
+
+        exit(-1)
 
         print(f"Reading trained classifiers to {out_file} ...")
         with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
-
-        """
-        for label in classifiers['level_1'].keys():
-            print(label)
-            clf = classifiers['level_1'][label]['clf']
-            binarizer = classifiers['level_1'][label]['binarizer']
-            print(binarizer.classes_)
-            token2idx = classifiers['level_1'][label]['token2idx']
-            max_sent_len = classifiers['top_level']['max_sent_len']
-            print()
-            print()
-
-        for label in classifiers['level_2'].keys():
-            print(label)
-            clf = classifiers['level_2'][label]['clf']
-            binarizer = classifiers['level_2'][label]['binarizer']
-            token2idx = classifiers['level_2'][label]['token2idx']
-            max_sent_len = classifiers['top_level']['max_sent_len']
-            print(binarizer.classes_)
-            print()
-            print()
-        """
 
         # apply on dev data
         # structure to store predictions on dev_data
@@ -865,9 +803,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                         classification[data['isbn']][2].append(str(label))
                     print("\n=====")
 
-        print(classification)
-
-        # ToDo: add tabs between each label of each level
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
             for x in dev_data_x:
@@ -886,16 +821,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                         output += '\t'
                         output += '\t'.join(classification[isbn][2])
                 output += '\n'
-                print(output)
                 f_out.write(output)
 
 
 def main():
-    # subtask_a
-    # subtask_b
-
-    # ToDo: generate a run for a) and b) by exploring
-
     # ToDo: Naive Bayes para low samples?
     # ToDo: ver bem os tokens, lower case? oov?
 
