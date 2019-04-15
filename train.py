@@ -737,15 +737,27 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         #
         # apply the top-level classifier
         #
+        # top_level_clf = classifiers['top_level']['clf']
+        # binarizer = classifiers['top_level']['binarizer']
+        # token2idx = classifiers['top_level']['token2idx']
+        # max_sent_len = classifiers['top_level']['max_sent_len']
+        # dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+        # print("Predicting on dev data")
+        # predictions = top_level_clf.predict([dev_vector], verbose=1)
+        # pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
+        # for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
+        #     if pred is None:
+        #         continue
+        #     classification[data['isbn']][0] = [p for p in pred]
+        #     print('\t'.join([p for p in pred]))
+        #     print("-----")
+
         top_level_clf = classifiers['top_level']['clf']
         binarizer = classifiers['top_level']['binarizer']
-        token2idx = classifiers['top_level']['token2idx']
-        max_sent_len = classifiers['top_level']['max_sent_len']
-        dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
         print("Predicting on dev data")
-        predictions = top_level_clf.predict([dev_vector], verbose=1)
-        pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
-        for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
+        predictions = top_level_clf.predict(dev_data_x)
+        predictions_bins = np.where(predictions >= 0.5, 1, 0)
+        for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
             if pred is None:
                 continue
             classification[data['isbn']][0] = [p for p in pred]
