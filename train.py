@@ -171,9 +171,9 @@ def train_baseline(train_data_x, train_data_y):
     best_clf = grid_search_tune.best_estimator_
     predictions_prob = best_clf.predict_proba(test_x)
 
-    predictions_probs = np.where(predictions_prob >= 0.5, 1, 0)
+    predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
 
-    pred_labels = ml_binarizer.inverse_transform(predictions_probs)
+    pred_labels = ml_binarizer.inverse_transform(predictions_bins)
     true_labels = ml_binarizer.inverse_transform(test_y)
 
     top_missed = defaultdict(int)
@@ -199,9 +199,9 @@ def train_baseline(train_data_x, train_data_y):
     print("")
     print("")
     print("")
-    print(pred_labels)
+    print(predictions_bins)
 
-    report = classification_report(test_y, pred_labels, target_names=ml_binarizer.classes_)
+    report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
     with open('results/models_subtask_a_report.txt', 'wt') as f_out:
         f_out.write(report)
