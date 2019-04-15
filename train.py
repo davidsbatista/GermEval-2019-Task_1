@@ -126,6 +126,7 @@ def train_random_forests_multilabel(train_data_x, train_data_y):
 
 
 def train_baseline(train_data_x, train_data_y):
+
     """
     Set a simple baseline,
 
@@ -193,6 +194,12 @@ def train_baseline(train_data_x, train_data_y):
     for k, v in top_missed.items():
         print(k, v)
     print("total missed: ", missed)
+
+    print(test_y)
+    print("")
+    print("")
+    print("")
+    print(pred_labels)
 
     report = classification_report(test_y, pred_labels, target_names=ml_binarizer.classes_)
     print(report)
