@@ -880,8 +880,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 output = isbn + '\t'
                 output += '\t'.join(classification[isbn][0])
                 if len(classification[isbn][1]) > 0:
+                    output += '\t'
                     output += '\t'.join(classification[isbn][1])
                     if len(classification[isbn][2]) > 0:
+                        output += '\t'
                         output += '\t'.join(classification[isbn][2])
                 output += '\n'
                 print(output)
