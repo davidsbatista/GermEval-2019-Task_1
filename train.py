@@ -755,7 +755,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
         top_level_clf = classifiers['top_level']['clf']
         binarizer = classifiers['top_level']['binarizer']
         print("Predicting on dev data")
-        predictions = top_level_clf.predict(dev_data_x)
+        new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+        predictions = top_level_clf.predict(new_data_x)
         predictions_bins = np.where(predictions >= 0.5, 1, 0)
         for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
             if pred is None:
