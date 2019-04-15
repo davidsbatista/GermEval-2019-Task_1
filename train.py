@@ -879,9 +879,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
                 isbn = x['isbn']
                 f_in.write(
                     isbn + '\t' +
-                    classification[isbn][0] + '\t' +
-                    classification[isbn][1] + '\t' +
-                    classification[isbn][2] + '\n')
+                    '\t'.join(classification[isbn][0]) + '\t' +
+                    '\t'.join(classification[isbn][1]) + '\t' +
+                    '\t'.join(classification[isbn][2]) + '\n')
 
 
 def main():
