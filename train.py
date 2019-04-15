@@ -877,11 +877,16 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
             f_out.write(str('subtask_b\n'))
             for x in dev_data_x:
                 isbn = x['isbn']
-                f_out.write(
-                    isbn + '\t' +
-                    '\t'.join(classification[isbn][0]) + '\t' +
-                    '\t'.join(classification[isbn][1]) + '\t' +
-                    '\t'.join(classification[isbn][2]) + '\n')
+                output = isbn
+                output += '\t'.join(classification[isbn][0])
+                if len(classification[isbn][1]) > 0:
+                    output += '\t'.join(classification[isbn][1])
+                    if len(classification[isbn][2]) > 0:
+                        output += '\t'.join(classification[isbn][2]+'\n')
+                    else:
+                        output += '\n'
+                print(output)
+                f_out.write(output)
 
 
 def main():
