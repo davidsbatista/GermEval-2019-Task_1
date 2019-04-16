@@ -451,7 +451,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_cnn_multilabel(train_data_x, train_data_y):
+def train_strategy_one(train_data_x, train_data_y):
     # aggregate data for 3-level classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -541,7 +541,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         print("samples: ", len(samples_x))
         print("samples: ", len(samples_y))
 
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
         classifiers['level_2'][k]['clf'] = clf
         classifiers['level_2'][k]['binarizer'] = ml_binarizer
         classifiers['level_2'][k]['token2idx'] = token2idx
@@ -612,21 +612,21 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
         generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
 
 
-def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
+def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
     """
     Subtask B)
 
-    The second task is a hierarchical multi-label classification into multiple writing genres.
-    In addition to the very general writing genres additional genres of different specificity can
-    be assigned to a book. In total, there are 343 different classes that are hierarchically
-    structured.
+    strategies
+
+    one : train a single classifier for the top 8 labels, then for each label train a classifier
+          for each of it's child-labels at level 1, then repeat this process for level 2
+
     """
 
-    if clf == 'cnn':
+    if strategy == 'one':
 
-        # sub-task B Train 3 classifiers, one for each level, random forests
         out_file = 'results/classifiers.pkl'
-        classifiers = train_cnn_multilabel(train_data_x, train_data_y)
+        classifiers = train_strategy_one(train_data_x, train_data_y)
         print(f"Saving trained classifiers to {out_file} ...")
         with open(out_file, 'wb') as f_out:
             pickle.dump(classifiers, f_out)
@@ -795,7 +795,7 @@ def main():
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
 
     # train subtask_b
-    subtask_b(train_data_x, train_data_y, dev_data_x, clf='cnn')
+    subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
 
 
 if __name__ == '__main__':
