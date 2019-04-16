@@ -477,7 +477,7 @@ def train_strategy_one(train_data_x, train_data_y):
     classifiers['top_level']['binarizer'] = ml_binarizer
 
     # LEVEL 1
-    print("LEVEL 1")
+    print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
         if len(v) == 0:
             continue
@@ -509,7 +509,7 @@ def train_strategy_one(train_data_x, train_data_y):
         print("----------------------------")
 
     # LEVEL 2
-    print("LEVEL 2")
+    print("\n\n=== LEVEL 2 ===")
     for k, v in sorted(hierarchical_level_2.items()):
         if len(v) == 0:
             continue
