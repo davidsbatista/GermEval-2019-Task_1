@@ -502,7 +502,7 @@ def train_strategy_one(train_data_x, train_data_y):
         # classifiers['level_1'][k]['token2idx'] = token2idx
         # classifiers['level_1'][k]['max_sent_len'] = max_sent_len
 
-        top_clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, 'top_level')
+        top_clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
         classifiers['level_1']['clf'] = top_clf
         classifiers['level_1']['binarizer'] = ml_binarizer
 
@@ -535,7 +535,7 @@ def train_strategy_one(train_data_x, train_data_y):
         # classifiers['level_2'][k]['token2idx'] = token2idx
         # classifiers['level_2'][k]['max_sent_len'] = max_sent_len
 
-        top_clf, ml_binarizer, = train_logit_tf_idf(train_data_x, samples_y, 'top_level')
+        top_clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
         classifiers['level_2']['clf'] = top_clf
         classifiers['level_2']['binarizer'] = ml_binarizer
 
