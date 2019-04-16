@@ -7,7 +7,7 @@ from copy import deepcopy
 
 
 from gensim.models import KeyedVectors
-
+import numpy as np
 
 from keras_preprocessing.sequence import pad_sequences
 
