@@ -107,7 +107,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
-    with open('classification_report.txt', 'wt+') as f_out:
+    with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label+'\n')
         f_out.write(report)
         f_out.write('\n')
@@ -443,7 +443,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
                                    target_names=ml_binarizer.classes_)
     print(report)
 
-    with open('classification_report.txt', 'wt+') as f_out:
+    with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label+'\n')
         f_out.write(report)
         f_out.write('\n')
