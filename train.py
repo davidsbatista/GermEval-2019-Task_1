@@ -502,8 +502,8 @@ def train_strategy_one(train_data_x, train_data_y):
         # classifiers['level_1'][k]['token2idx'] = token2idx
         # classifiers['level_1'][k]['max_sent_len'] = max_sent_len
 
-        top_clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-        classifiers['level_1']['clf'] = top_clf
+        clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
+        classifiers['level_1']['clf'] = clf
         classifiers['level_1']['binarizer'] = ml_binarizer
 
         print("----------------------------")
@@ -535,8 +535,8 @@ def train_strategy_one(train_data_x, train_data_y):
         # classifiers['level_2'][k]['token2idx'] = token2idx
         # classifiers['level_2'][k]['max_sent_len'] = max_sent_len
 
-        top_clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-        classifiers['level_2']['clf'] = top_clf
+        clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
+        classifiers['level_2']['clf'] = clf
         classifiers['level_2']['binarizer'] = ml_binarizer
 
         print("----------------------------")
@@ -678,6 +678,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
             print("top_level_preds: ", top_level_pred)
             # call level-1 classifier for each pred from top-level
             for pred in top_level_pred:
+
+                print(classifiers['level_1'].keys())
 
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
