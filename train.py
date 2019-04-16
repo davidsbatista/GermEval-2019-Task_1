@@ -5,9 +5,10 @@ import pickle
 from collections import defaultdict
 from copy import deepcopy
 
+
 from gensim.models import KeyedVectors
 
-from keras.layers import Embedding, np
+
 from keras_preprocessing.sequence import pad_sequences
 
 from nltk.corpus import stopwords
@@ -109,6 +110,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     print(report)
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label+'\n')
+        f_out.write("="*len(level_label))
         f_out.write(report)
         f_out.write('\n')
 
@@ -445,6 +447,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
 
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label+'\n')
+        f_out.write("=" * len(level_label))
         f_out.write(report)
         f_out.write('\n')
 
@@ -756,9 +759,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
 
 
 def main():
-    # ToDo: começar a escrever o paper
-    # ToDo: gravar os scores
-
     # ToDo: Naive Bayes para low samples?
     # ToDo: ver bem os tokens, lower case? oov?
     # ToDo: fazer grid-search cross validation k=5 para classificadores com mais 1000
