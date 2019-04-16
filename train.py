@@ -477,6 +477,7 @@ def train_strategy_one(train_data_x, train_data_y):
     classifiers['top_level']['binarizer'] = ml_binarizer
 
     # LEVEL 1
+    print("LEVEL 1")
     for k, v in sorted(hierarchical_level_1.items()):
         if len(v) == 0:
             continue
@@ -508,6 +509,7 @@ def train_strategy_one(train_data_x, train_data_y):
         print("----------------------------")
 
     # LEVEL 2
+    print("LEVEL 2")
     for k, v in sorted(hierarchical_level_2.items()):
         if len(v) == 0:
             continue
@@ -680,15 +682,15 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
                 new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-
-                # token2idx = classifiers['level_1'][pred]['token2idx']
-                # max_sent_len = classifiers['level_1'][pred]['max_sent_len']
-                # dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
-
                 print("Predicting on dev data")
                 predictions = clf.predict(new_data_x)
                 pred_bin = np.where(predictions >= 0.5, 1, 0)
 
+                # clf = classifiers['level_1'][pred]['clf']
+                # binarizer = classifiers['level_1'][pred]['binarizer']
+                # token2idx = classifiers['level_1'][pred]['token2idx']
+                # max_sent_len = classifiers['level_1'][pred]['max_sent_len']
+                # dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
                 # predictions = clf.predict([dev_vector], verbose=1)
                 # filter = np.array(len(binarizer.classes_)*[0.5])
                 # pred_bin = (predictions > filter).astype(int)
@@ -713,16 +715,24 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
                 # call level-2 classifier for each pred from top-level
                 if pred not in classifiers['level_2']:
                     continue
-                clf = classifiers['level_2'][pred]['clf']
-                binarizer = classifiers['level_2'][pred]['binarizer']
-                token2idx = classifiers['level_2'][pred]['token2idx']
-                max_sent_len = classifiers['level_2'][pred]['max_sent_len']
-                dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
 
+                clf = classifiers['level_1'][pred]['clf']
+                binarizer = classifiers['level_1'][pred]['binarizer']
+                new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
                 print("Predicting on dev data")
-                predictions = clf.predict([dev_vector], verbose=1)
-                filter_threshold = np.array(len(binarizer.classes_)*[0.5])
-                pred_bin = (predictions > filter_threshold).astype(int)
+                predictions = clf.predict(new_data_x)
+                pred_bin = np.where(predictions >= 0.5, 1, 0)
+
+                # clf = classifiers['level_2'][pred]['clf']
+                # binarizer = classifiers['level_2'][pred]['binarizer']
+                # token2idx = classifiers['level_2'][pred]['token2idx']
+                # max_sent_len = classifiers['level_2'][pred]['max_sent_len']
+                # dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
+                # print("Predicting on dev data")
+                # predictions = clf.predict([dev_vector], verbose=1)
+                # filter_threshold = np.array(len(binarizer.classes_)*[0.5])
+                # pred_bin = (predictions > filter_threshold).astype(int)
+
                 indexes = pred_bin[0].nonzero()[0]
                 if indexes.any():
                     for x in np.nditer(indexes):
