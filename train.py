@@ -503,8 +503,8 @@ def train_strategy_one(train_data_x, train_data_y):
         # classifiers['level_1'][k]['max_sent_len'] = max_sent_len
 
         clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-        classifiers['level_1']['clf'] = clf
-        classifiers['level_1']['binarizer'] = ml_binarizer
+        classifiers['level_1'][k]['clf'] = clf
+        classifiers['level_1'][k]['binarizer'] = ml_binarizer
 
         print("----------------------------")
 
@@ -536,8 +536,8 @@ def train_strategy_one(train_data_x, train_data_y):
         # classifiers['level_2'][k]['max_sent_len'] = max_sent_len
 
         clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-        classifiers['level_2']['clf'] = clf
-        classifiers['level_2']['binarizer'] = ml_binarizer
+        classifiers['level_2'][k]['clf'] = clf
+        classifiers['level_2'][k]['binarizer'] = ml_binarizer
 
         print("----------------------------")
 
@@ -618,11 +618,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
     if strategy == 'one':
 
         out_file = 'results/classifiers.pkl'
-        # classifiers = train_strategy_one(train_data_x, train_data_y)
-        # print(f"Saving trained classifiers to {out_file} ...")
-        # with open(out_file, 'wb') as f_out:
-        #    pickle.dump(classifiers, f_out)
-        # exit(-1)
+        classifiers = train_strategy_one(train_data_x, train_data_y)
+        print(f"Saving trained classifiers to {out_file} ...")
+        with open(out_file, 'wb') as f_out:
+            pickle.dump(classifiers, f_out)
 
         print(f"Reading trained classifiers to {out_file} ...")
         with open('results/classifiers.pkl', 'rb') as f_in:
