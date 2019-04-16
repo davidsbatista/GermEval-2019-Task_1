@@ -23,11 +23,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from analysis import extract_hierarchy
+from utils import generate_submission_file, load_data
 from models.convnets_utils import get_cnn_multichannel, get_cnn_rand, get_cnn_pre_trained_embeddings
 from models.keras_han.model import HAN
-from models.neural_networks_keras import build_lstm_based_model, build_token_index, \
-    vectorize_dev_data, vectorizer, vectorize_one_sample
-from utils import generate_submission_file, load_data
+from models.neural_networks_keras import build_lstm_based_model, build_token_index
+from models.neural_networks_keras import vectorize_dev_data, vectorizer, vectorize_one_sample
 
 
 def train_logit_tf_idf(train_data_x, train_data_y, level_label):
@@ -476,15 +476,13 @@ def train_strategy_one(train_data_x, train_data_y):
     classifiers['top_level']['clf'] = top_clf
     classifiers['top_level']['binarizer'] = ml_binarizer
 
-    print("\n\n=== LEVEL 1 ===")
+    # LEVEL 1
     for k, v in sorted(hierarchical_level_1.items()):
         if len(v) == 0:
             continue
-        print(f'classifier {k} on {len(v)} labels')
 
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
-
         samples_y = []
         for y in data_y_level_1:
             target = []
@@ -494,17 +492,22 @@ def train_strategy_one(train_data_x, train_data_y):
                         target.append(label)
                 samples_y.append(target)
 
-        print("samples: ", len(samples_x))
+        print(f'classifier {k} on {len(v)} labels')
         print("samples: ", len(samples_y))
 
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
-        classifiers['level_1'][k]['clf'] = clf
-        classifiers['level_1'][k]['binarizer'] = ml_binarizer
-        classifiers['level_1'][k]['token2idx'] = token2idx
-        classifiers['level_1'][k]['max_sent_len'] = max_sent_len
+        # clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
+        # classifiers['level_1'][k]['clf'] = clf
+        # classifiers['level_1'][k]['binarizer'] = ml_binarizer
+        # classifiers['level_1'][k]['token2idx'] = token2idx
+        # classifiers['level_1'][k]['max_sent_len'] = max_sent_len
+
+        top_clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, 'top_level')
+        classifiers['level_1']['clf'] = top_clf
+        classifiers['level_1']['binarizer'] = ml_binarizer
+
         print("----------------------------")
 
-    print("\n\n=== LEVEL 2 ===")
+    # LEVEL 2
     for k, v in sorted(hierarchical_level_2.items()):
         if len(v) == 0:
             continue
@@ -523,13 +526,16 @@ def train_strategy_one(train_data_x, train_data_y):
                 samples_y.append(target)
 
         print("samples: ", len(samples_x))
-        print("samples: ", len(samples_y))
 
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
-        classifiers['level_2'][k]['clf'] = clf
-        classifiers['level_2'][k]['binarizer'] = ml_binarizer
-        classifiers['level_2'][k]['token2idx'] = token2idx
-        classifiers['level_2'][k]['max_sent_len'] = max_sent_len
+        # clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
+        # classifiers['level_2'][k]['clf'] = clf
+        # classifiers['level_2'][k]['binarizer'] = ml_binarizer
+        # classifiers['level_2'][k]['token2idx'] = token2idx
+        # classifiers['level_2'][k]['max_sent_len'] = max_sent_len
+
+        top_clf, ml_binarizer, = train_logit_tf_idf(train_data_x, samples_y, 'top_level')
+        classifiers['level_2']['clf'] = top_clf
+        classifiers['level_2']['binarizer'] = ml_binarizer
 
         print("----------------------------")
 
@@ -670,16 +676,23 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
             print("top_level_preds: ", top_level_pred)
             # call level-1 classifier for each pred from top-level
             for pred in top_level_pred:
+
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
-                token2idx = classifiers['level_1'][pred]['token2idx']
-                max_sent_len = classifiers['level_1'][pred]['max_sent_len']
-                dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
+                new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+
+                # token2idx = classifiers['level_1'][pred]['token2idx']
+                # max_sent_len = classifiers['level_1'][pred]['max_sent_len']
+                # dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
 
                 print("Predicting on dev data")
-                predictions = clf.predict([dev_vector], verbose=1)
-                filter = np.array(len(binarizer.classes_)*[0.5])
-                pred_bin = (predictions > filter).astype(int)
+                predictions = clf.predict(new_data_x)
+                pred_bin = np.where(predictions >= 0.5, 1, 0)
+
+                # predictions = clf.predict([dev_vector], verbose=1)
+                # filter = np.array(len(binarizer.classes_)*[0.5])
+                # pred_bin = (predictions > filter).astype(int)
+
                 indexes = pred_bin[0].nonzero()[0]
                 if indexes.any():
                     for x in np.nditer(indexes):
