@@ -626,16 +626,15 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
         # sub-task B Train 3 classifiers, one for each level, random forests
         out_file = 'results/classifiers.pkl'
-        # classifiers = train_cnn_multilabel(train_data_x, train_data_y)
-        # print(f"Saving trained classifiers to {out_file} ...")
-        # with open(out_file, 'wb') as f_out:
-        #     pickle.dump(classifiers, f_out)
-        #
-        # exit(-1)
+        classifiers = train_cnn_multilabel(train_data_x, train_data_y)
+        print(f"Saving trained classifiers to {out_file} ...")
+        with open(out_file, 'wb') as f_out:
+            pickle.dump(classifiers, f_out)
+        exit(-1)
 
-        print(f"Reading trained classifiers to {out_file} ...")
-        with open('results/classifiers.pkl', 'rb') as f_in:
-            classifiers = pickle.load(f_in)
+        # print(f"Reading trained classifiers to {out_file} ...")
+        # with open('results/classifiers.pkl', 'rb') as f_in:
+        #     classifiers = pickle.load(f_in)
 
         # apply on dev data
         # structure to store predictions on dev_data
