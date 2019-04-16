@@ -13,7 +13,6 @@ from keras_preprocessing.sequence import pad_sequences
 from nltk.corpus import stopwords
 from nltk.tokenize import sent_tokenize, word_tokenize
 
-from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
@@ -30,102 +29,7 @@ from models.neural_networks_keras import build_lstm_based_model, build_token_ind
 from utils import generate_submission_file, load_data
 
 
-def train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level=None):
-    stop_words = set(stopwords.words('german'))
-    pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
-        ('clf', RandomForestClassifier())
-    ])
-
-    parameters = {
-        "clf__min_samples_split": [10, 100, 1000],
-        "clf__n_estimators": [250, 300, 500],
-        "clf__class_weight": ['balanced', None]
-    }
-
-    """
-    class_weight=None, criterion='gini',
-                           max_depth=None, max_features='auto', max_leaf_nodes=None,
-                           min_impurity_decrease=0.0, min_impurity_split=None,
-                           min_samples_leaf=1, min_samples_split=10,
-                           min_weight_fraction_leaf=0.0, n_estimators=250, n_jobs=None,
-                           oob_score=False, random_state=None, verbose=0,
-                           warm_start=False))
-    """
-
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=2, n_jobs=3, verbose=4)
-    grid_search_tune.fit(train_x, train_y)
-    print("Best parameters set:")
-    print(grid_search_tune.best_estimator_.steps)
-
-    # measuring performance on test set
-    # print("Applying best classifier on test data:")
-    best_clf = grid_search_tune.best_estimator_
-    predictions = best_clf.predict(test_x)
-    report = classification_report(test_y, predictions, target_names=ml_binarizer.classes_)
-    print(report)
-    with open('results/models_subtask_b_report_{}.txt'.format(level), 'wt') as f_out:
-        f_out.write(report)
-
-    # train a classifier on all data using the parameters that yielded best result
-    print("Training classifier with best parameters on all data")
-    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
-    clf = grid_search_tune.best_estimator_.steps[1][1]
-    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
-    all_data_x = np.concatenate([train_x, test_x])
-    all_data_y = np.concatenate([train_y, test_y])
-    best_pipeline.fit(all_data_x, all_data_y)
-
-    return best_clf
-
-
-def train_random_forests_multilabel(train_data_x, train_data_y):
-    # aggregate data for 3-independent classifiers
-    data_y_level_0 = []
-    data_y_level_1 = []
-    data_y_level_2 = []
-
-    for y_labels in train_data_y:
-        labels_0 = set()
-        labels_1 = set()
-        labels_2 = set()
-        for label in y_labels:
-            labels_0.add(label[0])
-            if 1 in label:
-                labels_1.add(label[1])
-            if 2 in label:
-                labels_2.add(label[2])
-        data_y_level_0.append(labels_0)
-        data_y_level_1.append(labels_1)
-        data_y_level_2.append(labels_2)
-
-    classifiers = []
-    ml_binarizers = []
-
-    level = 0
-    for train_data_y in [data_y_level_0, data_y_level_1, data_y_level_2]:
-        # encode y labels into one-hot vectors
-        ml_binarizer = MultiLabelBinarizer()
-        y_labels = ml_binarizer.fit_transform(train_data_y)
-        print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-        data_y = y_labels
-
-        # text representation: merge title and body
-        new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
-
-        # split into train and hold out set
-        train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
-                                                            random_state=42,
-                                                            test_size=0.30)
-        clf = train_random_forest(train_x, train_y, test_x, test_y, ml_binarizer, level)
-        classifiers.append(clf)
-        ml_binarizers.append(ml_binarizer)
-        level += 1
-
-    return classifiers, ml_binarizers
-
-
-def train_baseline(train_data_x, train_data_y):
+def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     """
     Set a simple baseline,
@@ -203,8 +107,10 @@ def train_baseline(train_data_x, train_data_y):
 
     report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
-    with open('results/models_subtask_a_report.txt', 'wt') as f_out:
+    with open('classification_report.txt', 'wt+') as f_out:
+        f_out.write(level_label+'\n')
         f_out.write(report)
+        f_out.write('\n')
 
     # train a classifier on all data using the parameters that yielded best result
     print("Training classifier with best parameters on all data")
@@ -462,7 +368,7 @@ def train_han(train_data_x, train_data_y):
     return han_model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_cnn_sent_class(train_data_x, train_data_y):
+def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     token2idx, max_sent_len = build_token_index(train_data_x)
 
     # x_data: vectorize, i.e. tokens to indexes and pad
@@ -537,6 +443,11 @@ def train_cnn_sent_class(train_data_x, train_data_y):
                                    target_names=ml_binarizer.classes_)
     print(report)
 
+    with open('classification_report.txt', 'wt+') as f_out:
+        f_out.write(level_label+'\n')
+        f_out.write(report)
+        f_out.write('\n')
+
     return model, ml_binarizer, max_sent_len, token2idx
 
 
@@ -577,7 +488,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
     # classifiers['top_level']['token2idx'] = token2idx
     # classifiers['top_level']['max_sent_len'] = max_sent_len
 
-    top_clf, ml_binarizer, = train_baseline(train_data_x, samples_y)
+    top_clf, ml_binarizer, = train_logit_tf_idf(train_data_x, samples_y, 'top_level')
     classifiers['top_level']['clf'] = top_clf
     classifiers['top_level']['binarizer'] = ml_binarizer
 
@@ -589,6 +500,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
 
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
+
         samples_y = []
         for y in data_y_level_1:
             target = []
@@ -601,7 +513,7 @@ def train_cnn_multilabel(train_data_x, train_data_y):
         print("samples: ", len(samples_x))
         print("samples: ", len(samples_y))
 
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y)
+        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
         classifiers['level_1'][k]['clf'] = clf
         classifiers['level_1'][k]['binarizer'] = ml_binarizer
         classifiers['level_1'][k]['token2idx'] = token2idx
@@ -661,7 +573,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
     if clf == 'logit':
         # TF-IDF w/ logistic regression
-        model, ml_binarizer = train_baseline(train_data_x, train_data_y)
+        model, ml_binarizer = train_logit_tf_idf(train_data_x, train_data_y)
 
         # apply on dev data
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
@@ -702,8 +614,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
 def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
     """
-    Subtask B
-    =========
+    Subtask B)
+
     The second task is a hierarchical multi-label classification into multiple writing genres.
     In addition to the very general writing genres additional genres of different specificity can
     be assigned to a book. In total, there are 343 different classes that are hierarchically
@@ -845,8 +757,13 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, clf='tree'):
 
 
 def main():
+    # ToDo: começar a escrever o paper
+    # ToDo: gravar os scores
+
     # ToDo: Naive Bayes para low samples?
     # ToDo: ver bem os tokens, lower case? oov?
+    # ToDo: fazer grid-search cross validation k=5 para classificadores com mais 1000
+    # ToDo: fazer grid-search cross validation k=3 para classificadores até 300
 
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
