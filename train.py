@@ -31,9 +31,7 @@ from utils import generate_submission_file, load_data
 
 
 def train_logit_tf_idf(train_data_x, train_data_y, level_label):
-
     """
-    Set a simple baseline,
 
     - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
 
@@ -87,30 +85,17 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         if len(pred) == 0:
             missed += 1
             top_missed[true] += 1
-            print(text)
-            print(len(text.split()))
-            print(true)
-            print(ml_binarizer.classes_)
-            print(probs)
-            print()
-            print()
 
     print("Missing labels for samples")
     for k, v in top_missed.items():
         print(k, v)
     print("total missed: ", missed)
 
-    print(test_y)
-    print("")
-    print("")
-    print("")
-    print(predictions_bins)
-
     report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label+'\n')
-        f_out.write("="*len(level_label))
+        f_out.write("="*len(level_label)+'\n')
         f_out.write(report)
         f_out.write('\n')
 
@@ -118,10 +103,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     print("Training classifier with best parameters on all data")
     best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
     clf = grid_search_tune.best_estimator_.steps[1][1]
-
-    print(best_tf_idf)
-    print()
-    print(clf)
 
     best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
     best_pipeline.fit(new_data_x, data_y)
@@ -447,7 +428,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
 
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label+'\n')
-        f_out.write("=" * len(level_label))
+        f_out.write("=" * len(level_label)+'\n')
         f_out.write(report)
         f_out.write('\n')
 
