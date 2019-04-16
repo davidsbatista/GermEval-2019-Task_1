@@ -677,9 +677,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
             print("top_level_preds: ", top_level_pred)
             # call level-1 classifier for each pred from top-level
             for pred in top_level_pred:
-
-                print(classifiers['level_1'].keys())
-
                 clf = classifiers['level_1'][pred]['clf']
                 binarizer = classifiers['level_1'][pred]['binarizer']
                 new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
@@ -717,8 +714,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
                 if pred not in classifiers['level_2']:
                     continue
 
-                clf = classifiers['level_1'][pred]['clf']
-                binarizer = classifiers['level_1'][pred]['binarizer']
+                clf = classifiers['level_2'][pred]['clf']
+                binarizer = classifiers['level_2'][pred]['binarizer']
                 new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
                 print("Predicting on dev data")
                 predictions = clf.predict(new_data_x)
@@ -766,8 +763,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
 def main():
     # ToDo: Naive Bayes para low samples?
     # ToDo: ver bem os tokens, lower case? oov?
-    # ToDo: fazer grid-search cross validation k=5 para classificadores com mais 1000
-    # ToDo: fazer grid-search cross validation k=3 para classificadores até 300
+    # ToDo: fazer grid-search e cross validation k=5 para classificadores com mais 1000
+    # ToDo: fazer grid-search e cross validation k=3 para classificadores até 300
 
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
