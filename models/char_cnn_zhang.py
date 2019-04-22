@@ -53,6 +53,7 @@ class CharCNNZhang(object):
         """
         # Input layer
         inputs = Input(shape=(self.input_size,), name='sent_input', dtype='int64')
+
         # Embedding layers
         x = Embedding(self.alphabet_size + 1, self.embedding_size, input_length=self.input_size)(inputs)
         # Convolution layers
@@ -62,13 +63,16 @@ class CharCNNZhang(object):
             if cl[2] != -1:
                 x = MaxPooling1D(cl[2])(x)
         x = Flatten()(x)
+
         # Fully connected layers
         for fl in self.fully_connected_layers:
             x = Dense(fl)(x)
             x = ThresholdedReLU(self.threshold)(x)
             x = Dropout(self.dropout_p)(x)
+
         # Output layer
         predictions = Dense(self.num_of_classes, activation='softmax')(x)
+
         # Build and compile model
         model = Model(inputs=inputs, outputs=predictions)
         model.compile(optimizer=self.optimizer, loss=self.loss)

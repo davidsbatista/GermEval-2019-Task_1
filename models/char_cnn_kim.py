@@ -53,8 +53,10 @@ class CharCNNKim(object):
         """
         # Input layer
         inputs = Input(shape=(self.input_size,), name='sent_input', dtype='int64')
+
         # Embedding layers
         x = Embedding(self.alphabet_size + 1, self.embedding_size, input_length=self.input_size)(inputs)
+
         # Convolution layers
         convolution_output = []
         for num_filters, filter_width in self.conv_layers:
@@ -65,12 +67,15 @@ class CharCNNKim(object):
             pool = GlobalMaxPooling1D(name='MaxPoolingOverTime_{}_{}'.format(num_filters, filter_width))(conv)
             convolution_output.append(pool)
         x = Concatenate()(convolution_output)
+
         # Fully connected layers
         for fl in self.fully_connected_layers:
             x = Dense(fl, activation='selu', kernel_initializer='lecun_normal')(x)
             x = AlphaDropout(self.dropout_p)(x)
+
         # Output layer
         predictions = Dense(self.num_of_classes, activation='softmax')(x)
+
         # Build and compile model
         model = Model(inputs=inputs, outputs=predictions)
         model.compile(optimizer=self.optimizer, loss=self.loss)
