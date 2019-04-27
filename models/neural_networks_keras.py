@@ -31,12 +31,11 @@ def build_token_index(x_data):
         for s in sentences:
             vocabulary.update(word_tokenize(s))
             tmp_len += len(s)
-        max_sent_length = tmp_len if tmp_len > max_sent_length else max_sent_length
+        max_sent_length = max(tmp_len, max_sent_length)
 
     token2idx = {word: i + 2 for i, word in enumerate(vocabulary, 0)}
     token2idx["PADDED"] = PADDED
     token2idx["UNKNOWN"] = UNKNOWN
-    idx2token = {value: key for key, value in token2idx.items()}
 
     return token2idx, max_sent_length
 

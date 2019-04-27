@@ -50,11 +50,10 @@ def init_weight_matrix(matrix, train_data_y, labels2idx):
     return matrix
 
 
-def build_neural_network(weight_matrix):
-
-    input_size = 1024
-    alphabet_size = 10
-    embedding_size = 10
+def build_neural_network(weight_matrix, max_input, vocab_size):
+    input_size = max_input
+    alphabet_size = vocab_size
+    embedding_size = 50
     conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
     dropout_p = 0.1
@@ -96,9 +95,6 @@ def build_neural_network(weight_matrix):
     model = Model(inputs=inputs, outputs=predictions)
     model.compile(optimizer=optimizer, loss=loss)
 
-    print("CharCNNKim model built: ")
-    model.summary()
-
     from keras.utils import plot_model
     plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
 
@@ -111,6 +107,8 @@ def build_vectors(train_data_x, train_data_y, labels2idx):
 
     token2idx, max_sent_len = build_token_index(train_data_x)
 
+    print("token2idx: ", len(token2idx))
+
     # y_data: encode into one-hot vectors with all labels in the hierarchy
     train_y = []
     for y_sample in train_data_y:
@@ -118,7 +116,6 @@ def build_vectors(train_data_x, train_data_y, labels2idx):
         for labels in y_sample:
             for level, label in labels.items():
                 all_labels[labels2idx[label]] = 1
-                print(type(all_labels))
         train_y.append(all_labels)
 
     # x_data: vectorize, i.e. tokens to indexes and pad
@@ -135,7 +132,7 @@ def build_vectors(train_data_x, train_data_y, labels2idx):
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                    truncating='post', value=token2idx['PADDED'])
 
-    return vectors_padded, np.array(train_y)
+    return vectors_padded, np.array(train_y), token2idx
 
 
 def main():
@@ -157,13 +154,15 @@ def main():
     #     print(y_sample)
     #     print("----------")
 
-    model = build_neural_network(weight_matrix)
+    x_train, y_train, token2idx = build_vectors(train_data_x, train_data_y, labels2idx)
 
-    x_train, y_train = build_vectors(train_data_x, train_data_y, labels2idx)
+    model = build_neural_network(weight_matrix, max_input=x_train.shape[1], vocab_size=len(token2idx))
 
     model.summary()
     print(x_train.shape)
     print(y_train.shape)
+
+    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1)
 
 if __name__ == '__main__':
     main()
