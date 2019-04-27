@@ -162,7 +162,7 @@ def main():
     print(x_train.shape)
     print(y_train.shape)
 
-    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1)
+    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=100)
 
 if __name__ == '__main__':
     main()
