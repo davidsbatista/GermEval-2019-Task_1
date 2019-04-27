@@ -269,15 +269,13 @@ def train_han(train_data_x, train_data_y):
     max_tokens = 0
     for x in train_data_x:
         sentences = sent_tokenize(x['body'], language='german')
-        if len(sentences) > max_sent:
-            max_sent = len(sentences)
+        max_sent = max(max_sent, len(sentences))
         for sentence in sentences:
             tokens = word_tokenize(sentence, language='german')
-            if len(tokens) > max_tokens:
-                max_tokens = len(tokens)
+            max_tokens = max(max_tokens, len(tokens))
 
-    print(max_sent)
     print(max_tokens)
+    print(max_sent)
 
     processed_x = np.zeros((len(train_data_x), max_sent, max_tokens), dtype='int32')
 
@@ -286,7 +284,7 @@ def train_han(train_data_x, train_data_y):
         text = x['title'] + " . " + x['body']
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
-            vectorized_sentences.append(vectorizer(word_tokenize(s, language='german')))
+            vectorized_sentences.append(vectorizer(word_tokenize(s, language='german'), token2idx))
 
         padded_sentences = pad_sequences(vectorized_sentences, padding='post',
                                          truncating='post', maxlen=max_tokens,
@@ -309,6 +307,7 @@ def train_han(train_data_x, train_data_y):
     train_x, test_x, train_y, test_y = train_test_split(processed_x, y_labels,
                                                         random_state=42,
                                                         test_size=0.30)
+    print("training")
     print(train_x.shape)
     print(train_y.shape)
 
@@ -794,10 +793,10 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
 
     # train subtask_b
-    subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
+    #subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
 
 
 if __name__ == '__main__':
