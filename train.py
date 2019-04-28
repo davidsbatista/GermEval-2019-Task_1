@@ -328,8 +328,6 @@ def train_han(train_data_x, train_data_y):
         except KeyError:
             not_found += 1
 
-    print(embedding_matrix)
-
     han_model = HAN(MAX_WORDS_PER_SENT, MAX_SENT, 8, embedding_matrix,
                     word_encoding_dim=100, sentence_encoding_dim=100)
 
@@ -434,7 +432,8 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_strategy_one(train_data_x, train_data_y):
+def train_strategy_one(train_data_x, train_data_y, type_clfs):
+
     # aggregate data for 3-level classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -459,28 +458,31 @@ def train_strategy_one(train_data_x, train_data_y):
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
+    # train a classifier for each level
+
     print("\n\n=== TOP-LEVEL ===")
     print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
     print(f'samples {len(data_y_level_0)}')
     print()
     samples_y = [list(y) for y in data_y_level_0]
 
-    # top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x, samples_y)
-    # classifiers['top_level']['clf'] = top_clf
-    # classifiers['top_level']['binarizer'] = ml_binarizer
-    # classifiers['top_level']['token2idx'] = token2idx
-    # classifiers['top_level']['max_sent_len'] = max_sent_len
+    if type_clfs['top'] == 'logit':
+        top_clf, ml_binarizer, = train_logit_tf_idf(train_data_x, samples_y, 'top_level')
+        classifiers['top_level']['clf'] = top_clf
+        classifiers['top_level']['binarizer'] = ml_binarizer
+    elif type_clfs['top'] == 'cnn':
+        top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
+                                                                              samples_y,
+                                                                              "top-level")
+        classifiers['top_level']['clf'] = top_clf
+        classifiers['top_level']['binarizer'] = ml_binarizer
+        classifiers['top_level']['token2idx'] = token2idx
+        classifiers['top_level']['max_sent_len'] = max_sent_len
 
-    top_clf, ml_binarizer, = train_logit_tf_idf(train_data_x, samples_y, 'top_level')
-    classifiers['top_level']['clf'] = top_clf
-    classifiers['top_level']['binarizer'] = ml_binarizer
-
-    # LEVEL 1
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
         if len(v) == 0:
             continue
-
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
         samples_y = []
@@ -495,28 +497,27 @@ def train_strategy_one(train_data_x, train_data_y):
         print(f'classifier {k} on {len(v)} labels')
         print("samples: ", len(samples_y))
 
-        # clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
-        # classifiers['level_1'][k]['clf'] = clf
-        # classifiers['level_1'][k]['binarizer'] = ml_binarizer
-        # classifiers['level_1'][k]['token2idx'] = token2idx
-        # classifiers['level_1'][k]['max_sent_len'] = max_sent_len
-
+    if type_clfs['level_1'] == 'logit':
         clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
         classifiers['level_1'][k]['clf'] = clf
         classifiers['level_1'][k]['binarizer'] = ml_binarizer
 
+    elif type_clfs['level_1'] == 'cnn':
+        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
+        classifiers['level_1'][k]['clf'] = clf
+        classifiers['level_1'][k]['binarizer'] = ml_binarizer
+        classifiers['level_1'][k]['token2idx'] = token2idx
+        classifiers['level_1'][k]['max_sent_len'] = max_sent_len
+
         print("----------------------------")
 
-    # LEVEL 2
     print("\n\n=== LEVEL 2 ===")
     for k, v in sorted(hierarchical_level_2.items()):
         if len(v) == 0:
             continue
         print(f'classifier {k} on {len(v)} labels')
-
         samples_x = [x for x, y in zip(train_data_x, data_y_level_2)
                      if any(label in y for label in v)]
-
         samples_y = []
         for y in data_y_level_2:
             target = []
@@ -525,18 +526,18 @@ def train_strategy_one(train_data_x, train_data_y):
                     if label in v:
                         target.append(label)
                 samples_y.append(target)
-
         print("samples: ", len(samples_x))
+        if type_clfs['level_2'] == 'logit':
+            clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
+            classifiers['level_2'][k]['clf'] = clf
+            classifiers['level_2'][k]['binarizer'] = ml_binarizer
 
-        # clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
-        # classifiers['level_2'][k]['clf'] = clf
-        # classifiers['level_2'][k]['binarizer'] = ml_binarizer
-        # classifiers['level_2'][k]['token2idx'] = token2idx
-        # classifiers['level_2'][k]['max_sent_len'] = max_sent_len
-
-        clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-        classifiers['level_2'][k]['clf'] = clf
-        classifiers['level_2'][k]['binarizer'] = ml_binarizer
+        elif type_clfs['level_2'] == 'cnn':
+            clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
+            classifiers['level_2'][k]['clf'] = clf
+            classifiers['level_2'][k]['binarizer'] = ml_binarizer
+            classifiers['level_2'][k]['token2idx'] = token2idx
+            classifiers['level_2'][k]['max_sent_len'] = max_sent_len
 
         print("----------------------------")
 
@@ -617,7 +618,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
     if strategy == 'one':
 
         out_file = 'results/classifiers.pkl'
-        classifiers = train_strategy_one(train_data_x, train_data_y)
+        clfs = {'top': 'logit',
+                'level1': 'cnn',
+                'level2': 'cnn'}
+        classifiers = train_strategy_one(train_data_x, train_data_y, clfs)
         print(f"Saving trained classifiers to {out_file} ...")
         with open(out_file, 'wb') as f_out:
             pickle.dump(classifiers, f_out)
@@ -793,10 +797,10 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
 
     # train subtask_b
-    #subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
+    subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
 
 
 if __name__ == '__main__':
