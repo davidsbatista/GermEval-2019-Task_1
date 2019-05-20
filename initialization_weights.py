@@ -105,7 +105,7 @@ def build_vectors(train_data_x, train_data_y, labels2idx):
 
     # ToDo: vectorize input data and target
 
-    token2idx, max_sent_len = build_token_index(train_data_x)
+    token2idx, max_sent_len, _ = build_token_index(train_data_x)
 
     print("token2idx: ", len(token2idx))
 
