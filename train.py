@@ -437,7 +437,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
 def train_bag_of_tricks(train_data_x, train_data_y, level_label):
 
     bot = BagOfTricks()
-    n_top_tokens = 15000
+    n_top_tokens = 80000
 
     # build tokens maping and compute freq
     token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lower=True)
@@ -470,7 +470,7 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
 
     # build a neural network and train a model
     model = bot.build_neural_network(n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=150, verbose=1)
+    model.fit(train_x, train_y, batch_size=32, epochs=100, verbose=1)
 
     predictions = model.predict([test_x], verbose=1)
 

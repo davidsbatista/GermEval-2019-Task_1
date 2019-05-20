@@ -7,9 +7,6 @@ from keras.layers import Dense, Embedding, GlobalAveragePooling1D
 from keras.models import Sequential
 from keras.preprocessing import sequence
 from nltk import sent_tokenize, word_tokenize
-from sklearn.preprocessing import LabelEncoder
-
-logger = logging.getLogger(__name__)
 
 
 class BagOfTricks:
@@ -24,7 +21,7 @@ class BagOfTricks:
     def __init__(self, stopwords=None):
         self.stop_words = stopwords
         self.n_top_tokens = 15000
-        self.ngram_range = 2
+        self.ngram_range = 3
         self.max_len = 300
         self.batch_size = 32
         self.embedding_dims = 50
