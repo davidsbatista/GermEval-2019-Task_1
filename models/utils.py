@@ -7,6 +7,7 @@ from nltk import sent_tokenize, word_tokenize
 
 from keras import Input, Model, optimizers
 from keras.layers import Embedding, Bidirectional, LSTM, Dropout, Dense, CuDNNLSTM
+from nltk.corpus import stopwords
 
 PADDED = 1
 UNKNOWN = 0
@@ -28,19 +29,21 @@ def build_token_index(x_data, lower=False):
     vocabulary = set()
     token_freq = Counter()
 
+    stop_words = set(stopwords.words('german'))
+
     for x in x_data:
         text = x['title'] + " SEP " + x['body']
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
             tmp_len = 0
             if lower is True:
-                words = [word.lower() for word in word_tokenize(s)]
+                words = [word.lower() for word in word_tokenize(s) if word not in stop_words]
                 vocabulary.update(words)
                 for token in words:
                     token_freq[token] += 1
             else:
                 words = word_tokenize(s)
-                vocabulary.update(words)
+                vocabulary.update([word for word in word_tokenize(s) if word not in stop_words])
                 for token in words:
                     token_freq[token] += 1
             tmp_len += len(s)
