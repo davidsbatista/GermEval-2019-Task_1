@@ -351,7 +351,7 @@ def train_han(train_data_x, train_data_y):
 
 
 def train_cnn_sent_class(train_data_x, train_data_y, level_label):
-    token2idx, max_sent_len = build_token_index(train_data_x)
+    token2idx, max_sent_len, _ = build_token_index(train_data_x)
 
     # x_data: vectorize, i.e. tokens to indexes and pad
     print("Vectorizing input data\n")
@@ -437,7 +437,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
 def train_bag_of_tricks(train_data_x, train_data_y, level_label):
 
     bot = BagOfTricks()
-    n_top_tokens = 10000
+    n_top_tokens = 15000
 
     # build tokens maping and compute freq
     token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lower=True)
