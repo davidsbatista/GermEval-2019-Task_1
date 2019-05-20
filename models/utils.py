@@ -29,10 +29,10 @@ def build_token_index(x_data, lower=False):
     token_freq = Counter()
 
     for x in x_data:
-        tmp_len = 0
         text = x['title'] + " SEP " + x['body']
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
+            tmp_len = 0
             if lower is True:
                 words = [word.lower() for word in word_tokenize(s)]
                 vocabulary.update(words)
@@ -44,7 +44,7 @@ def build_token_index(x_data, lower=False):
                 for token in words:
                     token_freq[token] += 1
             tmp_len += len(s)
-        max_sent_length = max(tmp_len, max_sent_length)
+            max_sent_length = max(tmp_len, max_sent_length)
 
     token2idx = {word: i + 2 for i, word in enumerate(vocabulary, 0)}
     token2idx["PADDED"] = PADDED

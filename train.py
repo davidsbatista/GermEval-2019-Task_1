@@ -439,42 +439,55 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
     bot = BagOfTricks()
     n_top_tokens = 10000
 
-    token2idx, max_sent_length, token_freq = build_token_index(train_data_x[:100], lower=True)
+    # build tokens maping and compute freq
+    token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lower=True)
 
     # select only top-k tokens
+    print(len(token2idx))
     token2idx = {k: i for i, (k, v) in enumerate(token_freq.most_common(n=n_top_tokens))}
-
-    print(token_freq.most_common(n=n_top_tokens))
-
-    print()
-    print(token2idx)
+    print(len(token2idx))
     print(max_sent_length)
-    # print(train_data_y[0:10])
-    # print(level_label)
-    exit(-1)
 
-    """
-    # Create token2idx mapping and pre-process some token representations
-    print("Mapping tokens")
-    bot.update_token_mapping(message, message_ent)
+    bot.token2idx = token2idx
+    bot.max_len = max_sent_length
 
-    # Create neural network input vectors and target vectors
-    print("Creating input and target vectors")
-    x_train, y_train = ret.map_data(message, message_ent, y_all)
-    encoded_y_data = ret.le.fit_transform(y_train)
+    # map data to vectors of n-grams
+    train_data_x = bot.map_data(train_data_x, train_data_y)
+
+    # y_data: encode into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    data_y = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+    n_classes = len(ml_binarizer.classes_)
+
+    # ToDo: do a proper cv validation
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+                                                        random_state=42,
+                                                        test_size=0.25)
+    print(train_x.shape)
+    print(train_y.shape)
 
     # build a neural network and train a model
-    # embedding_matrix = ret.load_static_embeddings(ret)
-    embedding_matrix = None
-    model = ret.build_neural_network(embedding_matrix)
-    y_vector = to_categorical(encoded_y_data, num_classes=len(ret.le.classes_))
-    model.fit(x_train, y_vector, batch_size=ret.batch_size, epochs=ret.epochs, verbose=1)
+    model = bot.build_neural_network(n_classes)
+    model.fit(train_x, train_y, batch_size=bot.batch_size, epochs=bot.epochs, verbose=1)
 
-    ret.model = model
+    predictions = model.predict([test_x], verbose=1)
 
-    #return top_clf, ml_binarizer, max_sent_len, token2idx
-    """
-    return None, None, None, None
+    binary_predictions = []
+    for pred in predictions:
+        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+    report = classification_report(test_y, np.array(binary_predictions),
+                                   target_names=ml_binarizer.classes_)
+    print(report)
+
+    with open('classification_report.txt', 'at+') as f_out:
+        f_out.write(level_label + '\n')
+        f_out.write("=" * len(level_label) + '\n')
+        f_out.write(report)
+        f_out.write('\n')
+
+    return model, ml_binarizer, max_sent_length, token2idx
 
 
 def train_strategy_one(train_data_x, train_data_y, type_clfs):
