@@ -462,9 +462,9 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
 
     # ToDo: do a proper cv validation
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
                                                         random_state=42,
-                                                        test_size=0.25)
+                                                        test_size=0.30)
     print(train_x.shape)
     print(train_y.shape)
 
