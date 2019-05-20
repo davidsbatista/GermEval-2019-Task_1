@@ -462,7 +462,7 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
 
     # ToDo: do a proper cv validation
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
                                                         test_size=0.30)
     print(train_x.shape)
@@ -470,7 +470,7 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
 
     # build a neural network and train a model
     model = bot.build_neural_network(n_classes)
-    model.fit(train_x, train_y, batch_size=bot.batch_size, epochs=bot.epochs, verbose=1)
+    model.fit(train_x, train_y, batch_size=32, epochs=150, verbose=1)
 
     predictions = model.predict([test_x], verbose=1)
 
