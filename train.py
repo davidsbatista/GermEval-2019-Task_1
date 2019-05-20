@@ -24,10 +24,12 @@ from sklearn.preprocessing import MultiLabelBinarizer
 
 from analysis import extract_hierarchy
 from utils import generate_submission_file, load_data
+
 from models.convnets_utils import get_cnn_multichannel, get_cnn_rand, get_cnn_pre_trained_embeddings
 from models.keras_han.model import HAN
-from models.neural_networks_keras import build_lstm_based_model, build_token_index
-from models.neural_networks_keras import vectorize_dev_data, vectorizer, vectorize_one_sample
+from models.utils import build_lstm_based_model, build_token_index
+from models.utils import vectorize_dev_data, vectorizer, vectorize_one_sample
+from models.bag_of_tricks import BagOfTricks
 
 
 def train_logit_tf_idf(train_data_x, train_data_y, level_label):
@@ -432,6 +434,49 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
+def train_bag_of_tricks(train_data_x, train_data_y, level_label):
+
+    bot = BagOfTricks()
+    n_top_tokens = 10000
+
+    token2idx, max_sent_length, token_freq = build_token_index(train_data_x[:100], lower=True)
+
+    # select only top-k tokens
+    token2idx = {k: i for i, (k, v) in enumerate(token_freq.most_common(n=n_top_tokens))}
+
+    print(token_freq.most_common(n=n_top_tokens))
+
+    print()
+    print(token2idx)
+    print(max_sent_length)
+    # print(train_data_y[0:10])
+    # print(level_label)
+    exit(-1)
+
+    """
+    # Create token2idx mapping and pre-process some token representations
+    print("Mapping tokens")
+    bot.update_token_mapping(message, message_ent)
+
+    # Create neural network input vectors and target vectors
+    print("Creating input and target vectors")
+    x_train, y_train = ret.map_data(message, message_ent, y_all)
+    encoded_y_data = ret.le.fit_transform(y_train)
+
+    # build a neural network and train a model
+    # embedding_matrix = ret.load_static_embeddings(ret)
+    embedding_matrix = None
+    model = ret.build_neural_network(embedding_matrix)
+    y_vector = to_categorical(encoded_y_data, num_classes=len(ret.le.classes_))
+    model.fit(x_train, y_vector, batch_size=ret.batch_size, epochs=ret.epochs, verbose=1)
+
+    ret.model = model
+
+    #return top_clf, ml_binarizer, max_sent_len, token2idx
+    """
+    return None, None, None, None
+
+
 def train_strategy_one(train_data_x, train_data_y, type_clfs):
 
     # aggregate data for 3-level classifiers
@@ -459,7 +504,6 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
                    'level_2': defaultdict(dict)}
 
     # train a classifier for each level
-
     print("\n\n=== TOP-LEVEL ===")
     print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
     print(f'samples {len(data_y_level_0)}')
@@ -470,6 +514,7 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
         top_clf, ml_binarizer, = train_logit_tf_idf(train_data_x, samples_y, 'top_level')
         classifiers['top_level']['clf'] = top_clf
         classifiers['top_level']['binarizer'] = ml_binarizer
+
     elif type_clfs['top'] == 'cnn':
         top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                               samples_y,
@@ -479,13 +524,26 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['token2idx'] = token2idx
         classifiers['top_level']['max_sent_len'] = max_sent_len
 
+    elif type_clfs['top'] == 'bag-of-tricks':
+        top_clf, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,
+                                                                             samples_y,
+                                                                             "top-level")
+        classifiers['top_level']['clf'] = top_clf
+        classifiers['top_level']['binarizer'] = ml_binarizer
+        classifiers['top_level']['token2idx'] = token2idx
+        classifiers['top_level']['max_sent_len'] = max_sent_len
+
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
+
         if len(v) == 0:
             continue
+
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
+
         samples_y = []
+
         for y in data_y_level_1:
             target = []
             if any(label in y for label in v):
@@ -496,6 +554,10 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
 
         print(f'classifier {k} on {len(v)} labels')
         print("samples: ", len(samples_y))
+
+    print("type_clfs")
+    print(type_clfs)
+    print()
 
     if type_clfs['level_1'] == 'logit':
         clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
@@ -618,10 +680,14 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
     if strategy == 'one':
 
         out_file = 'results/classifiers.pkl'
-        clfs = {'top': 'logit',
-                'level1': 'cnn',
-                'level2': 'cnn'}
+
+        # possibilities: logit, bag-of-tricks, cnn
+        clfs = {'top': 'bag-of-tricks',
+                'level_1': 'cnn',
+                'level_2': 'cnn'}
+
         classifiers = train_strategy_one(train_data_x, train_data_y, clfs)
+
         print(f"Saving trained classifiers to {out_file} ...")
         with open(out_file, 'wb') as f_out:
             pickle.dump(classifiers, f_out)
