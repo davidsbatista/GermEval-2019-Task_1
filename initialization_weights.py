@@ -10,7 +10,7 @@ from nltk import sent_tokenize, word_tokenize
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from analysis import extract_hierarchy
-from models.neural_networks_keras import vectorizer, build_token_index
+from models.utils import vectorizer, build_token_index
 from utils import load_data
 
 
