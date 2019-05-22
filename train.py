@@ -1015,22 +1015,23 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
         print("samples: ", len(samples_y))
         print()
 
-    if type_clfs['level_1'] == 'logit':
-        clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-        classifiers['level_1'][k]['clf'] = clf
-        classifiers['level_1'][k]['binarizer'] = ml_binarizer
+        if type_clfs['level_1'] == 'logit':
+            clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
+            classifiers['level_1'][k]['clf'] = clf
+            classifiers['level_1'][k]['binarizer'] = ml_binarizer
 
-    elif type_clfs['level_1'] == 'cnn':
-        clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y, k)
-        classifiers['level_1'][k]['clf'] = clf
-        classifiers['level_1'][k]['binarizer'] = ml_binarizer
-        classifiers['level_1'][k]['token2idx'] = token2idx
-        classifiers['level_1'][k]['max_sent_len'] = max_sent_len
+        elif type_clfs['level_1'] == 'cnn':
+            clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y,
+                                                                              k)
+            classifiers['level_1'][k]['clf'] = clf
+            classifiers['level_1'][k]['binarizer'] = ml_binarizer
+            classifiers['level_1'][k]['token2idx'] = token2idx
+            classifiers['level_1'][k]['max_sent_len'] = max_sent_len
 
-        print()
-        print(classifiers['level_1'].keys())
+            print()
+            print(classifiers['level_1'].keys())
 
-        print("----------------------------")
+            print("----------------------------")
 
     print("\n\n=== LEVEL 2 ===")
     for k, v in sorted(hierarchical_level_2.items()):
