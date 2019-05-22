@@ -522,8 +522,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
     best_pipeline.fit(new_data_x, data_y)
 
-    exit(-1)
-
     return best_pipeline, ml_binarizer
 
 
@@ -798,6 +796,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     print(train_x.shape)
     print(train_y.shape)
 
+    # model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
     model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=32, epochs=5, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)

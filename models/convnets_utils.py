@@ -69,7 +69,8 @@ def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2], feature_maps=300):
 def get_cnn_rand(embedding_dim, vocab_size, max_len, num_classes):
     # create the embedding layer
     embedding_matrix = np.random.rand(vocab_size, embedding_dim)
-    embedding_layer = get_embeddings_layer(embedding_matrix, 'embedding_layer_dynamic', max_len, trainable=True)
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'embedding_layer_dynamic', max_len,
+                                           trainable=True)
 
     # connect the input with the embedding layer
     i = Input(shape=(max_len,), dtype='int32', name='main_input')
