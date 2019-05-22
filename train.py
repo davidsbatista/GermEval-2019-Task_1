@@ -522,6 +522,8 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
     best_pipeline.fit(new_data_x, data_y)
 
+    exit(-1)
+
     return best_pipeline, ml_binarizer
 
 
