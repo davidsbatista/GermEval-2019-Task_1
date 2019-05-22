@@ -797,7 +797,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     print(train_y.shape)
 
     # model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
-    model = get_cnn_multichannel(200, len(token2idx) + 1, max_sent_len, n_classes)
+    model = get_cnn_pre_trained_embeddings(200, len(token2idx) + 1, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=32, epochs=5, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
