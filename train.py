@@ -8,6 +8,7 @@ from copy import deepcopy
 
 from gensim.models import KeyedVectors
 import numpy as np
+from keras.layers import Embedding
 
 from keras_preprocessing.sequence import pad_sequences
 
@@ -796,12 +797,12 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     print(train_x.shape)
     print(train_y.shape)
 
-    # model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
-    model = get_cnn_pre_trained_embeddings(200, len(token2idx) + 1, max_sent_len, n_classes)
+    """    
+    model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=32, epochs=5, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
-
     """
+
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     # build a word embeddings matrix, out of vocabulary words will be initialized randomly
@@ -813,12 +814,12 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
             embedding_matrix[i] = embedding_vector
         except KeyError:
             not_found += 1
-    model = get_cnn_pre_trained_embeddings(embedding_layer_static, max_sent_len, n_classes)
+    """
+    model = get_cnn_pre_trained_embeddings(static_embeddings, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
     """
 
-    """
     embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
                                         weights=[embedding_matrix], input_length=max_sent_len,
                                         trainable=True, name='embeddings_dynamic')
@@ -829,7 +830,6 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
                                  n_classes)
     model.fit([train_x, train_x], train_y, batch_size=128, epochs=1, validation_split=0.2)
     predictions = model.predict([test_x, test_x], verbose=1)
-    """
 
     # ToDo: there must be a more efficient way to do this, BucketEstimator
     binary_predictions = []
