@@ -828,7 +828,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
                                        trainable=False, name='embeddings_static')
     model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
                                  n_classes)
-    model.fit([train_x, train_x], train_y, batch_size=16, epochs=1, validation_split=0.2)
+    model.fit([train_x, train_x], train_y, batch_size=16, epochs=20, validation_split=0.2)
     predictions = model.predict([test_x, test_x], verbose=1)
 
     # ToDo: there must be a more efficient way to do this, BucketEstimator
@@ -1143,7 +1143,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
         out_file = 'results/classifiers.pkl'
 
         # possibilities: logit, bag-of-tricks, cnn
-        clfs = {'top': 'cnn',
+        clfs = {'top': 'logit',
                 'level_1': 'cnn',
                 'level_2': 'cnn'}
 
