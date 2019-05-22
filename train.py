@@ -1147,7 +1147,9 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
                 'level_2': 'cnn'}
 
         classifiers = train_strategy_one(train_data_x, train_data_y, clfs)
+        exit(-1)
 
+        """"""
         print(f"Saving trained classifiers to {out_file} ...")
         with open(out_file, 'wb') as f_out:
             pickle.dump(classifiers, f_out)
