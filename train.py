@@ -60,13 +60,21 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
+        ('tfidf', TfidfVectorizer()),
         ('clf', OneVsRestClassifier(
             LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
             n_jobs=3))
     ])
+
+    # stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)
+
     parameters = {
-        "clf__estimator__C": [300]
+        "clf__estimator__C": [300],
+        'tfidf__use_idf': (True, False),
+        'tfidf__stop_words': (stop_words, None),
+        'tfidf__max_df': (0.25, 0.5, 0.75),
+        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
+        'tfidf__lowercase': (True, False),
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
@@ -74,6 +82,10 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     # measuring performance on test set
     print("Applying best classifier on test data:")
     best_clf = grid_search_tune.best_estimator_
+    print()
+    print("Best Classifier parameters:")
+    print(best_clf)
+    print()
     predictions_prob = best_clf.predict_proba(test_x)
 
     predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
@@ -685,8 +697,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
 
     strategies
 
-    one : train a single classifier for the top 8 labels, then for each label train a classifier
-          for each of it's child-labels at level 1, then repeat this process for level 2
+    one : 1) train a single classifier for the top 8 labels;
+          2) then for each top-label train a classifier for each of it's child-labels at the
+          top-level 1;
+          3) repeat this process for level 2
 
     """
 
@@ -695,7 +709,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
         out_file = 'results/classifiers.pkl'
 
         # possibilities: logit, bag-of-tricks, cnn
-        clfs = {'top': 'bag-of-tricks',
+        clfs = {'top': 'logit',
                 'level_1': 'cnn',
                 'level_2': 'cnn'}
 
