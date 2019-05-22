@@ -1141,9 +1141,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
 
         out_file = 'results/classifiers.pkl'
 
-        """
         # possibilities: logit, bag-of-tricks, cnn
-        clfs = {'top': 'logit',
+        clfs = {'top': 'cnn',
                 'level_1': 'cnn',
                 'level_2': 'cnn'}
 
