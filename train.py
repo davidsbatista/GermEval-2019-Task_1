@@ -872,7 +872,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
                                        trainable=False, name='embeddings_static')
     model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
                                  n_classes)
-    model.fit([train_data_x, train_data_x], data_y, batch_size=16, epochs=30)
+    model.fit([train_data_x, train_data_x], data_y, batch_size=16, epochs=1)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
@@ -1001,7 +1001,6 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
 
         samples_x = [x for x, y in zip(train_data_x, data_y_level_1)
                      if any(label in y for label in v)]
-
         samples_y = []
 
         for y in data_y_level_1:
@@ -1027,6 +1026,9 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
         classifiers['level_1'][k]['binarizer'] = ml_binarizer
         classifiers['level_1'][k]['token2idx'] = token2idx
         classifiers['level_1'][k]['max_sent_len'] = max_sent_len
+
+        print()
+        print(classifiers['level_1'].keys())
 
         print("----------------------------")
 
