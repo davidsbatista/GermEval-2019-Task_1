@@ -845,6 +845,35 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         f_out.write(report)
         f_out.write('\n')
 
+    # ToDo: train on all data
+    print("Training on all data")
+    print("Loading pre-trained Embeddings\n")
+    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
+    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
+    not_found = 0
+    for word, i in token2idx.items():
+        try:
+            embedding_vector = static_embeddings[word.lower()]
+            embedding_matrix[i] = embedding_vector
+        except KeyError:
+            not_found += 1
+    """
+    model = get_cnn_pre_trained_embeddings(static_embeddings, max_sent_len, n_classes)
+    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
+    predictions = model.predict([test_x], verbose=1)
+    """
+
+    embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
+                                        weights=[embedding_matrix], input_length=max_sent_len,
+                                        trainable=True, name='embeddings_dynamic')
+    embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
+                                       weights=[embedding_matrix], input_length=max_sent_len,
+                                       trainable=False, name='embeddings_static')
+    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
+                                 n_classes)
+    model.fit([train_data_x, train_data_x], data_y, batch_size=16, epochs=30)
+
     return model, ml_binarizer, max_sent_len, token2idx
 
 
@@ -930,6 +959,10 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
+    print("type_clfs")
+    print(type_clfs)
+    print()
+
     # train a classifier for each level
     print("\n\n=== TOP-LEVEL ===")
     print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
@@ -981,10 +1014,7 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
 
         print(f'classifier {k} on {len(v)} labels')
         print("samples: ", len(samples_y))
-
-    print("type_clfs")
-    print(type_clfs)
-    print()
+        print()
 
     if type_clfs['level_1'] == 'logit':
         clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
@@ -1100,8 +1130,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
     strategies
 
     one : 1) train a single classifier for the top 8 labels;
-          2) then for each top-label train a classifier for each of it's child-labels at the
-          top-level 1;
+          2) for each top-label train a classifier using the top-label child-labels
           3) repeat this process for level 2
 
     """
