@@ -1142,6 +1142,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
 
         out_file = 'results/classifiers.pkl'
 
+        """
         # possibilities: logit, bag-of-tricks, cnn
         clfs = {'top': 'logit',
                 'level_1': 'cnn',
@@ -1152,7 +1153,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
         print(f"Saving trained classifiers to {out_file} ...")
         with open(out_file, 'wb') as f_out:
             pickle.dump(classifiers, f_out)
-        
+        """
         print(f"Reading trained classifiers to {out_file} ...")
         with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
