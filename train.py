@@ -806,6 +806,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
 
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+
     # build a word embeddings matrix, out of vocabulary words will be initialized randomly
     embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
     not_found = 0
@@ -817,7 +818,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
             not_found += 1
 
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
-                                           static_embeddings.vector_size, trainable=True)
+                                           max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
