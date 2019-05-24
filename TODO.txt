@@ -1,0 +1,20 @@
+
+
+already tried:
+- all logit
+
+
+best:
+=====
+strategy_one
+    - top: logit
+    - 1st level: several cnn
+    - 2nd level: several cnn
+
+
+
+to try:
+=======
+- weight initialization for top-level + 1st level only
+
+hidden layer matrix: 14k x 8+93
