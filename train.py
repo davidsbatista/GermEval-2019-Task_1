@@ -837,9 +837,11 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         f_out.write(report)
         f_out.write('\n')
 
-    # ToDo: train on all data
-    model = get_cnn_pre_trained_embeddings(static_embeddings, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
+    # train on all data without validation split
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
+                                           max_sent_len, trainable=True)
+    model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=20, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
