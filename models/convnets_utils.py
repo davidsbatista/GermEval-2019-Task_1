@@ -98,7 +98,7 @@ def get_cnn_pre_trained_embeddings(embedding_layer, max_len, num_classes):
 
     # generate several branches in the network, each for a different convolution+pooling operation,
     # and concatenate the result of each branch into a single vector
-    branches = get_conv_pool(x, 'static')
+    branches = get_conv_pool(x, 'static', max_len)
     z = concatenate(branches, axis=-1)
 
     # pass the concatenated vector to the predition layer
