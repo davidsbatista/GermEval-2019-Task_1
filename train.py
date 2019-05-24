@@ -814,22 +814,10 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
             embedding_matrix[i] = embedding_vector
         except KeyError:
             not_found += 1
-    """
-    model = get_cnn_pre_trained_embeddings(static_embeddings, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
-    predictions = model.predict([test_x], verbose=1)
-    """
 
-    embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
-                                        weights=[embedding_matrix], input_length=max_sent_len,
-                                        trainable=True, name='embeddings_dynamic')
-    embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
-                                       weights=[embedding_matrix], input_length=max_sent_len,
-                                       trainable=False, name='embeddings_static')
-    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
-                                 n_classes)
-    model.fit([train_x, train_x], train_y, batch_size=16, epochs=20, validation_split=0.2)
-    predictions = model.predict([test_x, test_x], verbose=1)
+    model = get_cnn_pre_trained_embeddings(static_embeddings, max_sent_len, n_classes)
+    model.fit(train_x, train_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
+    predictions = model.predict([test_x], verbose=1)
 
     # ToDo: there must be a more efficient way to do this, BucketEstimator
     binary_predictions = []
@@ -840,39 +828,14 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     print(report)
 
     with open('classification_report.txt', 'at+') as f_out:
-        f_out.write(level_label+'\n')
-        f_out.write("=" * len(level_label)+'\n')
+        f_out.write(level_label + '\n')
+        f_out.write("=" * len(level_label) + '\n')
         f_out.write(report)
         f_out.write('\n')
 
     # ToDo: train on all data
-    print("Training on all data")
-    print("Loading pre-trained Embeddings\n")
-    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
-    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
-    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
-    not_found = 0
-    for word, i in token2idx.items():
-        try:
-            embedding_vector = static_embeddings[word.lower()]
-            embedding_matrix[i] = embedding_vector
-        except KeyError:
-            not_found += 1
-    """
     model = get_cnn_pre_trained_embeddings(static_embeddings, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=True, validation_split=0.33)
-    predictions = model.predict([test_x], verbose=1)
-    """
-
-    embedding_layer_dynamic = Embedding(len(token2idx), static_embeddings.vector_size,
-                                        weights=[embedding_matrix], input_length=max_sent_len,
-                                        trainable=True, name='embeddings_dynamic')
-    embedding_layer_static = Embedding(len(token2idx), static_embeddings.vector_size,
-                                       weights=[embedding_matrix], input_length=max_sent_len,
-                                       trainable=False, name='embeddings_static')
-    model = get_cnn_multichannel(embedding_layer_static, embedding_layer_dynamic, max_sent_len,
-                                 n_classes)
-    model.fit([train_data_x, train_data_x], data_y, batch_size=16, epochs=1)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
@@ -1208,22 +1171,24 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
             print("top_level_preds: ", top_level_pred)
             # call level-1 classifier for each pred from top-level
             for pred in top_level_pred:
-                print(pred)
-                clf = classifiers['level_1'][pred]['clf']
-                binarizer = classifiers['level_1'][pred]['binarizer']
-                new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-                print("Predicting on dev data")
-                predictions = clf.predict(new_data_x)
-                pred_bin = np.where(predictions >= 0.5, 1, 0)
 
+                # TF-IDF logit
                 # clf = classifiers['level_1'][pred]['clf']
                 # binarizer = classifiers['level_1'][pred]['binarizer']
-                # token2idx = classifiers['level_1'][pred]['token2idx']
-                # max_sent_len = classifiers['level_1'][pred]['max_sent_len']
-                # dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
-                # predictions = clf.predict([dev_vector], verbose=1)
-                # filter = np.array(len(binarizer.classes_)*[0.5])
-                # pred_bin = (predictions > filter).astype(int)
+                # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+                # print("Predicting on dev data")
+                # predictions = clf.predict(new_data_x)
+                # pred_bin = np.where(predictions >= 0.5, 1, 0)
+
+                # CNN
+                clf = classifiers['level_1'][pred]['clf']
+                binarizer = classifiers['level_1'][pred]['binarizer']
+                token2idx = classifiers['level_1'][pred]['token2idx']
+                max_sent_len = classifiers['level_1'][pred]['max_sent_len']
+                dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
+                predictions = clf.predict([dev_vector], verbose=1)
+                filtered = np.array(len(binarizer.classes_)*[0.5])
+                pred_bin = (predictions > filtered).astype(int)
 
                 indexes = pred_bin[0].nonzero()[0]
                 if indexes.any():
@@ -1246,22 +1211,22 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
                 if pred not in classifiers['level_2']:
                     continue
 
-                clf = classifiers['level_2'][pred]['clf']
-                binarizer = classifiers['level_2'][pred]['binarizer']
-                new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-                print("Predicting on dev data")
-                predictions = clf.predict(new_data_x)
-                pred_bin = np.where(predictions >= 0.5, 1, 0)
-
                 # clf = classifiers['level_2'][pred]['clf']
                 # binarizer = classifiers['level_2'][pred]['binarizer']
-                # token2idx = classifiers['level_2'][pred]['token2idx']
-                # max_sent_len = classifiers['level_2'][pred]['max_sent_len']
-                # dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
+                # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
                 # print("Predicting on dev data")
-                # predictions = clf.predict([dev_vector], verbose=1)
-                # filter_threshold = np.array(len(binarizer.classes_)*[0.5])
-                # pred_bin = (predictions > filter_threshold).astype(int)
+                # predictions = clf.predict(new_data_x)
+                # pred_bin = np.where(predictions >= 0.5, 1, 0)
+
+                clf = classifiers['level_2'][pred]['clf']
+                binarizer = classifiers['level_2'][pred]['binarizer']
+                token2idx = classifiers['level_2'][pred]['token2idx']
+                max_sent_len = classifiers['level_2'][pred]['max_sent_len']
+                dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
+                print("Predicting on dev data")
+                predictions = clf.predict([dev_vector], verbose=1)
+                filter_threshold = np.array(len(binarizer.classes_)*[0.5])
+                pred_bin = (predictions > filter_threshold).astype(int)
 
                 indexes = pred_bin[0].nonzero()[0]
                 if indexes.any():
