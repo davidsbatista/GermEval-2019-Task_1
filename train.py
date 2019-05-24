@@ -829,7 +829,6 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
     report = classification_report(test_y, np.array(binary_predictions),
                                    target_names=ml_binarizer.classes_)
-    print(report)
 
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label + '\n')
@@ -997,10 +996,9 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
             classifiers['level_1'][k]['token2idx'] = token2idx
             classifiers['level_1'][k]['max_sent_len'] = max_sent_len
 
-            print()
-            print(classifiers['level_1'].keys())
-
-            print("----------------------------")
+        print()
+        print(classifiers['level_1'].keys())
+        print("----------------------------")
 
     print("\n\n=== LEVEL 2 ===")
     for k, v in sorted(hierarchical_level_2.items()):
@@ -1030,6 +1028,8 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
             classifiers['level_2'][k]['token2idx'] = token2idx
             classifiers['level_2'][k]['max_sent_len'] = max_sent_len
 
+        print()
+        print(classifiers['level_2'].keys())
         print("----------------------------")
 
     return classifiers
