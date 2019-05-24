@@ -26,7 +26,8 @@ from sklearn.preprocessing import MultiLabelBinarizer
 from analysis import extract_hierarchy
 from utils import generate_submission_file, load_data
 
-from models.convnets_utils import get_cnn_multichannel, get_cnn_rand, get_cnn_pre_trained_embeddings
+from models.convnets_utils import get_cnn_multichannel, get_cnn_rand, \
+    get_cnn_pre_trained_embeddings, get_embeddings_layer
 from models.keras_han.model import HAN
 from models.utils import build_lstm_based_model, build_token_index
 from models.utils import vectorize_dev_data, vectorizer, vectorize_one_sample
@@ -815,7 +816,9 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         except KeyError:
             not_found += 1
 
-    model = get_cnn_pre_trained_embeddings(static_embeddings, max_sent_len, n_classes)
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
+                                           static_embeddings.vector_size, trainable=True)
+    model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
     model.fit(train_x, train_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
