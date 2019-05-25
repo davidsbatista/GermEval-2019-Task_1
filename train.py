@@ -509,10 +509,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         print(k, v)
     print("total missed: ", missed)
 
-    write_reports_to_disk(predictions_bins, predictions_prob, test_y,
-                          best_clf, ml_binarizer.classes_)
-
-    """
     report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
     with open('classification_report.txt', 'at+') as f_out:
@@ -520,7 +516,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         f_out.write("="*len(level_label)+'\n')
         f_out.write(report)
         f_out.write('\n')
-    """
 
     # train a classifier on all data using the parameters that yielded best result
     print("Training classifier with best parameters on all data")
