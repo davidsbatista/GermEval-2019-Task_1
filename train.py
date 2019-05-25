@@ -832,7 +832,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
+    model.fit(train_x, train_y, batch_size=16, epochs=10, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
     # ToDo: there must be a more efficient way to do this, BucketEstimator
@@ -847,6 +847,8 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         f_out.write("=" * len(level_label) + '\n')
         f_out.write(report)
         f_out.write('\n')
+
+    exit(-1)
 
     # train on all data without validation split
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
