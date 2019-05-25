@@ -805,7 +805,8 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
-                                                        test_size=0.25)
+                                                        test_size=0.30)
+
     print(train_x.shape)
     print(train_y.shape)
 
@@ -1125,7 +1126,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
         out_file = 'results/classifiers.pkl'
 
         # possibilities: logit, bag-of-tricks, cnn
-        clfs = {'top': 'logit',
+        clfs = {'top': 'cnn',
                 'level_1': 'cnn',
                 'level_2': 'cnn'}
 
