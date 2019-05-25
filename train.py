@@ -509,12 +509,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         print(k, v)
     print("total missed: ", missed)
 
-    print()
-    print(pred_labels)
-    print()
-    print(true_labels)
-
-    write_reports_to_disk(pred_labels, predictions_prob, true_labels,
+    write_reports_to_disk(predictions_bins, predictions_prob, test_y,
                           best_clf, ml_binarizer.classes_)
 
     """
