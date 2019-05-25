@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from keras.utils import to_categorical
 from sklearn.metrics import classification_report, confusion_matrix, precision_recall_curve
-from sklearn.utils.fixes import signature
+# from sklearn.utils.fixes import signature
 from sklearn.utils.multiclass import unique_labels
 
 
@@ -131,9 +131,9 @@ def write_reports_to_disk(all_preds, all_scores, all_true, model, classes, clf=N
         precision, recall, _ = precision_recall_curve(all_true, all_scores)
 
         # In matplotlib < 1.5, plt.fill_between does not have a 'step' argument
-        step_kwargs = ({'step': 'post'}
-                       if 'step' in signature(plt.fill_between).parameters
-                       else {})
+        #step_kwargs = ({'step': 'post'}
+        #               if 'step' in signature(plt.fill_between).parameters
+        #               else {})
         plt.step(recall, precision, color='b', alpha=0.2,
                  where='post')
         plt.fill_between(recall, precision, alpha=0.2, color='b', **step_kwargs)
