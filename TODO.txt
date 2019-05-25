@@ -16,5 +16,12 @@ strategy_one
 to try:
 =======
 - weight initialization for top-level + 1st level only
+  hidden layer matrix: 14k x 8+93
 
-hidden layer matrix: 14k x 8+93
+- samples with no predicted labels, for 1st and 2nd level, get 2nd best ranked prediction
+
+# ToDo: other embeddings? BRET, ELMo, Flair?
+# ToDo: language model based on char?
+# ToDO: https://github.com/cambridgeltl/multilabel-nn
+# ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification
+# ToDo: https://github.com/locuslab/TCN

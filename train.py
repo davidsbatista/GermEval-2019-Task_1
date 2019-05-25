@@ -24,10 +24,11 @@ from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from analysis import extract_hierarchy
+from models.utils2 import write_reports_to_disk
 from utils import generate_submission_file, load_data
 
-from models.convnets_utils import get_cnn_multichannel, get_cnn_rand, \
-    get_cnn_pre_trained_embeddings, get_embeddings_layer
+from models.convnets_utils import get_cnn_multichannel, get_cnn_rand
+from models.convnets_utils import get_cnn_pre_trained_embeddings, get_embeddings_layer
 from models.keras_han.model import HAN
 from models.utils import build_lstm_based_model, build_token_index
 from models.utils import vectorize_dev_data, vectorizer, vectorize_one_sample
@@ -508,6 +509,10 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         print(k, v)
     print("total missed: ", missed)
 
+    write_reports_to_disk(pred_labels, predictions_prob, true_labels,
+                          best_clf, ml_binarizer.classes_)
+
+    """
     report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
     with open('classification_report.txt', 'at+') as f_out:
@@ -515,6 +520,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         f_out.write("="*len(level_label)+'\n')
         f_out.write(report)
         f_out.write('\n')
+    """
 
     # train a classifier on all data using the parameters that yielded best result
     print("Training classifier with best parameters on all data")
@@ -766,6 +772,16 @@ def train_han(train_data_x, train_data_y):
 
 
 def train_cnn_sent_class(train_data_x, train_data_y, level_label):
+    # ToDo: grid-search Keras:
+    """
+    - Grid search across different kernel sizes to find the optimal configuration for your problem,
+      in the range 1-10.
+    - Search the number of filters from 100-600 and explore a dropout of 0.0-0.5 as part of the
+      same search.
+    - Explore using tanh, relu, and linear activation functions.
+    - https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
+    """
+
     token2idx, max_sent_len, _ = build_token_index(train_data_x)
 
     # x_data: vectorize, i.e. tokens to indexes and pad
@@ -960,6 +976,8 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['binarizer'] = ml_binarizer
         classifiers['top_level']['token2idx'] = token2idx
         classifiers['top_level']['max_sent_len'] = max_sent_len
+
+    exit(-1)
 
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
@@ -1270,24 +1288,6 @@ def main():
 
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
     # ToDo: confusion-matrix ?
-    # ToDo: grid-search Keras:
-    """
-    - Grid search across different kernel sizes to find the optimal configuration for your problem,
-    in the range 1-10.
-
-    - Search the number of filters from 100-600 and explore a dropout of 0.0-0.5 as part of the
-    same search.
-
-    - Explore using tanh, relu, and linear activation functions.
-    :return:
-    """
-    # https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
-
-    # ToDo: other embeddings? BRET, ELMo, Flair?
-    # ToDo: language model based on char?
-    # ToDO: https://github.com/cambridgeltl/multilabel-nn
-    # ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification
-    # ToDo: https://github.com/locuslab/TCN
 
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
