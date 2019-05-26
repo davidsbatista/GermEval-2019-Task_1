@@ -20,8 +20,35 @@ to try:
 
 - samples with no predicted labels, for 1st and 2nd level, get 2nd best ranked prediction
 
+
+# pre-processing
+
+- replaces the characters “#- ,;:/+)<>&” and line break characters by spaces and we replace
+  the substring “’s” (as in “geht’s”) by a space.
+
+- for features with stemming we use the German stemmer of NLTK
+
+- for creating character-level features we concatenate (Join in Table 1) the resulting tokens
+  with spaces into one string for extracting character-level n-grams.
+
+- CNGR extracts all character-level n-grams of length 3 to 7,
+- while TNGR extracts all stemmed token-level n-grams of length 1 to 3
+
+
+- we perform TFIDF over all extracted n-grams, keep only those with a document frequency between
+  0.01 and 0.0002 (i.e., those that are rare enough to carry some signal, but frequent enough to
+  have a potential to generalize over unseen data).
+
+- The document frequency thresholds were tuned by means of a grid search on a 90%/10% split of the
+  training data, with the aim to maximize prediction scores of the base classifiers (see Section 4).
+  We use the TFIDF score of the relevant n-grams as input features (
+
+
+
+
 # ToDo: other embeddings? BRET, ELMo, Flair?
 # ToDo: language model based on char?
 # ToDO: https://github.com/cambridgeltl/multilabel-nn
 # ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification
 # ToDo: https://github.com/locuslab/TCN
+
