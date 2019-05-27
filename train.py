@@ -5,14 +5,16 @@ import pickle
 from collections import defaultdict
 from copy import deepcopy
 
-
+import nltk
 from gensim.models import KeyedVectors
 import numpy as np
 from keras.layers import Embedding
 
 from keras_preprocessing.sequence import pad_sequences
+from nltk import wordpunct_tokenize
 
 from nltk.corpus import stopwords
+from nltk.stem.snowball import GermanStemmer
 from nltk.tokenize import sent_tokenize, word_tokenize
 
 from sklearn.feature_extraction.text import TfidfVectorizer
@@ -54,7 +56,20 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     # TODO: use author as feature, what about unseen authors ?
 
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+    new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
+    de_stemmer = GermanStemmer()
+    all_doc_tokens = []
+
+    for x in new_data_x:
+        doc_tokens = []
+        for s in sent_tokenize(x):
+            tokens = wordpunct_tokenize(s)
+            words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
+            doc_tokens.extend(words)
+        doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
+        all_doc_tokens.append(doc_tokens_stemmed)
+
+    new_data_x = all_doc_tokens
 
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,

@@ -35,6 +35,16 @@ to try:
 - while TNGR extracts all stemmed token-level n-grams of length 1 to 3
 
 
+- top-scoring n-grams for each doc ?
+- top-scoring n-grams for each class
+
+from nltk.stem.snowball import GermanStemmer
+stem = GermanStemmer()
+
+https://www.nltk.org/api/nltk.stem.html
+
+
+
 - we perform TFIDF over all extracted n-grams, keep only those with a document frequency between
   0.01 and 0.0002 (i.e., those that are rare enough to carry some signal, but frequent enough to
   have a potential to generalize over unseen data).
@@ -45,6 +55,17 @@ to try:
 
 
 
+- These two groups of features are based on the same idea: to perform TFIDF over the whole dataset,
+  select the k most important types relative to each of the m classes
+  (m = 2 in Task 1, m = 4 in Task 2).
+
+  We determine importance by ranking features according to their average TFIDF value in all documents
+  in the respective class. Based on the resulting  list of k ·m most important type/class combinations
+  we create a feature for each k ·m combination.
+
+  For CIMP each type is a character n-gram, while for TIMP each type is a token. Intuitively this
+  selects the most distinguishing types per category, a related analysis is described in the blog
+  of Thomas Buhrman.3
 
 # ToDo: other embeddings? BRET, ELMo, Flair?
 # ToDo: language model based on char?
