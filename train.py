@@ -69,8 +69,9 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
             tokens = wordpunct_tokenize(s)
             words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
             doc_tokens.extend(words)
-        doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
-        all_doc_tokens.append(doc_tokens_stemmed)
+        # doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
+        # all_doc_tokens.append(doc_tokens_stemmed)
+        all_doc_tokens.append(doc_tokens)
 
     new_data_x = all_doc_tokens
 
