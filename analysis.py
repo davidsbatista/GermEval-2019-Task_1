@@ -80,7 +80,21 @@ def data_analysis(train_data_x, train_data_y, labels):
 
     # top_words_per_class(train_data_x, train_data_y)
 
-    extract_hierarchy()
+    hierarchical_level_1, hierarchical_level_2 = extract_hierarchy()
+
+    print("top-level: ", len(hierarchical_level_1))
+    print("---------")
+    level_1 = 0
+    for k, v in hierarchical_level_1.items():
+        print(k, len(v))
+        level_1 += len(v)
+    print()
+    print("hierarchical_level_1:", level_1)
+    print("---------")
+    level_2 = 0
+    for k, v in hierarchical_level_2.items():
+        level_2 += len(v)
+    print("hierarchical_level_2:", level_2)
 
     """
     from pandas import DataFrame
@@ -111,6 +125,7 @@ def main():
     # do some data analysis
     # data_analysis(train_data_x, train_data_y, labels)
     data_analysis(None, None, None)
+
 
 if __name__ == '__main__':
     main()
