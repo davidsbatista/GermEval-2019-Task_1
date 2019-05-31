@@ -1,0 +1,200 @@
+%
+% File konvens2019.tex
+%
+% Contact: konferenz-konvens2019@lists.fau.de
+%%
+%% Based on the style files for KONVENS 2018, which were, in turn,
+%% Based on the style files for KONVENS 2016, which were, in turn,
+%% Based on the style files for GSCL-2015, which were, in turn,
+%% Based on the style files for ACL-2014, which were, in turn,
+%% Based on the style files for ACL-2013, which were, in turn,
+%% Based on the style files for ACL-2012, which were, in turn,
+%% based on the style files for ACL-2011, which were, in turn,
+%% based on the style files for ACL-2010, which were, in turn,
+%% based on the style files for ACL-IJCNLP-2009, which were, in turn,
+%% based on the style files for EACL-2009 and IJCNLP-2008...
+
+\documentclass[11pt]{article}
+\usepackage{konvens2019}
+\usepackage{mathptmx}
+\usepackage[scaled=.90]{helvet}
+\usepackage{courier}
+
+\usepackage{url}
+\usepackage{latexsym}
+
+\usepackage{comment}
+
+%\setlength\titlebox{5cm}
+
+% You can expand the titlebox if you need extra space
+% to show all the authors. Please do not make the titlebox
+% smaller than 5cm (the original size); we will check this
+% in the camera-ready version and ask you to change it back.
+
+
+\title{COMTRAVO-DS team at GermEval 2019 shared task on hierarchical classification of blurbs}
+
+\author{First Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  {\tt email@domain} \\\And
+  Second Author \\
+  Affiliation / Address line 1 \\
+  Affiliation / Address line 2 \\
+  Affiliation / Address line 3 \\
+  {\tt email@domain} \\}
+
+
+
+\begin{document}
+\maketitle
+\begin{abstract}
+
+\end{abstract}
+
+\section{Introduction}
+
+\section{Task}
+
+The GermEval 2010 Shared Task on hierarchical classification of blurbs challenges involved the
+classification of books into genres given a book's blurb i.e., a short textual description of the
+book. The competition contained two sub-tasks:
+
+\begin{itemize}
+
+\item Sub-Task A: classify German books into one or multiple most general writing genres. Therfore,
+it can be considered a multi-label classification task. In total, there are 8 classes that can be
+assigned to a book.
+
+\item Sub-Task B: targets hierarchical multi-label classification into multiple writing genres. In
+addition to the very general writing genres, additional genres of different specificity can
+be assigned to a book. In total, there are 343 different classes that are hierarchically
+structured on up to 4 levels.
+
+\end{itemize}
+
+
+\subsection{Dataset}
+
+The dataset contains 3 levels and it's considered a hierarchically multi-label since any example
+can be can assigned to more than one class at any given level of the hierarchy. The hierarchy
+contains a totalling of 343 classes distinct classes:
+
+\begin{itemize}
+% binary classifiers per node, one-vs-all
+\item{Level 1: 8 classes}
+\item{Level 2: 93 classes}
+\item{Level 3: 242 classes}
+\end{itemize}
+
+There are XX XXX samples in the training dataset provided by the shared task organizers.
+
+% hierarchy-tree
+% imbalence of classes ?
+% taxonomy or tree ?
+% Whether the taxonomy is organized into a tree or a DAG influences the degree of difficulty of
+% the underlying hierarchical classification problem
+
+
+\section{Hierarchical Classification}
+
+\textbf{TODO:}
+
+\subsection{Local Classifier}
+
+The local classifier strategy is one way to approach the hierarchical document classification task
+and it was first proposed in the seminal work of \cite{Koller:1997:HCD:645526.657130}, it is also
+sometimes refered to as top-down approach in the literature.
+
+There are different approaches, based on the idea of a local classifier, depending on how they use
+the local information and devise a strategy to build several classifiers~\cite{Silla:2011:SHC:1937796.1937884}:
+
+\begin{itemize}
+\item{a local classifier per node}
+\item{a local classifier per parent node}
+\item{a local classifier per level}
+\end{itemize}
+
+
+% Local Classifier Per Node Approach
+The \textit{local classifier per node} approach consists in training one binary classifier for each
+node in the hierarchy tree, where node every possible label in the hierarchy tree. There are several
+diferent strategies on how to select the positive and negative classes (see~\cite{})
+
+
+% Local Classifier Per Parent Node Approach
+In \textit{a per parent node approach}, for each parent node in the hierarchy tree, a multi-class
+classifier is trained to classify the probability of a given sample beloging to each of the parent's
+child nodes.
+
+%During the testing phase, this approach is often coupled with the top-down class prediction approach,
+%but this coupling is not necessarily a must, as new class prediction approaches for this type of
+%local approach could be developed.
+
+%Consider the top-down class-prediction approach and the same class tree example of Figure 5,
+%and suppose that the first level classifier assigns the example to the class 2.
+
+%The second level classifier, which was only trained with the children of the class node 2, in this
+%case 2.1 and 2.2, will then make its class assignment (and so on, if deeper-level classifiers were available),
+%therefore avoiding the problem of making inconsistent predictions and respecting the natural constrains of class membership.
+
+
+% Local Classifier Per Level Approach
+The \textit{local classifier per level} approach consists of training one multi-class classifier
+for each level of the hierarchy tree. When a new test sample is presented we get the output of the
+classifiers from each level and use this information as the final classification.
+
+This approach however is prone to class-membership inconsistency, since different classifiers are
+trained for each level of the hierarchy. For instance, it's possible to have has outputs for the
+first-level classes 2 and 3, ant then classes 1.1 and 1.2 at the second-level, and class 3.1.1
+at the third-level, whichi generates an inconsistent classification. This approach should
+be complemented by a post-processing method that tries to correct the prediction inconsistency.
+
+
+% Summary
+
+\begin{comment}
+In essence, in this top-down approach, for each new example in the test set, the system first
+predicts its first-level (most generic) class, then it uses that predicted class to narrow
+the choices of classes to be predicted at the second level (the only valid candidate
+second-level classes are the children of the class predicted at the first level), and so on,
+recursively, until the most specific prediction is made.
+
+This local approach has some disadvantages, a disadvantage of the top-down class-prediction
+approach (which is shared by all the three types of local classifiers discussed next) is that an
+error at a certain class level is going to be propagated downwards the hierarchy, unless some
+procedure for avoiding this problem is used
+\end{comment}
+
+
+
+\subsection{Global Classifier: label co-ocorruence}
+
+
+
+\section{System}
+
+\subsection{Preprocessing}
+
+\subsection{Approaches}
+
+
+\section{Experiments and Results}
+
+\subsection{Local Classifier Per Parent Node Approach}
+
+
+
+
+\section*{Acknowledgments}
+
+%The acknowledgments should go immediately before the references.
+%Do not number the acknowledgments section. Do not include this section
+%when submitting your paper for review.
+
+\bibliographystyle{konvens2019}
+\bibliography{references.bib}
+
+\end{document}
