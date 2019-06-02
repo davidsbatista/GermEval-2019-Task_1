@@ -79,14 +79,51 @@ def extract_hierarchy():
     return hierarchical_level_1, hierarchical_level_2
 
 
+def stats_genres_per_blurb(train_data_y):
+    genres_per_blurb = []
+    genres_per_level_per_blurb = {0: [], 1: [], 2: []}
+    for blurb in train_data_y:
+        all_genres = set()
+        genres_per_level = {0: set(), 1: set(), 2: set()}
+        for labels in blurb:
+            for k, v in labels.items():
+                all_genres.add(v)
+                genres_per_level[k].add(v)
+        genres_per_blurb.append(len(all_genres))
+
+        genres_per_level_per_blurb[0].append(len(genres_per_level[0]))
+        genres_per_level_per_blurb[1].append(len(genres_per_level[1]))
+        genres_per_level_per_blurb[2].append(len(genres_per_level[2]))
+    print()
+    print("Avg. genres per label", statistics.mean(genres_per_blurb))
+    print("Std. deviation : ", statistics.stdev(genres_per_blurb))
+    print()
+    print("Avg. genres per label per level")
+    for x, v in genres_per_level_per_blurb.items():
+        print("Level ", x)
+        print(statistics.mean(v))
+        print(statistics.stdev(v))
+        print()
+
+
+def count_sentences_tokens(train_data_x):
+    # the title of the book is considered a sentence
+    new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
+    sentences_per_blurb = []
+    tokens_per_blurb = []
+    for x in new_data_x:
+        doc_tokens = []
+        sentences_per_blurb.append(len(sent_tokenize(x)))
+        for s in sent_tokenize(x):
+            tokens = wordpunct_tokenize(s)
+            # consider only alphanumeric tokens
+            words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
+            doc_tokens.extend(words)
+        tokens_per_blurb.append(len(doc_tokens))
+    return sentences_per_blurb, tokens_per_blurb
+
+
 def data_analysis(train_data_x, train_data_y, labels, test_data_x):
-
-    # Avg. genres per blurb
-    print(train_data_y)
-
-    print(labels)
-
-    exit(-1)
 
     # how many genres/classes per level
     hierarchical_level_1, hierarchical_level_2 = extract_hierarchy()
@@ -121,6 +158,12 @@ def data_analysis(train_data_x, train_data_y, labels, test_data_x):
     print("Avg. tokens per blurb: ", statistics.mean(tokens_per_blurb))
     print("Std. deviation : ", statistics.stdev(tokens_per_blurb))
 
+    # Avg. genres per blurb
+    print()
+    print("Genres")
+    print("======")
+    stats_genres_per_blurb(train_data_y)
+
     """
     from pandas import DataFrame
     df_stats_level_0 = DataFrame.from_dict(labels['0'], orient='index', columns=['counts'])
@@ -140,32 +183,12 @@ def data_analysis(train_data_x, train_data_y, labels, test_data_x):
     """
 
 
-def count_sentences_tokens(train_data_x):
-    # the title of the book is considered a sentence
-    new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
-    sentences_per_blurb = []
-    tokens_per_blurb = []
-    for x in new_data_x:
-        doc_tokens = []
-        sentences_per_blurb.append(len(sent_tokenize(x)))
-        for s in sent_tokenize(x):
-            tokens = wordpunct_tokenize(s)
-
-            # consider only alphanumeric tokens
-            words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
-            doc_tokens.extend(words)
-
-        tokens_per_blurb.append(len(doc_tokens))
-    return sentences_per_blurb, tokens_per_blurb
-
-
 def main():
-    # load train data
+    # load train and test data
     train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt')
-
     test_data_x, _, _ = load_data('blurbs_test_participants.txt')
 
-    # do some data analysis
+    # data analysis
     data_analysis(train_data_x, train_data_y, labels, test_data_x)
 
 
