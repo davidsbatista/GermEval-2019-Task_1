@@ -82,19 +82,23 @@ def extract_hierarchy():
 def stats_genres_per_blurb(train_data_y):
     genres_per_blurb = []
     genres_per_level_per_blurb = {0: [], 1: [], 2: []}
-    samples_per_co_ocurrence = defaultdict(int)
+    samples_per_co_occurrence = defaultdict(int)
+    nr_samples_leaf_at_level = {0: 0, 1: 0, 2: 0}
     for blurb in train_data_y:
         all_genres = set()
         genres_per_level = {0: set(), 1: set(), 2: set()}
+        max_level = 0
         for labels in blurb:
             for k, v in labels.items():
+                max_level = k if k > max_level else max_level
                 all_genres.add(v)
                 genres_per_level[k].add(v)
+        nr_samples_leaf_at_level[max_level] += 1
         genres_per_blurb.append(len(all_genres))
         genres_per_level_per_blurb[0].append(len(genres_per_level[0]))
         genres_per_level_per_blurb[1].append(len(genres_per_level[1]))
         genres_per_level_per_blurb[2].append(len(genres_per_level[2]))
-        samples_per_co_ocurrence['_'.join(list(sorted(all_genres)))] += 1
+        samples_per_co_occurrence['_'.join(list(sorted(all_genres)))] += 1
 
     print()
     print("Avg. genres per label", statistics.mean(genres_per_blurb))
@@ -108,9 +112,14 @@ def stats_genres_per_blurb(train_data_y):
         print()
 
     print("Avg. blurb per co-occurrence")
-    samples_co_occurrences = list(samples_per_co_ocurrence.values())
+    samples_co_occurrences = list(samples_per_co_occurrence.values())
     print(statistics.mean(samples_co_occurrences))
     print(statistics.stdev(samples_co_occurrences))
+
+    print("\nLeaf nodes at each level (1;2;3)")
+    print("1 :", nr_samples_leaf_at_level[0], nr_samples_leaf_at_level[0]/len(train_data_y))
+    print("2 :", nr_samples_leaf_at_level[1], nr_samples_leaf_at_level[1]/len(train_data_y))
+    print("3 :", nr_samples_leaf_at_level[2], nr_samples_leaf_at_level[2]/len(train_data_y))
 
 
 def count_sentences_tokens(train_data_x):
