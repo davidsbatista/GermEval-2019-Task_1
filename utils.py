@@ -4,14 +4,18 @@ from os.path import join
 from bs4 import BeautifulSoup, Tag, NavigableString
 
 
-def load_data(file):
+def load_data(file, dev=False):
     """
     Parses and loads the training/dev/test data into a list of dicts
 
+    :param dev:
     :param file:
     :return:
     """
-    base_path = 'blurbs_dev_participants/'
+    if dev:
+        base_path = 'data/blurbs_dev_participants/'
+    else:
+        base_path = 'data/blurbs_test_participants/'
     full_path = join(base_path, file)
 
     labels_by_level = {'0': defaultdict(int),

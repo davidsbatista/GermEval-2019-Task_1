@@ -35,15 +35,11 @@
 
 \title{COMTRAVO-DS team at GermEval 2019 shared task on hierarchical classification of blurbs}
 
-\author{First Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
-  {\tt email@domain} \\\And
+\author{David S. Batista \\
+  Comtravo Gmbh \\
+  {\tt david.batista@comtravo.com} \\\And
   Second Author \\
-  Affiliation / Address line 1 \\
-  Affiliation / Address line 2 \\
-  Affiliation / Address line 3 \\
+  Comtravo Gmbh \\
   {\tt email@domain} \\}
 
 
@@ -70,32 +66,69 @@ assigned to a book.
 
 \item Sub-Task B: targets hierarchical multi-label classification into multiple writing genres. In
 addition to the very general writing genres, additional genres of different specificity can
-be assigned to a book. In total, there are 343 different classes that are hierarchically
-structured on up to 4 levels.
+be assigned to a book.
 
 \end{itemize}
 
 
 \subsection{Dataset}
 
-The dataset contains 3 levels and it's considered a hierarchically multi-label since any example
-can be can assigned to more than one class at any given level of the hierarchy. The hierarchy
-contains a totalling of 343 classes distinct classes:
-
-\begin{itemize}
-% binary classifiers per node, one-vs-all
-\item{Level 1: 8 classes}
-\item{Level 2: 93 classes}
-\item{Level 3: 242 classes}
-\end{itemize}
-
-There are XX XXX samples in the training dataset provided by the shared task organizers.
+The dataset made available for this task contains 3 levels and it's considered a hierarchically
+multi-label since any example can be can assigned to more than one class at any given level of
+the hierarchy. The hierarchy contains a totall of 343 classes distinct classes, and in total there
+are 16 627 samples. Table~\ref{quantitivy-analysis-train} as a detailed statistical description of
+the dataset.
 
 % hierarchy-tree
 % imbalence of classes ?
 % taxonomy or tree ?
 % Whether the taxonomy is organized into a tree or a DAG influences the degree of difficulty of
 % the underlying hierarchical classification problem
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline\centering\textbf{Training dataset}  &             \\
+\hline
+Avg. lenght of blurb (tokens)              &  96.7       \\
+Std. deviation $\sigma$ (tokens)           &  39.6       \\
+Avg. lenght of blurb (sentences)           &  6.5        \\
+Std. deviation $\sigma$ (sentences)        &  2.7        \\
+\hline
+Total number of genres                     &  343        \\
+Possible genres per level (1;2;3)          &  8; 93; 242 \\
+Avg. genres per per blurb                  &             \\
+Avg. genres per blurb at level (1;2;3)     &             \\
+\hline
+Avg. blurb per co-occorrence               &             \\
+Co-occorrence std. deviation               &             \\
+Leaf nodes at each level (1;2;3)           &             \\
+
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{quantitivy-analysis-train}Quantitative analysis of the training dataset.}
+\end{table}
+
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline\centering\textbf{Test dataset}  &         \\
+\hline
+Avg. lenght of blurb (words)           &         \\
+Avg. lenght of blurb (sentences)       &         \\
+% How many samples have leaf nodes at each level ?
+
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{quantitivy-analysis-test}Quantitative analysis of the test dataset.}
+\end{table}
+
+
+
+\textbf{TODO:}
 
 
 \section{Hierarchical Classification}
@@ -105,8 +138,9 @@ There are XX XXX samples in the training dataset provided by the shared task org
 \subsection{Local Classifier}
 
 The local classifier strategy is one way to approach the hierarchical document classification task
-and it was first proposed in the seminal work of \cite{Koller:1997:HCD:645526.657130}, it is also
-sometimes refered to as top-down approach in the literature.
+and it was first proposed, to the best of our knowledge, in the seminal work of Koller and
+Sahami~\shortcite{Koller:1997:HCD:645526.657130}, it is also sometimes refered to as top-down
+approach in the literature.
 
 There are different approaches, based on the idea of a local classifier, depending on how they use
 the local information and devise a strategy to build several classifiers~\cite{Silla:2011:SHC:1937796.1937884}:
@@ -177,6 +211,9 @@ procedure for avoiding this problem is used
 \section{System}
 
 \subsection{Preprocessing}
+
+% consider only alphanumeric tokens
+% stop-words ?
 
 \subsection{Approaches}
 
