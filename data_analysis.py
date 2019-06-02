@@ -82,6 +82,7 @@ def extract_hierarchy():
 def stats_genres_per_blurb(train_data_y):
     genres_per_blurb = []
     genres_per_level_per_blurb = {0: [], 1: [], 2: []}
+    samples_per_co_ocurrence = defaultdict(int)
     for blurb in train_data_y:
         all_genres = set()
         genres_per_level = {0: set(), 1: set(), 2: set()}
@@ -90,10 +91,11 @@ def stats_genres_per_blurb(train_data_y):
                 all_genres.add(v)
                 genres_per_level[k].add(v)
         genres_per_blurb.append(len(all_genres))
-
         genres_per_level_per_blurb[0].append(len(genres_per_level[0]))
         genres_per_level_per_blurb[1].append(len(genres_per_level[1]))
         genres_per_level_per_blurb[2].append(len(genres_per_level[2]))
+        samples_per_co_ocurrence['_'.join(list(sorted(all_genres)))] += 1
+
     print()
     print("Avg. genres per label", statistics.mean(genres_per_blurb))
     print("Std. deviation : ", statistics.stdev(genres_per_blurb))
@@ -104,6 +106,11 @@ def stats_genres_per_blurb(train_data_y):
         print(statistics.mean(v))
         print(statistics.stdev(v))
         print()
+
+    print("Avg. blurb per co-occurrence")
+    samples_co_occurrences = list(samples_per_co_ocurrence.values())
+    print(statistics.mean(samples_co_occurrences))
+    print(statistics.stdev(samples_co_occurrences))
 
 
 def count_sentences_tokens(train_data_x):
@@ -123,7 +130,7 @@ def count_sentences_tokens(train_data_x):
     return sentences_per_blurb, tokens_per_blurb
 
 
-def data_analysis(train_data_x, train_data_y, labels, test_data_x):
+def data_analysis(train_data_x, train_data_y, test_data_x):
 
     # how many genres/classes per level
     hierarchical_level_1, hierarchical_level_2 = extract_hierarchy()
@@ -189,7 +196,7 @@ def main():
     test_data_x, _, _ = load_data('blurbs_test_participants.txt')
 
     # data analysis
-    data_analysis(train_data_x, train_data_y, labels, test_data_x)
+    data_analysis(train_data_x, train_data_y, test_data_x)
 
 
 if __name__ == '__main__':

@@ -7,9 +7,8 @@ from keras.layers import Embedding, Convolution1D, GlobalMaxPooling1D, Concatena
     AlphaDropout
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize
-from sklearn.preprocessing import MultiLabelBinarizer
 
-from analysis import extract_hierarchy
+from data_analysis import extract_hierarchy
 from models.utils import vectorizer, build_token_index
 from utils import load_data
 
