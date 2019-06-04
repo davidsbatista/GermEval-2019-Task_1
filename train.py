@@ -913,10 +913,10 @@ def main():
     # ToDo: confusion-matrix ?
 
     # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
     # load dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt')
+    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
