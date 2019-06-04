@@ -105,6 +105,7 @@ Std. deviation $\sigma$                    &  0.27; 0.76; 0.79  \\
 \hline
 Avg. blurb per co-occurrence               &  6.48              \\
 Co-occorrence std. deviation               & 35.90              \\
+\hline
 Nr. samples with leaf nodes at:            &                    \\
  - Level 1                                 & 1.9\% (311)        \\
  - Level 2                                 & 44,6\% (7.422)     \\
@@ -142,6 +143,7 @@ Std. deviation $\sigma$ (sentences)        &  2.62              \\
 
 \section{Hierarchical Classification}
 
+
 \textbf{TODO:}
 
 \subsection{Local Classifier}
@@ -162,26 +164,25 @@ the local information and devise a strategy to build several classifiers~\cite{S
 
 
 % Local Classifier Per Node Approach
-The \textit{local classifier per node} approach consists in training one binary classifier for each
-node in the hierarchy tree, where node every possible label in the hierarchy tree. There are several
-diferent strategies on how to select the positive and negative classes (see~\cite{})
+The \textit{local classifier per node approach} consists in training one binary classifier for each
+node in the hierarchy tree, where a node is every possible label in the hierarchy tree. This
+approach needs to define a strategy on how to select the positive and negative classes (see~\cite{})
 
 
 % Local Classifier Per Parent Node Approach
 In \textit{a per parent node approach}, for each parent node in the hierarchy tree, a multi-class
 classifier is trained to classify the probability of a given sample beloging to each of the parent's
-child nodes.
+child nodes. A parent node is in this case every label in the hierarchy-tree which has one or more
+child labels.
 
-%During the testing phase, this approach is often coupled with the top-down class prediction approach,
-%but this coupling is not necessarily a must, as new class prediction approaches for this type of
-%local approach could be developed.
+In prediction mode top-down class prediction approach is applied. Given a new sample, first the
+top-level classifier is applied, then for every top-level predicted class (e.g., class 2 and 3)
+we apply it's child classifiers, e.g.: a classifer trained to predicted every 2.x classes and
+another for 3.x classes, and so one until we reach the last level.
 
-%Consider the top-down class-prediction approach and the same class tree example of Figure 5,
-%and suppose that the first level classifier assigns the example to the class 2.
-
-%The second level classifier, which was only trained with the children of the class node 2, in this
-%case 2.1 and 2.2, will then make its class assignment (and so on, if deeper-level classifiers were available),
-%therefore avoiding the problem of making inconsistent predictions and respecting the natural constrains of class membership.
+Note that the sub-classifiers were trained only with the children of classes 2 and 3, therefore
+this approach avoids the problem of making inconsistent predictions and respects the constrains
+of class membership defined by the hierarchy-tree.
 
 
 % Local Classifier Per Level Approach
@@ -191,8 +192,8 @@ classifiers from each level and use this information as the final classification
 
 This approach however is prone to class-membership inconsistency, since different classifiers are
 trained for each level of the hierarchy. For instance, it's possible to have has outputs for the
-first-level classes 2 and 3, ant then classes 1.1 and 1.2 at the second-level, and class 3.1.1
-at the third-level, whichi generates an inconsistent classification. This approach should
+first-level classes 2 and 3, and then classes 1.1 and 1.2 at the second-level, and class 3.1.1
+at the third-level, which generates an inconsistent classification. This approach should
 be complemented by a post-processing method that tries to correct the prediction inconsistency.
 
 

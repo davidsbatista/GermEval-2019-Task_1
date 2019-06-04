@@ -1,0 +1,1 @@
+Put gold results here, same format as for submitted systems, cf. Put output of system here as described in https://competitions.codalab.org/competitions/21226#learn_the_details-evaluation. 
