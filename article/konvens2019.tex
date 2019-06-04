@@ -182,12 +182,12 @@ another for 3.x classes, and so one until we reach the last level.
 
 Note that the sub-classifiers were trained only with the children of classes 2 and 3, therefore
 this approach avoids the problem of making inconsistent predictions and respects the constrains
-of class membership defined by the hierarchy-tree.
+of class-membership defined by the hierarchy-tree.
 
 
 % Local Classifier Per Level Approach
 The \textit{local classifier per level} approach consists of training one multi-class classifier
-for each level of the hierarchy tree. When a new test sample is presented we get the output of the
+for each level of the hierarchy-tree. When a new test sample is presented we get the output of the
 classifiers from each level and use this information as the final classification.
 
 This approach however is prone to class-membership inconsistency, since different classifiers are

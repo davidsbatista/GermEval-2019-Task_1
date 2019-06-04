@@ -25,7 +25,7 @@ from sklearn.multiclass import OneVsRestClassifier
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from analysis import extract_hierarchy
+from data_analysis import extract_hierarchy
 from models.utils2 import write_reports_to_disk
 from utils import generate_submission_file, load_data
 
