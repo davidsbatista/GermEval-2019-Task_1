@@ -1,37 +1,34 @@
 %
-% File konvens2019.tex
+% File acl2019.tex
 %
-% Contact: konferenz-konvens2019@lists.fau.de
-%%
-%% Based on the style files for KONVENS 2018, which were, in turn,
-%% Based on the style files for KONVENS 2016, which were, in turn,
-%% Based on the style files for GSCL-2015, which were, in turn,
+%% Based on the style files for ACL 2018, NAACL 2018/19, which were
+%% Based on the style files for ACL-2015, with some improvements
+%%  taken from the NAACL-2016 style
 %% Based on the style files for ACL-2014, which were, in turn,
-%% Based on the style files for ACL-2013, which were, in turn,
-%% Based on the style files for ACL-2012, which were, in turn,
-%% based on the style files for ACL-2011, which were, in turn,
-%% based on the style files for ACL-2010, which were, in turn,
-%% based on the style files for ACL-IJCNLP-2009, which were, in turn,
-%% based on the style files for EACL-2009 and IJCNLP-2008...
+%% based on ACL-2013, ACL-2012, ACL-2011, ACL-2010, ACL-IJCNLP-2009,
+%% EACL-2009, IJCNLP-2008...
+%% Based on the style files for EACL 2006 by
+%%e.agirre@ehu.es or Sergi.Balari@uab.es
+%% and that of ACL 08 by Joakim Nivre and Noah Smith
 
-\documentclass[11pt]{article}
-\usepackage{konvens2019}
-\usepackage{mathptmx}
-\usepackage[scaled=.90]{helvet}
-\usepackage{courier}
+\documentclass[11pt,a4paper]{article}
+\usepackage[hyperref]{acl2019}
+\usepackage{times}
+\usepackage{latexsym}
+\usepackage{verbatim}
 
 \usepackage{url}
-\usepackage{latexsym}
 
-\usepackage{comment}
+\aclfinalcopy % Uncomment this line for the final submission
+%\def\aclpaperid{***} %  Enter the acl Paper ID here
 
 %\setlength\titlebox{5cm}
-
 % You can expand the titlebox if you need extra space
 % to show all the authors. Please do not make the titlebox
 % smaller than 5cm (the original size); we will check this
 % in the camera-ready version and ask you to change it back.
 
+\newcommand\BibTeX{B\textsc{ib}\TeX}
 
 \title{COMTRAVO-DS team at GermEval 2019 shared task on hierarchical classification of blurbs}
 
@@ -43,12 +40,13 @@
   {\tt email@domain} \\}
 
 
+\date{}
 
 \begin{document}
 \maketitle
 \begin{abstract}
-
 \end{abstract}
+
 
 \section{Introduction}
 
@@ -236,14 +234,54 @@ procedure for avoiding this problem is used
 
 
 
-
 \section*{Acknowledgments}
 
-%The acknowledgments should go immediately before the references.
-%Do not number the acknowledgments section. Do not include this section
-%when submitting your paper for review.
+\begin{comment}
 
-\bibliographystyle{konvens2019}
-\bibliography{references.bib}
+The acknowledgments should go immediately before the references.  Do
+not number the acknowledgments section. Do not include this section
+when submitting your paper for review. \\
+
+\noindent \textbf{Preparing References:} \\
+Include your own bib file like this:
+\verb|\bibliographystyle{acl_natbib}|
+\verb|\bibliography{acl2019}|
+
+where \verb|acl2019| corresponds to a acl2019.bib file.
+\end{comment}
+
+\bibliography{konvens2019.bib}
+\bibliographystyle{acl_natbib}
+
+\begin{comment}
+
+\appendix
+
+\section{Appendices}
+\label{sec:appendix}
+Appendices are material that can be read, and include lemmas, formulas, proofs, and tables that are not critical to the reading and understanding of the paper.
+Appendices should be \textbf{uploaded as supplementary material} when submitting the paper for review. Upon acceptance, the appendices come after the references, as shown here. Use
+\verb|\appendix| before any appendix section to switch the section
+numbering over to letters.
+
+
+\section{Supplemental Material}
+\label{sec:supplemental}
+Submissions may include non-readable supplementary material used in the work and described in the paper. Any accompanying software and/or data should include licenses and documentation of research review as appropriate. Supplementary material may report preprocessing decisions, model parameters, and other details necessary for the replication of the experiments reported in the paper. Seemingly small preprocessing decisions can sometimes make a large difference in performance, so it is crucial to record such decisions to precisely characterize state-of-the-art methods.
+
+Nonetheless, supplementary material should be supplementary (rather
+than central) to the paper. \textbf{Submissions that misuse the supplementary
+material may be rejected without review.}
+Supplementary material may include explanations or details
+of proofs or derivations that do not fit into the paper, lists of
+features or feature templates, sample inputs and outputs for a system,
+pseudo-code or source code, and data. (Source code and data should
+be separate uploads, rather than part of the paper).
+
+The paper should not rely on the supplementary material: while the paper
+may refer to and cite the supplementary material and the supplementary material will be available to the
+reviewers, they will not be asked to review the
+supplementary material.
+\end{comment}
 
 \end{document}
