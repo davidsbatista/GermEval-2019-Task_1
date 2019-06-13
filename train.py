@@ -75,7 +75,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     new_data_x = all_doc_tokens
 
-
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
                                                         random_state=42,
