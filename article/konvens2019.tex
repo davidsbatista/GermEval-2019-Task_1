@@ -299,6 +299,12 @@ tokens, i.e., all punctuation tokens were discarded.
 
 % What else did we tried? % de_stemmer = GermanStemmer() % stop-words ?
 
+% What other models did we tried ?
+% train_han
+% train_bag_of_tricks
+% train_bi_lstm
+% train_cnn_sent_class
+
 We preformed a parameter search, on 3 folds over the training set, varying following parameters:
 
 \begin{itemize}
@@ -310,10 +316,57 @@ We preformed a parameter search, on 3 folds over the training set, varying follo
 
 This classifier is also the one that reports the results for Sub-Task A.
 
-For Level 1 and 2 in the hierarchy tree we trained classifiers based the
-convolutional neural networks sentence classification model from~\citet*{kim-2014-convolutional}.
+For Level 1 and 2 in the hierarchy tree we trained classifiers based the convolutional
+neural networks sentence classification model from~\citet*{kim-2014-convolutional}.
+
+We implemented the variation of the proposed architecture based on pre-trained embeddings
+but which are fine-tuned during learning. We used the German fastText embeddings trained on
+Common Crawl and Wikipedia~\cite{grave-etal-2018-learning}.
 
 
+
+\begin{comment}
+
+embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
+                                       max_sent_len, trainable=True)
+model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
+model.fit(train_x, train_y, batch_size=16, epochs=10, verbose=True, validation_split=0.33)
+predictions = model.predict([test_x], verbose=1)
+
+
+def get_cnn_pre_trained_embeddings(embedding_layer, max_len, num_classes):
+# connect the input with the embedding layer
+i = Input(shape=(max_len,), dtype='int32', name='main_input')
+x = embedding_layer(i)
+
+# generate several branches in the network, each for a different convolution+pooling operation,
+# and concatenate the result of each branch into a single vector
+branches = get_conv_pool(x, 'static', max_len)
+z = concatenate(branches, axis=-1)
+
+# pass the concatenated vector to the predition layer
+o = Dense(num_classes, activation='sigmoid', name='output')(z)
+
+model = Model(inputs=i, outputs=o)
+model.compile(loss={'output': 'binary_crossentropy'}, optimizer='adam', metrics=['accuracy'])
+
+return model
+
+def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2], feature_maps=300):
+    branches = []
+    for n in n_grams:
+        branch = Conv1D(filters=feature_maps, kernel_size=n, activation=relu,
+                        # kernel_regularizer=regularizers.l2(0.01),
+                        name='Conv_'+suffix+'_'+str(n))(x_input)
+        branch = MaxPooling1D(pool_size=(max_len-n+1),
+                              strides=None, padding='valid',
+                              name='MaxPooling_'+suffix+'_'+str(n))(branch)
+        # branch = GlobalMaxPooling1D(name='MaxPooling_'+suffix+'_'+str(n))(branch)
+        branch = Flatten(name='Flatten_'+suffix+'_'+str(n))(branch)
+        branches.append(branch)
+
+    return branches
+\end{comment}
 
 
 
