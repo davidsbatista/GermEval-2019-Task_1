@@ -152,7 +152,10 @@ Std. deviation $\sigma$ (sentences)        &  2.62              \\
 \section{Hierarchical Classification}\label{hierarchical-clf}
 
 
+\ \newline
 \textbf{TODO:}
+\ \newline
+
 
 \subsection{Local Classifier}
 
@@ -217,10 +220,9 @@ approach is the propagation of errors downwards the hierarchy.
 
 \subsection{Global Classifier: labels co-occurrence}
 
-Another type of strategy is to learn a classifier than can globally learn to output the predictions for each level
-in the hierarchical structure. This is done by leveraging on the labels co-occurrence.
+Another type of strategy is to learn a classifier than can globally learn to output the predictions for each level in the hierarchical structure. This is done by leveraging on the labels co-occurrence.
 
-\citet*{kurata-etal-2016-improved} proposed a novel novel neural network initialization method to treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label co-occurrence These dedicated neurons are initialized to connect to the corresponding co-occurring labels with stronger weights than to others.
+\citet{kurata-etal-2016-improved} proposed a novel novel neural network initialization method to treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label co-occurrence These dedicated neurons are initialized to connect to the corresponding co-occurring labels with stronger weights than to others.
 
 
 
@@ -255,7 +257,6 @@ trained 51 classifiers distributed by different levels as described in
 Table~\ref{parent-per-node-classifiers}.
 
 \begin{table}[!h]
-\small
 \begin{center}
 \begin{tabular}{|l|r|}
 \hline\centering\textbf{Level}  &  \textbf{Nr. Parent Nodes}    \\
@@ -273,9 +274,16 @@ Total Classifiers & 51    \\
 
 \subsection{Global Classifier}
 
+\ \newline
+\textbf{TODO:}
+\ \newline
 
 
 \section{Experiments and Results}\label{experiments}
+
+\ \newline
+\textbf{TODO:}
+\ \newline
 
 \subsection{Results on the Development Set}
 
@@ -301,12 +309,6 @@ tokens, i.e., all punctuation tokens were discarded.
 
 % What else did we tried? % de_stemmer = GermanStemmer() % stop-words ?
 
-% What other models did we tried ?
-% train_han
-% train_bag_of_tricks
-% train_bi_lstm
-% train_cnn_sent_class
-
 We preformed a parameter search, on 3 folds over the training set, varying following parameters:
 
 \begin{itemize}
@@ -318,62 +320,35 @@ We preformed a parameter search, on 3 folds over the training set, varying follo
 
 This classifier is also the one that reports the results for Sub-Task A.
 
+We also experimented with other methods for the root classifier, namely with
+
+% What other models did we tried ?
+% train_han
+% train_bag_of_tricks
+% train_bi_lstm
+% train_cnn_sent_class
+
+
+
+
 For Level 1 and 2 in the hierarchy tree we trained classifiers based the convolutional
-neural networks sentence classification model from~\citet*{kim-2014-convolutional}.
+neural networks sentence classification model from~\citet{kim-2014-convolutional}.
 
 We implemented the variation of the proposed architecture based on pre-trained embeddings
-but which are fine-tuned during learning. We used the German fastText embeddings trained on
-Common Crawl and Wikipedia~\cite{grave-etal-2018-learning}.
+which are fine-tuned during learning, and we used the public available German fastText embeddings trained on Wikipedia, of dimension 300 and obtained using the skip-gram model described in ~\citet{bojanowski-etal-2017-enriching} with default parameters.
 
+We used rectified linear units in the activation functions of the 1D convolutions,
+filter windows (i.e., n-grams) of size 1 and 2 with 300 feature maps each and a
+dropout rate of 0.5.
 
+Training is done with the Adam optimizer~\cite{journals/corr/KingmaB14} over
+shuffled mini-batches of size 16 for 10 epochs and using 33\% of the data for validation.
+The neural network was implemented in Keras 2.2.4 with Tensorflow 1.13.1 backend.
 
-\begin{comment}
+Table~\ref{devset-results} shows the results for both tasks with the system described
+above on the development set.
 
-embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
-                                       max_sent_len, trainable=True)
-model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-model.fit(train_x, train_y, batch_size=16, epochs=10, verbose=True, validation_split=0.33)
-predictions = model.predict([test_x], verbose=1)
-
-
-def get_cnn_pre_trained_embeddings(embedding_layer, max_len, num_classes):
-# connect the input with the embedding layer
-i = Input(shape=(max_len,), dtype='int32', name='main_input')
-x = embedding_layer(i)
-
-# generate several branches in the network, each for a different convolution+pooling operation,
-# and concatenate the result of each branch into a single vector
-branches = get_conv_pool(x, 'static', max_len)
-z = concatenate(branches, axis=-1)
-
-# pass the concatenated vector to the predition layer
-o = Dense(num_classes, activation='sigmoid', name='output')(z)
-
-model = Model(inputs=i, outputs=o)
-model.compile(loss={'output': 'binary_crossentropy'}, optimizer='adam', metrics=['accuracy'])
-
-return model
-
-def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2], feature_maps=300):
-    branches = []
-    for n in n_grams:
-        branch = Conv1D(filters=feature_maps, kernel_size=n, activation=relu,
-                        # kernel_regularizer=regularizers.l2(0.01),
-                        name='Conv_'+suffix+'_'+str(n))(x_input)
-        branch = MaxPooling1D(pool_size=(max_len-n+1),
-                              strides=None, padding='valid',
-                              name='MaxPooling_'+suffix+'_'+str(n))(branch)
-        # branch = GlobalMaxPooling1D(name='MaxPooling_'+suffix+'_'+str(n))(branch)
-        branch = Flatten(name='Flatten_'+suffix+'_'+str(n))(branch)
-        branches.append(branch)
-
-    return branches
-\end{comment}
-
-
-
-
-\begin{table}[!h]
+\begin{table}
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
 \hline\centering\textbf{Task}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
@@ -396,16 +371,18 @@ def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2], feature_maps=300):
 
 \subsection{Official Results}
 
-
-
-
-
-
-
+\ \newline
+\textbf{TODO:}
+\ \newline
 
 \section{Future Work}\label{future}
 
 % other features, release date, author's name
+
+
+\ \newline
+\textbf{TODO:}
+\ \newline
 
 
 
