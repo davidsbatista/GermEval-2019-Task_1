@@ -54,6 +54,9 @@
 
 This paper describes the approach taken for the GermEval'19 task 1 taken by the Comtravo data-science team.
 
+\ \newline
+\textbf{TODO:}
+\ \newline
 
 This paper is organized as follows, in Section~\ref{task} we describe task in detail and give a description of the
 dataset provided. In Section~\ref{hierarchical-clf} we describe some of the proposed approaches in the literature to
@@ -230,7 +233,10 @@ in the hierarchical structure. This is done by leveraging on the labels co-occur
 
 \section{System}\label{system}
 
-In our developed system we tried out two main approaches, a classifier per parent node (parent-node), and second one based exploring the labels co-occurrence.
+In our developed system we tried out two main approaches: a classifier per
+parent node (parent-node), and global classifier by exploring the
+labels co-occurrence.
+
 
 \subsection{Preprocessing}
 % consider only alphanumeric tokens
@@ -240,8 +246,35 @@ In our developed system we tried out two main approaches, a classifier per paren
 
 \subsection{Local Classifier}
 
-In the local classifier approach we trained a classifier per parent node, looking at the data in Table~\ref{} one can see the possible labels per level, in the first level we have 8 possible labels, in the
+With the local classifier approach we employed a parent per parent approach. We
+only need to train classifiers for parents node, so we for the third level we
+don't need to train any classifier since it contains only leaf nodes.
 
+According to Table~\ref{quantitivy-analysis-train} the first level has 8 possible
+labels, which means that the parent node of the first level (i.e, the Root node)
+needs to be trained in a multi-label fashion and predict over 8 classes. Each of
+these 8 classes represents a parent node of some child classes on then
+second level of the hierarchy. So for Level 1 we need to train eight multi-label
+classifiers where the labels are the child`s of each parent in the root level.
+Finally, for Level 2, we train 42 classifiers only, since according to the
+hierarchy-tree some labels in this level are already leaf nodes. In total we
+trained 51 classifiers distributed by different levels as described in
+Table~\ref{parent-per-node-classifiers}.
+
+\begin{table}
+\small
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline\centering\textbf{Level}  &  \textbf{Nr. Parent Nodes}    \\
+\hline
+Root              &  1       \\
+Level 1           &  8       \\
+Level 2           &  42      \\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{parent-per-node-classifiers}Number of parent nodes per level in the hierarchy.}
+\end{table}
 
 
 
@@ -251,29 +284,48 @@ In the local classifier approach we trained a classifier per parent node, lookin
 
 \section{Experiments and Results}\label{experiments}
 
+\subsection{Results on the Development Set}
+
+\subsubsection{Local classifier per node}
+
+
+
+
+\begin{comment}
+Subtask_a detailed scores:
+Recall: '0.8291'
+Precision: '0.8247'
+F1_micro: '0.8269'
+Subset_acc: '0.7268'
+
+Subtask_b detailed scores:
+Recall: '0.5602'
+Precision: '0.6930'
+F1_micro: '0.6196'
+Subset_acc: '0.2165'
+\end{comment}
+
+
+
+
+
 \subsection{Official Results}
 
-\subsection{Results on the Development Set}
+
+
+
+
+
+
 
 \section{Future Work}\label{future}
 
 % other features
 
+
+
+
 \section*{Acknowledgments}
-
-\begin{comment}
-
-The acknowledgments should go immediately before the references.  Do
-not number the acknowledgments section. Do not include this section
-when submitting your paper for review. \\
-
-\noindent \textbf{Preparing References:} \\
-Include your own bib file like this:
-\verb|\bibliographystyle{acl_natbib}|
-\verb|\bibliography{acl2019}|
-
-where \verb|acl2019| corresponds to a acl2019.bib file.
-\end{comment}
 
 \bibliography{konvens2019.bib}
 \bibliographystyle{acl_natbib}
