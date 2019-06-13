@@ -288,11 +288,14 @@ We randomly split the development data into training, 70\% and test sets 30\%.
 
 \subsubsection{Local classifier per node}
 
+For the root node we trained a logistic regression with TF-IDF weighted vectors
+in a one-versus-rest scenario using the scikit-learn~\cite{scikit-learn~\cite{Pedregosa:2011:SML:1953048.2078195}} implementation on version 0.21.1
+
 \begin{comment}
 
 root node:
 - logistic regression with tf-idf weighted vectors
-- trained in a OneVsRestClassifier scenario using scikit-learn~\cite{Pedregosa:2011:SML:1953048.2078195}
+- trained in a OneVsRestClassifier scenario using
 - class_weight='balanced', solver='sag', max_iter=50000
 
 - parameters:
