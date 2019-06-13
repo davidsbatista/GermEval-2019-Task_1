@@ -276,8 +276,6 @@ Level 2           &  42      \\
 \caption{\label{parent-per-node-classifiers}Number of parent nodes per level in the hierarchy.}
 \end{table}
 
-
-
 \subsection{Global Classifier}
 
 
@@ -286,26 +284,47 @@ Level 2           &  42      \\
 
 \subsection{Results on the Development Set}
 
+We randomly split the development data into training, 70\% and test sets 30\%.
+
 \subsubsection{Local classifier per node}
 
-
-
-
 \begin{comment}
-Subtask_a detailed scores:
-Recall: '0.8291'
-Precision: '0.8247'
-F1_micro: '0.8269'
-Subset_acc: '0.7268'
 
-Subtask_b detailed scores:
-Recall: '0.5602'
-Precision: '0.6930'
-F1_micro: '0.6196'
-Subset_acc: '0.2165'
+root node:
+- logistic regression with tf-idf weighted vectors
+- trained in a OneVsRestClassifier scenario using scikit-learn~\cite{Pedregosa:2011:SML:1953048.2078195}
+- class_weight='balanced', solver='sag', max_iter=50000
+
+- parameters:
+  - tokenization? We use the standard tokenization for german from NLTK~\cite{Bird:2009:NLP:1717171} version XX.XX
+  - tfidf: n_gram_range=(1,2)
+  parameters = {
+      "clf__estimator__C": [300],
+      'tfidf__lowercase': (True, False),
+      'tfidf__norm': ('l1', 'l2'),
+  }
+  grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=3)
+  grid_search_tune.fit(train_x, train_y,)
+
+level_1 and level_2
+
+\cite{kim-2014-convolutional}
+
 \end{comment}
 
 
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline\centering\textbf{Task}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\_{1}}\\
+\hline
+Subtask\_a              & 0.8247 & 0.8291 & 0.8269 \\
+Subtask\_b              & 0.6930 & 0.5602 & 0.6196 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{devset-results}Results for the development set.}
+\end{table}
 
 
 
