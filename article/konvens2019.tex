@@ -238,11 +238,6 @@ parent node (parent-node), and global classifier by exploring the
 labels co-occurrence.
 
 
-\subsection{Preprocessing}
-% consider only alphanumeric tokens
-% stop-words ?
-
-
 
 \subsection{Local Classifier}
 
@@ -288,32 +283,35 @@ We randomly split the development data into training, 70\% and test sets 30\%.
 
 \subsubsection{Local classifier per node}
 
+The best results were achieved with the following classifiers configuration.
+
 For the root node we trained a logistic regression with TF-IDF weighted vectors
-in a one-versus-rest scenario using the scikit-learn~\cite{scikit-learn~\cite{Pedregosa:2011:SML:1953048.2078195}} implementation on version 0.21.1
+in a one-versus-rest scenario using the scikit-learn 0.21.1~\cite{Pedregosa:2011:SML:1953048.2078195}.
+
+We pre-processed the data by using the german tokenizer available on NLTLK 3.4.1~\cite{Bird:2009:NLP:1717171} and considered only alphanumeric tokens.
+
+% What else did we tried?
+% de_stemmer = GermanStemmer()
+% stop-words ?
+
+We preformed a parameter search, on 3 folds over the training set, varying following parameters:
+
+- n\_gram\_range = (1,2)
+- lowercase': (True, False),
+- norm': ('l1', 'l2'),
+- regularization parameter C: [300],
+
+% class_weight='balanced', solver='sag', max_iter=50000
 
 \begin{comment}
-
-root node:
-- logistic regression with tf-idf weighted vectors
-- trained in a OneVsRestClassifier scenario using
-- class_weight='balanced', solver='sag', max_iter=50000
-
-- parameters:
-  - tokenization? We use the standard tokenization for german from NLTK~\cite{Bird:2009:NLP:1717171} version XX.XX
-  - tfidf: n_gram_range=(1,2)
-  parameters = {
-      "clf__estimator__C": [300],
-      'tfidf__lowercase': (True, False),
-      'tfidf__norm': ('l1', 'l2'),
-  }
-  grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=3)
-  grid_search_tune.fit(train_x, train_y,)
-
 level_1 and level_2
-
 \cite{kim-2014-convolutional}
-
 \end{comment}
+
+
+
+
+
 
 
 \begin{table}[!h]

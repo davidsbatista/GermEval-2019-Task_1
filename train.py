@@ -65,7 +65,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     for x in new_data_x:
         doc_tokens = []
-        for s in sent_tokenize(x):
+        for s in sent_tokenize(x, language='german'):
             tokens = wordpunct_tokenize(s)
             words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
             doc_tokens.extend(words)
