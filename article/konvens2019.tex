@@ -289,6 +289,7 @@ For the root node we trained a logistic regression with TF-IDF weighted vectors
 in a one-versus-rest scenario using the scikit-learn 0.21.1~\cite{Pedregosa:2011:SML:1953048.2078195}.
 
 % class_weight='balanced', solver='sag', max_iter=50000
+% The "balanced" mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data as ``n_samples / (n_classes * np.bincount(y))``.
 
 We pre-processed the data by first tokenizing the blurbs into sentences, and then
 from sentences into tokens. We consider the title of the book a sentence. We used
@@ -309,7 +310,7 @@ We preformed a parameter search, on 3 folds over the training set, varying follo
 
 This classifier is also the one that reports the results for Sub-Task A.
 
-For Level 1 and Level 2 in the hierarchy tree we trained classifiers based the
+For Level 1 and 2 in the hierarchy tree we trained classifiers based the
 convolutional neural networks sentence classification model from~\citet*{kim-2014-convolutional}.
 
 
