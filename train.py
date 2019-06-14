@@ -92,8 +92,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         'tfidf__lowercase': (True, False),
         'tfidf__norm': ['l1', 'l2'],
         'tfidf__max_df': [0.8, 0.9],
-        'tfidf__min_df': [0.1, 0.2],
-        "clf__estimator__C": [0.01, 0.1, 1, 10, 50, 100, 300],
+        "clf__estimator__C": [1, 10, 50, 100, 300],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
     grid_search_tune.fit(train_x, train_y,)
