@@ -81,7 +81,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         return doc
 
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=None,
+        ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(1, 2),
                                   analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun,)),
         ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
                                                        solver='sag',
@@ -89,7 +89,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     ])
 
     parameters = {
-        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
         'tfidf__lowercase': (True, False),
         'tfidf__norm': ['l1', 'l2'],
         'tfidf__max_df': [0.8, 0.9],
