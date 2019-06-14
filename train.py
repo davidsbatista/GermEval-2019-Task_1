@@ -87,7 +87,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     ])
 
     parameters = {
-        'tfidf__stop_words': [None, stopwords(words='german')],
+        'tfidf__stop_words': [None, stopwords.words('german')],
         'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
         'tfidf__lowercase': (True, False),
         'tfidf__norm': ['l1', 'l2'],
