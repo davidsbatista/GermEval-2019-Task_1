@@ -85,7 +85,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
                                   analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun,)),
         ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
                                                        solver='sag',
-                                                       max_iter=50000), n_jobs=3))
+                                                       max_iter=50000), n_jobs=5))
     ])
 
     parameters = {
