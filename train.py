@@ -81,14 +81,14 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         return doc
 
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun,)),
+        ('tfidf', TfidfVectorizer(stop_words=None,
+                                  analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun,)),
         ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
                                                        solver='sag',
                                                        max_iter=50000), n_jobs=3))
     ])
 
     parameters = {
-        'tfidf__stop_words': None,
         'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
         'tfidf__lowercase': (True, False),
         'tfidf__norm': ['l1', 'l2'],
