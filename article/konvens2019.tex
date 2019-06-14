@@ -16,9 +16,7 @@
 \usepackage{times}
 \usepackage{latexsym}
 \usepackage{verbatim}
-
 \usepackage{url}
-
 \usepackage{fixltx2e}
 
 \aclfinalcopy % Uncomment this line for the final submission
@@ -222,7 +220,7 @@ approach is the propagation of errors downwards the hierarchy.
 
 Another type of strategy is to learn a classifier than can globally learn to output the predictions for each level in the hierarchical structure. This is done by leveraging on the labels co-occurrence.
 
-\citet{kurata-etal-2016-improved} proposed a novel novel neural network initialization method to treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label co-occurrence These dedicated neurons are initialized to connect to the corresponding co-occurring labels with stronger weights than to others.
+\citet{kurata-etal-2016-improved} proposed a novel novel neural network initialisation method to treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label co-occurrence These dedicated neurons are initialised to connect to the corresponding co-occurring labels with stronger weights than to others.
 
 
 
@@ -301,9 +299,9 @@ in a one-versus-rest scenario using the scikit-learn 0.21.1~\cite{Pedregosa:2011
 % class_weight='balanced', solver='sag', max_iter=50000
 % The "balanced" mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data as ``n_samples / (n_classes * np.bincount(y))``.
 
-We pre-processed the data by first tokenizing the blurbs into sentences, and then
+We pre-processed the data by first tokenising the blurbs into sentences, and then
 from sentences into tokens. We consider the title of the book a sentence. We used
-the german sentence tokenizer, and the \textit {word\_punkt\_tokenizer} both available
+the german sentence tokeniser, and the \textit {word\_punkt\_tokenizer} both available
 on NLTLK 3.4.1~\cite{Bird:2009:NLP:1717171}, also, we only considered alphanumeric
 tokens, i.e., all punctuation tokens were discarded.
 

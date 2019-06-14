@@ -53,9 +53,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     print('Total of {} classes'.format(len(ml_binarizer.classes_)))
 
     data_y = y_labels
-
-    # TODO: use author as feature, what about unseen authors ?
-
     new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
 
     de_stemmer = GermanStemmer()
@@ -84,23 +81,19 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         return doc
 
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=None,
-                                  ngram_range=(1, 2), max_df=0.75,
-                                  analyzer='word',
-                                  tokenizer=dummy_fun,
-                                  preprocessor=dummy_fun,
-                                  )),
+        ('tfidf', TfidfVectorizer(analyzer='word',tokenizer=dummy_fun,preprocessor=dummy_fun,)),
         ('clf', OneVsRestClassifier(
-            LogisticRegression(class_weight='balanced', solver='sag', max_iter=50000),
-            n_jobs=3))
+            LogisticRegression(class_weight='balanced', solver='sag', max_iter=50000), n_jobs=3))
     ])
 
-    # stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)
-
     parameters = {
-        "clf__estimator__C": [300],
+        'tfidf__stop_words': [None, stopwords(words='german')],
+        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
         'tfidf__lowercase': (True, False),
-        'tfidf__norm': ('l1', 'l2'),
+        'tfidf__norm': ['l1', 'l2'],
+        'tfidf__max_df': [0.8, 0.9],
+        'tfidf__min_df': [0.1, 0.2],
+        "clf__estimator__C": [0.01, 0.1, 1, 10, 50, 100, 300],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=3)
     grid_search_tune.fit(train_x, train_y,)
@@ -423,7 +416,6 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     train_data_x = vectors_padded
     data_y = y_labels
 
-    # ToDo: do a proper cv validation
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
@@ -457,7 +449,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     model.fit(train_x, train_y, batch_size=16, epochs=10, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
-    # ToDo: there must be a more efficient way to do this, BucketEstimator
+    # ToDo: there must be a more efficient way to do this
     binary_predictions = []
     for pred in predictions:
         binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
@@ -509,7 +501,6 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
     print('Total of {} classes'.format(len(ml_binarizer.classes_)))
     n_classes = len(ml_binarizer.classes_)
 
-    # ToDo: do a proper cv validation
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
