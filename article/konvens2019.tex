@@ -239,9 +239,11 @@ labels co-occurrence.
 
 \subsection{Local Classifier}
 
-With the local classifier approach we employed a parent per parent approach. We
-only need to train classifiers for parents node, so we for the third level we
-don't need to train any classifier since it contains only leaf nodes.
+We employed a parent per parent approach, which has the advantage of not being
+prone to hierarchy inconsistency errors. We need to train classifiers for
+parents node, so we for the Level 3 we don't need to train any classifier
+since it contains only leaf nodes, plus some nodes on Level 2 are already leaf
+nodes.
 
 According to Table~\ref{quantitivy-analysis-train} the first level has 8 possible
 labels, which means that the parent node of the first level (i.e, the Root node)
@@ -263,7 +265,7 @@ Root              &  1       \\
 Level 1           &  8       \\
 Level 2           &  42      \\
 \hline
-Total Classifiers & 51    \\
+Total Classifiers & 51       \\
 \hline
 \end{tabular}
 \end{center}
