@@ -330,6 +330,10 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
     return model, ml_binarizer, max_sent_length, token2idx
 
 
+def dummy_fun(doc):
+    return doc
+
+
 def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     """
 
@@ -369,9 +373,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
                                                         random_state=42,
                                                         test_size=0.30)
-
-    def dummy_fun(doc):
-        return doc
 
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(1, 2),
