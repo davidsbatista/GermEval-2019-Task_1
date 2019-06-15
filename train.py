@@ -375,7 +375,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(1, 2),
-                                  analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun,)),
+                                  analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun)),
         ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
                                                        solver='sag',
                                                        max_iter=5), n_jobs=3))
@@ -433,6 +433,9 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
     best_pipeline.fit(new_data_x, data_y)
+
+    with open('test.pkl', 'wb') as f_out:
+        pickle.dump(best_pipeline, f_out)
 
     return best_pipeline, ml_binarizer
 

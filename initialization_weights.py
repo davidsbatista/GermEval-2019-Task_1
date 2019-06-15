@@ -136,13 +136,15 @@ def build_vectors(train_data_x, train_data_y, labels2idx):
 
 def main():
     # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt')
+    train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt')
 
     # create matrix
     weight_matrix, labels2idx = create_weight_matrix(n_samples=14548)
 
     # fill-in weight matrix
     weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
+
+    print(weight_matrix)
 
     idx2labels = {v: k for k, v in labels2idx.items()}
 
