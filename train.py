@@ -89,10 +89,12 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     ])
 
     parameters = {
+        # 'tfidf__lowercase': (True, False),
+        # 'tfidf__norm': ['l1', 'l2'],
+        # 'tfidf__max_df': [0.8, 0.9],
+        # "clf__estimator__C": [1, 10, 50, 100, 300],
         'tfidf__lowercase': (True, False),
-        'tfidf__norm': ['l1', 'l2'],
-        'tfidf__max_df': [0.8, 0.9],
-        "clf__estimator__C": [1, 10, 50, 100, 300],
+        "clf__estimator__C": [100, 300],
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
     grid_search_tune.fit(train_x, train_y,)
@@ -445,7 +447,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=16, epochs=10, verbose=True, validation_split=0.33)
+    model.fit(train_x, train_y, batch_size=16, epochs=1, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
     # ToDo: there must be a more efficient way to do this
@@ -871,6 +873,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
                         classification[data['isbn']][2].append(str(label))
                     print("\n=====")
 
+        # generate answer file
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
             for x in dev_data_x:
