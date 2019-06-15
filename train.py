@@ -37,113 +37,6 @@ from models.utils import vectorize_dev_data, vectorizer, vectorize_one_sample
 from models.bag_of_tricks import BagOfTricks
 
 
-def train_logit_tf_idf(train_data_x, train_data_y, level_label):
-    """
-
-    - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
-
-    :param train_data_x:
-    :param train_data_y:
-    :return: tuned classifier
-
-    """
-    # encode y labels into one-hot vectors
-    ml_binarizer = MultiLabelBinarizer()
-    y_labels = ml_binarizer.fit_transform(train_data_y)
-    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-
-    data_y = y_labels
-    new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
-
-    de_stemmer = GermanStemmer()
-    all_doc_tokens = []
-
-    # TODO: remove stop-words?
-
-    for x in new_data_x:
-        doc_tokens = []
-        for s in sent_tokenize(x, language='german'):
-            tokens = wordpunct_tokenize(s)
-            words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
-            doc_tokens.extend(words)
-        # doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
-        # all_doc_tokens.append(doc_tokens_stemmed)
-        all_doc_tokens.append(doc_tokens)
-
-    new_data_x = all_doc_tokens
-
-    # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
-                                                        random_state=42,
-                                                        test_size=0.30)
-
-    def dummy_fun(doc):
-        return doc
-
-    pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(1, 2),
-                                  analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun,)),
-        ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
-                                                       solver='sag',
-                                                       max_iter=50000), n_jobs=3))
-    ])
-
-    parameters = {
-        # 'tfidf__lowercase': (True, False),
-        # 'tfidf__norm': ['l1', 'l2'],
-        # 'tfidf__max_df': [0.8, 0.9],
-        # "clf__estimator__C": [1, 10, 50, 100, 300],
-        'tfidf__lowercase': (True, False),
-        "clf__estimator__C": [100, 300],
-    }
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
-    grid_search_tune.fit(train_x, train_y,)
-
-    # measuring performance on test set
-    print("Applying best classifier on test data:")
-    best_clf = grid_search_tune.best_estimator_
-    print()
-    print("Best Classifier parameters:")
-    print(best_clf)
-    print()
-    predictions_prob = best_clf.predict_proba(test_x)
-
-    predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
-
-    pred_labels = ml_binarizer.inverse_transform(predictions_bins)
-    true_labels = ml_binarizer.inverse_transform(test_y)
-
-    top_missed = defaultdict(int)
-    missed = 0
-    for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_prob):
-        if len(pred) == 0:
-            missed += 1
-            top_missed[true] += 1
-
-    print("Missing labels for samples")
-    for k, v in top_missed.items():
-        print(k, v)
-    print("total missed: ", missed)
-
-    report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
-    print(report)
-    with open('classification_report.txt', 'at+') as f_out:
-        f_out.write(level_label+'\n')
-        f_out.write("="*len(level_label)+'\n')
-        f_out.write(report)
-        f_out.write('\n')
-
-    # train a classifier on all data using the parameters that yielded best result
-    print("Training classifier with best parameters on all data")
-    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
-    clf = grid_search_tune.best_estimator_.steps[1][1]
-
-    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
-    best_pipeline.fit(new_data_x, data_y)
-
-    return best_pipeline, ml_binarizer
-
-
 def train_bi_lstm(train_data_x, train_data_y):
     """
     Trains a biLSTM classifier, message is represented by the concatenation of the two last
@@ -382,6 +275,168 @@ def train_han(train_data_x, train_data_y):
     return han_model, ml_binarizer, max_sent_len, token2idx
 
 
+def train_bag_of_tricks(train_data_x, train_data_y, level_label):
+
+    bot = BagOfTricks()
+    n_top_tokens = 80000
+
+    # build tokens maping and compute freq
+    token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lower=True)
+
+    # select only top-k tokens
+    print(len(token2idx))
+    token2idx = {k: i for i, (k, v) in enumerate(token_freq.most_common(n=n_top_tokens))}
+    print(len(token2idx))
+    print(max_sent_length)
+
+    bot.token2idx = token2idx
+    bot.max_len = max_sent_length
+
+    # map data to vectors of n-grams
+    train_data_x = bot.map_data(train_data_x, train_data_y)
+
+    # y_data: encode into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    data_y = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+    n_classes = len(ml_binarizer.classes_)
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+                                                        random_state=42,
+                                                        test_size=0.30)
+    print(train_x.shape)
+    print(train_y.shape)
+
+    # build a neural network and train a model
+    model = bot.build_neural_network(n_classes)
+    model.fit(train_x, train_y, batch_size=32, epochs=100, verbose=1)
+
+    predictions = model.predict([test_x], verbose=1)
+
+    binary_predictions = []
+    for pred in predictions:
+        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+    report = classification_report(test_y, np.array(binary_predictions),
+                                   target_names=ml_binarizer.classes_)
+    print(report)
+
+    with open('classification_report.txt', 'at+') as f_out:
+        f_out.write(level_label + '\n')
+        f_out.write("=" * len(level_label) + '\n')
+        f_out.write(report)
+        f_out.write('\n')
+
+    return model, ml_binarizer, max_sent_length, token2idx
+
+
+def train_logit_tf_idf(train_data_x, train_data_y, level_label):
+    """
+
+    - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
+
+    :param train_data_x:
+    :param train_data_y:
+    :return: tuned classifier
+
+    """
+    # encode y labels into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+
+    data_y = y_labels
+    new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
+
+    de_stemmer = GermanStemmer()
+    all_doc_tokens = []
+
+    # TODO: remove stop-words?
+
+    for x in new_data_x:
+        doc_tokens = []
+        for s in sent_tokenize(x, language='german'):
+            tokens = wordpunct_tokenize(s)
+            words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
+            doc_tokens.extend(words)
+        # doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
+        # all_doc_tokens.append(doc_tokens_stemmed)
+        all_doc_tokens.append(doc_tokens)
+
+    new_data_x = all_doc_tokens
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
+                                                        random_state=42,
+                                                        test_size=0.30)
+
+    def dummy_fun(doc):
+        return doc
+
+    pipeline = Pipeline([
+        ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(1, 2),
+                                  analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun,)),
+        ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
+                                                       solver='sag',
+                                                       max_iter=50000), n_jobs=3))
+    ])
+
+    parameters = {
+        # 'tfidf__lowercase': (True, False),
+        # 'tfidf__norm': ['l1', 'l2'],
+        # 'tfidf__max_df': [0.8, 0.9],
+        # "clf__estimator__C": [1, 10, 50, 100, 300],
+        'tfidf__lowercase': (True, False),
+        "clf__estimator__C": [100, 300],
+    }
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
+    grid_search_tune.fit(train_x, train_y,)
+
+    # measuring performance on test set
+    print("Applying best classifier on test data:")
+    best_clf = grid_search_tune.best_estimator_
+    print()
+    print("Best Classifier parameters:")
+    print(best_clf)
+    print()
+    predictions_prob = best_clf.predict_proba(test_x)
+
+    predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
+
+    pred_labels = ml_binarizer.inverse_transform(predictions_bins)
+    true_labels = ml_binarizer.inverse_transform(test_y)
+
+    top_missed = defaultdict(int)
+    missed = 0
+    for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_prob):
+        if len(pred) == 0:
+            missed += 1
+            top_missed[true] += 1
+
+    print("Missing labels for samples")
+    for k, v in top_missed.items():
+        print(k, v)
+    print("total missed: ", missed)
+
+    report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
+    print(report)
+    with open('classification_report.txt', 'at+') as f_out:
+        f_out.write(level_label+'\n')
+        f_out.write("="*len(level_label)+'\n')
+        f_out.write(report)
+        f_out.write('\n')
+
+    # train a classifier on all data using the parameters that yielded best result
+    print("Training classifier with best parameters on all data")
+    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
+    clf = grid_search_tune.best_estimator_.steps[1][1]
+
+    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
+    best_pipeline.fit(new_data_x, data_y)
+
+    return best_pipeline, ml_binarizer
+
+
 def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     # ToDo: grid-search Keras:
     """
@@ -476,62 +531,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_bag_of_tricks(train_data_x, train_data_y, level_label):
-
-    bot = BagOfTricks()
-    n_top_tokens = 80000
-
-    # build tokens maping and compute freq
-    token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lower=True)
-
-    # select only top-k tokens
-    print(len(token2idx))
-    token2idx = {k: i for i, (k, v) in enumerate(token_freq.most_common(n=n_top_tokens))}
-    print(len(token2idx))
-    print(max_sent_length)
-
-    bot.token2idx = token2idx
-    bot.max_len = max_sent_length
-
-    # map data to vectors of n-grams
-    train_data_x = bot.map_data(train_data_x, train_data_y)
-
-    # y_data: encode into one-hot vectors
-    ml_binarizer = MultiLabelBinarizer()
-    data_y = ml_binarizer.fit_transform(train_data_y)
-    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
-    n_classes = len(ml_binarizer.classes_)
-
-    # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
-                                                        random_state=42,
-                                                        test_size=0.30)
-    print(train_x.shape)
-    print(train_y.shape)
-
-    # build a neural network and train a model
-    model = bot.build_neural_network(n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=100, verbose=1)
-
-    predictions = model.predict([test_x], verbose=1)
-
-    binary_predictions = []
-    for pred in predictions:
-        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
-    report = classification_report(test_y, np.array(binary_predictions),
-                                   target_names=ml_binarizer.classes_)
-    print(report)
-
-    with open('classification_report.txt', 'at+') as f_out:
-        f_out.write(level_label + '\n')
-        f_out.write("=" * len(level_label) + '\n')
-        f_out.write(report)
-        f_out.write('\n')
-
-    return model, ml_binarizer, max_sent_length, token2idx
-
-
-def train_strategy_one(train_data_x, train_data_y, type_clfs):
+def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
 
     # aggregate data for 3-level classifiers
     data_y_level_0 = []
@@ -590,8 +590,6 @@ def train_strategy_one(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['binarizer'] = ml_binarizer
         classifiers['top_level']['token2idx'] = token2idx
         classifiers['top_level']['max_sent_len'] = max_sent_len
-
-    exit(-1)
 
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
@@ -748,7 +746,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
                 'level_1': 'cnn',
                 'level_2': 'cnn'}
 
-        classifiers = train_strategy_one(train_data_x, train_data_y, clfs)
+        classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
         print(f"Saving trained classifiers to {out_file} ...")
         with open(out_file, 'wb') as f_out:
