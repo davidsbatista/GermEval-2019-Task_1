@@ -524,7 +524,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=20, verbose=True)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=1, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
@@ -894,11 +894,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one'):
 def main():
     # ToDo: Naive Bayes para low samples?
     # ToDo: ver bem os tokens, lower case? oov?
-    # ToDo: fazer grid-search e cross validation k=5 para classificadores com mais 1000
-    # ToDo: fazer grid-search e cross validation k=3 para classificadores até 300
-
     # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
-    # ToDo: confusion-matrix ?
 
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
