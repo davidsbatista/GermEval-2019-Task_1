@@ -514,8 +514,6 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
 
     print(report)
 
-    exit(-1)
-
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(level_label + '\n')
         f_out.write("=" * len(level_label) + '\n')
