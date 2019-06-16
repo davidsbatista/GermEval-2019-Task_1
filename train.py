@@ -291,7 +291,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
                                                         test_size=0.30)
 
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(1, 2),
+        ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(1, 2), lowercase=False,
                                   analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun)),
         ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
                                                        solver='sag',
