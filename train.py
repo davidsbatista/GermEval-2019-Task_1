@@ -502,6 +502,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         except KeyError:
             not_found += 1
 
+    """
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
@@ -522,7 +523,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         f_out.write("=" * len(level_label) + '\n')
         f_out.write(report)
         f_out.write('\n')
-
+    """
     # train on all data without validation split
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
@@ -906,10 +907,10 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
 
     # train subtask_b
-    # subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
+    subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
 
 
 if __name__ == '__main__':
