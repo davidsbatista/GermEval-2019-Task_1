@@ -268,7 +268,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     data_y = y_labels
     new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
 
-    de_stemmer = GermanStemmer()
+    # de_stemmer = GermanStemmer()
     all_doc_tokens = []
 
     # TODO: remove stop-words?
@@ -284,6 +284,8 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         all_doc_tokens.append(doc_tokens)
 
     new_data_x = all_doc_tokens
+
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
 
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
