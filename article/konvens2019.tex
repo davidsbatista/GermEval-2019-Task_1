@@ -181,7 +181,9 @@ is naturally multi-label since it is possible to predict multiple labels per cla
 
 This approach however is prone to class-membership inconsistency, consider having again in the first level
 classes 1, 2 and 3, and in the second level, for instance, classes 1.1, 1.2, since the classifiers for nodes
-1 and 1.1 are independently trained, one can classify a sample as belonging to classes 1.2 and 1.1 but not to class 1. This approach should also be complemented by a post-processing method that tries to correct the prediction inconsistency.
+1 and 1.1 are independently trained, one can classify a sample as belonging to classes 1.2 and 1.1
+but not to class 1. This approach should also be complemented by a post-processing method that tries
+to correct the prediction inconsistency.
 
 
 \subsubsection{A classifier per parent node} % Local Classifier Per Parent Node Approach
@@ -218,9 +220,13 @@ approach is the propagation of errors downwards the hierarchy.
 
 \subsection{Global Classifier: labels co-occurrence}
 
-Another type of strategy is to learn a classifier than can globally learn to output the predictions for each level in the hierarchical structure. This is done by leveraging on the labels co-occurrence.
+Another type of strategy is to learn a classifier than can globally learn to output the predictions
+for each level in the hierarchical structure. This is done by leveraging on the labels co-occurrence.
 
-\citet{kurata-etal-2016-improved} proposed a novel novel neural network initialisation method to treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label co-occurrence These dedicated neurons are initialised to connect to the corresponding co-occurring labels with stronger weights than to others.
+\citet{kurata-etal-2016-improved} proposed a novel novel neural network initialisation method to
+treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label
+co-occurrence These dedicated neurons are initialised to connect to the corresponding co-occurring
+labels with stronger weights than to others.
 
 
 
