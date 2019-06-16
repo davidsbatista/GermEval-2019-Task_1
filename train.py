@@ -290,28 +290,18 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
                                                         random_state=42,
                                                         test_size=0.30)
 
+    stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=None,
-                                  ngram_range=(1, 2), max_df=0.75,
-                                  analyzer='word',
-                                  tokenizer=dummy_fun,
-                                  preprocessor=dummy_fun,
-                                  )),
+        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
         ('clf', OneVsRestClassifier(
-            LogisticRegression(class_weight='balanced', solver='sag', max_iter=50000),
+            LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
             n_jobs=3))
     ])
-
-    # stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)
-
     parameters = {
-        "clf__estimator__C": [300],
-        'tfidf__lowercase': (True, False),
-        'tfidf__norm': ('l1', 'l2'),
+        "clf__estimator__C": [300]
     }
-
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
-    grid_search_tune.fit(train_x, train_y,)
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
+    grid_search_tune.fit(train_x, train_y)
 
     # measuring performance on test set
     print("Applying best classifier on test data:")
