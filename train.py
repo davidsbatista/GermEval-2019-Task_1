@@ -379,7 +379,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
                                   analyzer='word', tokenizer=dummy_fun, preprocessor=dummy_fun)),
         ('clf', OneVsRestClassifier(LogisticRegression(class_weight='balanced',
                                                        solver='sag',
-                                                       max_iter=5), n_jobs=3))
+                                                       max_iter=5000), n_jobs=3))
     ])
 
     parameters = {
@@ -506,7 +506,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=16, epochs=1, verbose=True, validation_split=0.33)
+    model.fit(train_x, train_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
     predictions = model.predict([test_x], verbose=1)
 
     # ToDo: there must be a more efficient way to do this
@@ -528,7 +528,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=1, verbose=True)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=20, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
