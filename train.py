@@ -617,6 +617,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         print("samples: ", len(samples_y))
         print()
 
+        # total number of samples?  samples per classe?
         # ToDo: Naive Bayes para low samples?
         # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
 
@@ -908,10 +909,10 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
 
     # train subtask_b
-    subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
+    # subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
 
 
 if __name__ == '__main__':
