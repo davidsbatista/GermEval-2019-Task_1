@@ -254,6 +254,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
 
+    :param level_label:
     :param train_data_x:
     :param train_data_y:
     :return: tuned classifier
@@ -694,7 +695,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
     if clf == 'logit':
         # TF-IDF w/ logistic regression
-        model, ml_binarizer = train_logit_tf_idf(train_data_x, train_data_y)
+        model, ml_binarizer = train_logit_tf_idf(train_data_x, train_data_y, 'top_level')
 
         # apply on dev data
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
