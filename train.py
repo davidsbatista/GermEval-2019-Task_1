@@ -282,9 +282,9 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         # doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
         # all_doc_tokens.append(doc_tokens_stemmed)
         all_doc_tokens.append(doc_tokens)
-
     new_data_x = all_doc_tokens
 
+    # simple tokenization using TfidfVectorizer regex works better than NLTK german specific
     new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
 
     # split into train and hold out set
@@ -528,7 +528,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=20, verbose=True)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
