@@ -22,6 +22,7 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
 from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.multiclass import OneVsRestClassifier
+from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
@@ -301,6 +302,109 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     ])
     parameters = {
         "clf__estimator__C": [300]
+    }
+    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
+    grid_search_tune.fit(train_x, train_y)
+
+    # measuring performance on test set
+    print("Applying best classifier on test data:")
+    best_clf = grid_search_tune.best_estimator_
+    print()
+    print("Best Classifier parameters:")
+    print(best_clf)
+    print()
+    predictions_prob = best_clf.predict_proba(test_x)
+
+    predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
+
+    pred_labels = ml_binarizer.inverse_transform(predictions_bins)
+    true_labels = ml_binarizer.inverse_transform(test_y)
+
+    top_missed = defaultdict(int)
+    missed = 0
+    for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_prob):
+        if len(pred) == 0:
+            missed += 1
+            top_missed[true] += 1
+
+    print("Missing labels for samples")
+    for k, v in top_missed.items():
+        print(k, v)
+    print("total missed: ", missed)
+
+    report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
+    print(report)
+    with open('classification_report.txt', 'at+') as f_out:
+        f_out.write(level_label+'\n')
+        f_out.write("="*len(level_label)+'\n')
+        f_out.write(report)
+        f_out.write('\n')
+
+    # train a classifier on all data using the parameters that yielded best result
+    print("Training classifier with best parameters on all data")
+    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
+    clf = grid_search_tune.best_estimator_.steps[1][1]
+
+    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
+    best_pipeline.fit(new_data_x, data_y)
+
+    with open('test.pkl', 'wb') as f_out:
+        pickle.dump(best_pipeline, f_out)
+
+    return best_pipeline, ml_binarizer
+
+
+def train_naive_bayes(train_data_x, train_data_y, level_label):
+    """
+
+    - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
+
+    :param level_label:
+    :param train_data_x:
+    :param train_data_y:
+    :return: tuned classifier
+
+    """
+    # encode y labels into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+
+    data_y = y_labels
+    new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
+
+    # de_stemmer = GermanStemmer()
+    all_doc_tokens = []
+
+    # TODO: remove stop-words?
+
+    for x in new_data_x:
+        doc_tokens = []
+        for s in sent_tokenize(x, language='german'):
+            tokens = wordpunct_tokenize(s)
+            words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
+            doc_tokens.extend(words)
+        # doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
+        # all_doc_tokens.append(doc_tokens_stemmed)
+        all_doc_tokens.append(doc_tokens)
+    new_data_x = all_doc_tokens
+
+    # simple tokenization using TfidfVectorizer regex works better than NLTK german specific
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
+                                                        test_size=0.30)
+
+    stop_words = set(stopwords.words('german'))
+    pipeline = Pipeline([
+        ('tfidf', TfidfVectorizer(stop_words=stop_words, ngram_range=(1, 2), max_df=0.75)),
+        ('clf', OneVsRestClassifier(MultinomialNB(fit_prior=True, class_prior=None))),
+    ])
+    parameters = {
+        'tfidf__max_df': (0.25, 0.5, 0.75),
+        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
+        'clf__estimator__alpha': (1e-2, 1e-3)
     }
     grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=3, verbose=2)
     grid_search_tune.fit(train_x, train_y)
