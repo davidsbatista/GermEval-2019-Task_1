@@ -62,7 +62,7 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     dropout_p = 0.1
     num_of_classes = weight_matrix.shape[1]
     optimizer = "adam"
-    loss = "categorical_crossentropy"
+    loss = "binary_crossentropy"
     threshold = 1e-6
 
     print("number of units in hidden layer : ", weight_matrix.shape[0])
@@ -89,11 +89,11 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     # Fully connected layers
     for fl in fully_connected_layers:
         # x = Dense(fl, activation='selu', kernel_initializer='lecun_normal')(x)
-        x = Dense(fl, activation='selu', kernel_initializer='random_uniform')(x)
+        x = Dense(fl, activation='tan', kernel_initializer='random_uniform')(x)
         x = AlphaDropout(dropout_p)(x)
 
     # Output layer
-    predictions = Dense(num_of_classes, activation='softmax')(x)
+    predictions = Dense(num_of_classes, activation='sigmoid')(x)
 
     # Build and compile model
     model = Model(inputs=inputs, outputs=predictions)
