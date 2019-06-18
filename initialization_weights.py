@@ -4,13 +4,17 @@
 import numpy as np
 from keras import Input, Model
 from keras.layers import Embedding, Convolution1D, GlobalMaxPooling1D, Concatenate, Dense, \
-    AlphaDropout
+    AlphaDropout, concatenate, Dropout
+from keras import backend as K
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize
 
 from data_analysis import extract_hierarchy
+from models.convnets_utils import get_embeddings_layer, get_conv_pool
 from models.utils import vectorizer, build_token_index
 from utils import load_data
+
+import tensorflow as tf
 
 
 def create_weight_matrix(n_samples):
@@ -40,7 +44,6 @@ def create_weight_matrix(n_samples):
 
 
 def init_weight_matrix(matrix, train_data_y, labels2idx):
-
     for i, y_sample in enumerate(train_data_y):
         for labels in y_sample:
             for level, label in labels.items():
@@ -84,7 +87,8 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
     # Fully connected layers
     for fl in fully_connected_layers:
-        x = Dense(fl, activation='selu', kernel_initializer='lecun_normal')(x)
+        # x = Dense(fl, activation='selu', kernel_initializer='lecun_normal')(x)
+        x = Dense(fl, activation='selu', kernel_initializer='random_uniform')(x)
         x = AlphaDropout(dropout_p)(x)
 
     # Output layer
@@ -134,32 +138,31 @@ def build_vectors(train_data_x, train_data_y, labels2idx):
     return vectors_padded, np.array(train_y), token2idx
 
 
+def my_init(shape, dtype=None):
+    return K.random_normal(shape, dtype=dtype)
+
+
+def init_f(shape, dtype=None):
+    ker = np.zeros(shape, dtype=dtype)
+    ker[tuple(map(lambda x: int(np.floor(x/2)), ker.shape))]=1
+    return tf.convert_to_tensor(ker)
+
+
 def main():
     # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt')
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
     # create matrix
-    weight_matrix, labels2idx = create_weight_matrix(n_samples=14548)
+    weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
 
     # fill-in weight matrix
     weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
 
-    print(weight_matrix)
-
-    idx2labels = {v: k for k, v in labels2idx.items()}
-
-    # for row, y_sample in zip(weight_matrix, train_data_y):
-    #     non_zeros = np.nonzero(row)
-    #     for x in non_zeros[0]:
-    #         print(idx2labels[x], x)
-    #     print(y_sample)
-    #     print("----------")
-
     x_train, y_train, token2idx = build_vectors(train_data_x, train_data_y, labels2idx)
-
     model = build_neural_network(weight_matrix, max_input=x_train.shape[1], vocab_size=len(token2idx))
 
     model.summary()
+
     print(x_train.shape)
     print(y_train.shape)
 

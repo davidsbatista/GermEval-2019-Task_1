@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pickle
+import re
 from collections import defaultdict
 from copy import deepcopy
 
@@ -252,7 +253,6 @@ def dummy_fun(doc):
 
 def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     """
-
     - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
 
     :param level_label:
@@ -269,28 +269,23 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     data_y = y_labels
     new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
 
+    # NOTE: simple tokenisation using TfidfVectorizer regex give better results
+    #       than NLTK german specific
     # de_stemmer = GermanStemmer()
-    all_doc_tokens = []
-
-    # TODO: remove stop-words?
-
-    for x in new_data_x:
-        doc_tokens = []
-        for s in sent_tokenize(x, language='german'):
-            tokens = wordpunct_tokenize(s)
-            words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
-            doc_tokens.extend(words)
-        # doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
-        # all_doc_tokens.append(doc_tokens_stemmed)
-        all_doc_tokens.append(doc_tokens)
-    new_data_x = all_doc_tokens
-
-    # simple tokenization using TfidfVectorizer regex works better than NLTK german specific
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in train_data_x]
+    # all_doc_tokens = []
+    # for x in new_data_x:
+    #     doc_tokens = []
+    #     for s in sent_tokenize(x, language='german'):
+    #         tokens = wordpunct_tokenize(s)
+    #         words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
+    #         doc_tokens.extend(words)
+    #     doc_tokens_stemmed = [de_stemmer.stem(x) for x in doc_tokens]
+    #     all_doc_tokens.append(doc_tokens_stemmed)
+    #     all_doc_tokens.append(doc_tokens)
+    # new_data_x = all_doc_tokens
 
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
-                                                        random_state=42,
+    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
                                                         test_size=0.30)
 
     stop_words = set(stopwords.words('german'))
@@ -355,16 +350,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
 
 def train_naive_bayes(train_data_x, train_data_y, level_label):
-    """
-
-    - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
-
-    :param level_label:
-    :param train_data_x:
-    :param train_data_y:
-    :return: tuned classifier
-
-    """
     # encode y labels into one-hot vectors
     ml_binarizer = MultiLabelBinarizer()
     y_labels = ml_binarizer.fit_transform(train_data_y)
@@ -561,11 +546,8 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     print("Vectorizing input data\n")
     vectors = []
     for x in train_data_x:
-        tokens = []
         text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
+        tokens = re.findall(r'(?u)\b\w\w+\b', text)
         vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
