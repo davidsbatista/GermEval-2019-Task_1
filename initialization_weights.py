@@ -181,6 +181,13 @@ def main():
     filtered = np.array(len(labels2idx) * [0.5])
     pred_bin = (predictions > filtered).astype(int)
 
+    idx2labels = {v: k for k, v in labels2idx.items()}
+
+    for row in pred_bin:
+        print(row)
+
+    print(idx2labels)
+
     print(pred_bin)
     print(pred_bin.shape)
 
