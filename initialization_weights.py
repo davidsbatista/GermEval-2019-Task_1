@@ -189,9 +189,7 @@ def main():
         print(row)
         for x in np.nonzero(row):
             print(x[0])
-            print(type(x))
-            # ToDo: x as int
-            print(idx2labels[x])
+            print(idx2labels[x[0]])
 
     print(pred_bin)
     print(pred_bin.shape)
