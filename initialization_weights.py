@@ -97,7 +97,7 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
     # Build and compile model
     model = Model(inputs=inputs, outputs=predictions)
-    model.compile(optimizer=optimizer, loss=loss)
+    model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
 
     from keras.utils import plot_model
     plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
