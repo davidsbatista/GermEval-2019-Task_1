@@ -58,7 +58,7 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     embedding_size = 1
     #conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
     # conv_layers = [[300, 1], [300, 2]]
-    conv_layers = [[10, 1]]
+    conv_layers = [[10, 1], [10, 1]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
     dropout_p = 0.1
     num_of_classes = weight_matrix.shape[1]
