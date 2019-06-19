@@ -11,7 +11,7 @@ from nltk import sent_tokenize, word_tokenize
 
 from data_analysis import extract_hierarchy
 from models.convnets_utils import get_embeddings_layer, get_conv_pool
-from models.utils import vectorizer, build_token_index
+from models.utils import vectorizer, build_token_index, vectorize_one_sample, vectorize_dev_data
 from utils import load_data
 
 import tensorflow as tf
@@ -136,7 +136,7 @@ def build_vectors(train_data_x, train_data_y, labels2idx):
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                    truncating='post', value=token2idx['PADDED'])
 
-    return vectors_padded, np.array(train_y), token2idx
+    return vectors_padded, np.array(train_y), token2idx, max_sent_len
 
 
 def my_init(shape, dtype=None):
@@ -153,13 +153,16 @@ def main():
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
+    # load dev data
+    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+
     # create matrix
     weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
 
     # fill-in weight matrix
     weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
 
-    x_train, y_train, token2idx = build_vectors(train_data_x, train_data_y, labels2idx)
+    x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y, labels2idx)
     model = build_neural_network(weight_matrix, max_input=x_train.shape[1], vocab_size=len(token2idx))
 
     model.summary()
@@ -167,7 +170,15 @@ def main():
     print(x_train.shape)
     print(y_train.shape)
 
-    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=100)
+    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=1)
+
+    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+    predictions = model.predict(dev_vector, verbose=1)
+
+    print(predictions)
+
+    # filtered = np.array(len(binarizer.classes_) * [0.5])
+    # pred_bin = (predictions > filtered).astype(int)
 
 
 if __name__ == '__main__':
