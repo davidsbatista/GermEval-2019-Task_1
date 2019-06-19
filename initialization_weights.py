@@ -177,8 +177,11 @@ def main():
 
     print(predictions)
 
-    # filtered = np.array(len(binarizer.classes_) * [0.5])
-    # pred_bin = (predictions > filtered).astype(int)
+    filtered = np.array(len(labels2idx) * [0.5])
+    pred_bin = (predictions > filtered).astype(int)
+
+    print(pred_bin)
+    print(pred_bin.shape)
 
 
 if __name__ == '__main__':
