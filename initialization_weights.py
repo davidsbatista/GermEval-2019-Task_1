@@ -183,12 +183,12 @@ def main():
 
     idx2labels = {v: k for k, v in labels2idx.items()}
 
-    for row in pred_bin:
-        print(row)
-        if np.count_nonzero(row) > 0:
-            for x in np.nonzero(row):
-                print(x[0])
-                print(idx2labels[x[0]])
+    for row_pred, sample in zip(pred_bin, dev_data_x):
+        print(sample, end='')
+        if np.count_nonzero(row_pred) > 0:
+            for x in np.nonzero(row_pred):
+                print(idx2labels[x[0]], end='')
+        print()
 
     print(pred_bin)
     print(pred_bin.shape)
