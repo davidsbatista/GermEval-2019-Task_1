@@ -173,26 +173,31 @@ def main():
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     predictions = model.predict(dev_vector, verbose=1)
 
+    # ToDo:
+
     # tune threshold for different levels?
-    # 0-7 top-level
-    # 8-X 1st_level
-    # X-343 2nd_level
+    # 0-7 top-level: 0.5
+    # 8-X 1st_level: 0.3
+    # X-343 2nd_level: 0.1
+
+    # initialize weigh matrix
 
     filtered = np.array(len(labels2idx) * [0.3])
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
 
-    with open('answer.txt', 'wt') as f_out:
+    # f_out.write(str(isbn) + '\t' + '\t'.join(classification[isbn][0]) + '\n')
 
+    with open('answer.txt', 'wt') as f_out:
         # subtask-a
         f_out.write(str('subtask_a\n'))
         for row_pred, sample in zip(pred_bin, dev_data_x):
-            print(sample['isbn'], end='\t')
+            f_out.write(sample['isbn'] + '\t')
             if np.count_nonzero(row_pred) > 0:
                 for x in np.nditer(np.nonzero(row_pred)):
                     if int(x) <= 7:
-                        print(idx2labels[int(x)], end='\t')
-            print()
+                        label = idx2labels[int(x)]
+                        f_out.write(label+'\t')
 
         # subtask-b
         f_out.write(str('subtask_b\n'))
