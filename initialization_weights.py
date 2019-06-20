@@ -2,19 +2,16 @@
 # -*- coding: utf-8 -*-
 
 import numpy as np
-from keras import Input, Model
-from keras.layers import Embedding, Convolution1D, GlobalMaxPooling1D, Concatenate, Dense, \
-    AlphaDropout, concatenate, Dropout
-from keras import backend as K
+import tensorflow as tf
+from keras import Input, Model, backend as K
+from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, Embedding, \
+    GlobalMaxPooling1D
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize
 
 from data_analysis import extract_hierarchy
-from models.convnets_utils import get_embeddings_layer, get_conv_pool
-from models.utils import vectorizer, build_token_index, vectorize_one_sample, vectorize_dev_data
+from models.utils import build_token_index, vectorize_dev_data, vectorizer
 from utils import load_data
-
-import tensorflow as tf
 
 
 def create_weight_matrix(n_samples):
@@ -166,7 +163,12 @@ def main():
 
     model.summary()
 
-    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=10)
+    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=5)
+    model.save('global_classifier.h5')  # creates a HDF5 file 'my_model.h5'
+
+    # returns a compiled model
+    # identical to the previous one
+    # model = load_model('my_model.h5')
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     predictions = model.predict(dev_vector, verbose=1)
@@ -175,6 +177,8 @@ def main():
     pred_bin = (predictions > filtered).astype(int)
 
     idx2labels = {v: k for k, v in labels2idx.items()}
+
+    # ToDo: save to file
 
     for row_pred, sample in zip(pred_bin, dev_data_x):
         print(sample['isbn'], end='\t')
