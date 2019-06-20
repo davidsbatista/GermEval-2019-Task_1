@@ -175,13 +175,7 @@ def main():
 
     filtered = np.array(len(labels2idx) * [0.3])
     pred_bin = (predictions > filtered).astype(int)
-
     idx2labels = {v: k for k, v in labels2idx.items()}
-
-    # this is 'subtask-a' scores
-    # {'Architektur & Garten': 0, 'Ganzheitliches Bewusstsein': 1, 'Glaube & Ethik': 2,
-    #  'Kinderbuch & Jugendbuch': 3, 'Künste': 4, 'Literatur & Unterhaltung': 5, 'Ratgeber': 6,
-    # ' Sachbuch': 7}
 
     # subtask-a
     for row_pred, sample in zip(pred_bin, dev_data_x):
@@ -191,8 +185,6 @@ def main():
                 if int(x) <= 7:
                     print(idx2labels[int(x)], end='\t')
         print()
-
-    exit(-1)
 
     # subtask-b
     for row_pred, sample in zip(pred_bin, dev_data_x):
