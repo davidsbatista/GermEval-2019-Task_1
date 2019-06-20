@@ -184,14 +184,11 @@ def main():
     idx2labels = {v: k for k, v in labels2idx.items()}
 
     for row_pred, sample in zip(pred_bin, dev_data_x):
-        print(sample, end='')
+        print(sample['isbn'], end='')
         if np.count_nonzero(row_pred) > 0:
             for x in np.nonzero(row_pred):
                 print(idx2labels[x[0]], end='')
         print()
-
-    print(pred_bin)
-    print(pred_bin.shape)
 
 
 if __name__ == '__main__':
