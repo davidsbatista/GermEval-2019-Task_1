@@ -149,7 +149,7 @@ def init_f(shape, dtype=None):
 
 def main():
 
-    if not os.path.exists('my_model.h5'):
+    if not os.path.exists('global_classifier.h5'):
 
         # load train data
         train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
@@ -166,7 +166,7 @@ def main():
         model.save('global_classifier.h5')  # creates a HDF5 file 'my_model.h5'
 
     else:
-        model = load_model(filepath='my_model.h5')
+        model = load_model(filepath='global_classifier.h5')
 
         # load dev data
         dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
