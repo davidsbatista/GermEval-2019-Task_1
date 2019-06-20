@@ -26,9 +26,6 @@ def create_weight_matrix(n_samples):
         labels2idx[k] = label_idx
         label_idx += 1
 
-    print(labels2idx)
-    exit(-1)
-
     for k, v in sorted(hierarchical_level_1.items()):
         for sublabel in v:
             labels2idx[sublabel] = label_idx
