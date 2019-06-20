@@ -198,6 +198,7 @@ def main():
                     if int(x) <= 7:
                         label = idx2labels[int(x)]
                         f_out.write(label+'\t')
+            f_out.write('\n')
 
         # subtask-b
         f_out.write(str('subtask_b\n'))
