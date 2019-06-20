@@ -191,7 +191,7 @@ def main():
         print(sample['isbn'], end='\t')
         if np.count_nonzero(row_pred) > 0:
             for x in np.nditer(np.nonzero(row_pred)):
-                if x <= 7:
+                if int(x) <= 7:
                     print(idx2labels[int(x)], end='\t')
         print()
 
