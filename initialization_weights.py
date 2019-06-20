@@ -1,9 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
+import os
 
 import numpy as np
 import tensorflow as tf
 from keras import Input, Model, backend as K
+from keras.engine.saving import load_model
 from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, Embedding, \
     GlobalMaxPooling1D
 from keras_preprocessing.sequence import pad_sequences
@@ -146,29 +148,28 @@ def init_f(shape, dtype=None):
 
 
 def main():
-    # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
-    # load dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+    if not os.path.exists('my_model.h5'):
 
-    # create matrix
-    weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
+        # load train data
+        train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
-    # fill-in weight matrix
-    weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
+        # create matrix
+        weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
 
-    x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y, labels2idx)
-    model = build_neural_network(weight_matrix, max_input=x_train.shape[1], vocab_size=len(token2idx))
+        # fill-in weight matrix
+        weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
+        x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y, labels2idx)
+        model = build_neural_network(weight_matrix, max_input=x_train.shape[1], vocab_size=len(token2idx))
+        model.summary()
+        model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=5)
+        model.save('global_classifier.h5')  # creates a HDF5 file 'my_model.h5'
 
-    model.summary()
+    else:
+        model = load_model(filepath='my_model.h5')
 
-    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=5)
-    model.save('global_classifier.h5')  # creates a HDF5 file 'my_model.h5'
-
-    # returns a compiled model
-    # identical to the previous one
-    # model = load_model('my_model.h5')
+        # load dev data
+        dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     predictions = model.predict(dev_vector, verbose=1)
@@ -178,13 +179,14 @@ def main():
 
     idx2labels = {v: k for k, v in labels2idx.items()}
 
-    # ToDo: save to file
+    # ToDo: save to file to allow to perform evaluation
 
     for row_pred, sample in zip(pred_bin, dev_data_x):
         print(sample['isbn'], end='\t')
         print(np.count_nonzero(row_pred))
         if np.count_nonzero(row_pred) > 0:
             for x in np.nonzero(row_pred):
+                print(x)
                 print(idx2labels[x[0]], end='\t')
             print()
 
