@@ -171,15 +171,15 @@ def main():
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     predictions = model.predict(dev_vector, verbose=1)
 
-    filtered = np.array(len(labels2idx) * [0.5])
+    filtered = np.array(len(labels2idx) * [0.3])
     pred_bin = (predictions > filtered).astype(int)
 
     idx2labels = {v: k for k, v in labels2idx.items()}
 
     for row_pred, sample in zip(pred_bin, dev_data_x):
         print(sample['isbn'], end='\t')
+        print(np.count_nonzero(row_pred))
         if np.count_nonzero(row_pred) > 0:
-            print(np.count_nonzero)
             for x in np.nonzero(row_pred):
                 print(idx2labels[x[0]], end='\t')
             print()
