@@ -56,9 +56,9 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     input_size = max_input
     alphabet_size = vocab_size
     embedding_size = 1
-    #conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
+    conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
     # conv_layers = [[300, 1], [300, 2]]
-    conv_layers = [[10, 1], [5, 1]]
+    # conv_layers = [[10, 1], [5, 1]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
     dropout_p = 0.1
     num_of_classes = weight_matrix.shape[1]
@@ -168,10 +168,7 @@ def main():
 
     model.summary()
 
-    print(x_train.shape)
-    print(y_train.shape)
-
-    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=1)
+    model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=10)
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     predictions = model.predict(dev_vector, verbose=1)
