@@ -17,7 +17,6 @@ from utils import load_data
 
 
 def create_weight_matrix(n_samples):
-
     hierarchical_level_1, hierarchical_level_2 = extract_hierarchy()
 
     label_idx = 0
@@ -107,7 +106,6 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
 
 def build_vectors(train_data_x, train_data_y, labels2idx):
-
     # ToDo: vectorize input data and target
 
     token2idx, max_sent_len, _ = build_token_index(train_data_x)
@@ -146,12 +144,11 @@ def my_init(shape, dtype=None):
 
 def init_f(shape, dtype=None):
     ker = np.zeros(shape, dtype=dtype)
-    ker[tuple(map(lambda x: int(np.floor(x/2)), ker.shape))]=1
+    ker[tuple(map(lambda x: int(np.floor(x / 2)), ker.shape))] = 1
     return tf.convert_to_tensor(ker)
 
 
 def main():
-
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
@@ -160,10 +157,12 @@ def main():
 
     # fill-in weight matrix
     weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
-    x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y, labels2idx)
+    x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y,
+                                                              labels2idx)
 
     if not os.path.exists('global_classifier.h5'):
-        model = build_neural_network(weight_matrix, max_input=x_train.shape[1], vocab_size=len(token2idx))
+        model = build_neural_network(weight_matrix, max_input=x_train.shape[1],
+                                     vocab_size=len(token2idx))
         model.summary()
         model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=5)
         model.save('global_classifier.h5')  # creates a HDF5 file 'my_model.h5'
@@ -182,8 +181,23 @@ def main():
 
     idx2labels = {v: k for k, v in labels2idx.items()}
 
-    # ToDo: save to file to allow to perform evaluation
+    # this is 'subtask-a' scores
+    # {'Architektur & Garten': 0, 'Ganzheitliches Bewusstsein': 1, 'Glaube & Ethik': 2,
+    #  'Kinderbuch & Jugendbuch': 3, 'Künste': 4, 'Literatur & Unterhaltung': 5, 'Ratgeber': 6,
+    # ' Sachbuch': 7}
 
+    # subtask-a
+    for row_pred, sample in zip(pred_bin, dev_data_x):
+        print(sample['isbn'], end='\t')
+        if np.count_nonzero(row_pred) > 0:
+            for x in np.nditer(np.nonzero(row_pred)):
+                if x <= 7:
+                    print(idx2labels[int(x)], end='\t')
+        print()
+
+    exit(-1)
+
+    # subtask-b
     for row_pred, sample in zip(pred_bin, dev_data_x):
         print(sample['isbn'], end='\t')
         if np.count_nonzero(row_pred) > 0:
