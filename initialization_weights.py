@@ -57,8 +57,6 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     alphabet_size = vocab_size
     embedding_size = 1
     conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
-    # conv_layers = [[300, 1], [300, 2]]
-    # conv_layers = [[10, 1], [5, 1]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
     dropout_p = 0.1
     num_of_classes = weight_matrix.shape[1]
@@ -173,19 +171,18 @@ def main():
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     predictions = model.predict(dev_vector, verbose=1)
 
-    print(predictions)
-
     filtered = np.array(len(labels2idx) * [0.5])
     pred_bin = (predictions > filtered).astype(int)
 
     idx2labels = {v: k for k, v in labels2idx.items()}
 
     for row_pred, sample in zip(pred_bin, dev_data_x):
-        print(sample['isbn'], end='')
+        print(sample['isbn'], end='\t')
         if np.count_nonzero(row_pred) > 0:
+            print(np.count_nonzero)
             for x in np.nonzero(row_pred):
-                print(idx2labels[x[0]], end='')
-        print()
+                print(idx2labels[x[0]], end='\t')
+            print()
 
 
 if __name__ == '__main__':
