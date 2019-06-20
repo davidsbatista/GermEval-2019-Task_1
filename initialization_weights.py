@@ -186,7 +186,6 @@ def main():
         if np.count_nonzero(row_pred) > 0:
             for x in np.nditer(np.nonzero(row_pred)):
                 print(idx2labels[int(x)], end='\t')
-        print("------------------------------")
 
 
 if __name__ == '__main__':
