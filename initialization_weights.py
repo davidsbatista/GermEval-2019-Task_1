@@ -183,11 +183,9 @@ def main():
 
     for row_pred, sample in zip(pred_bin, dev_data_x):
         print(sample['isbn'], end='\t')
-        print(np.count_nonzero(row_pred))
         if np.count_nonzero(row_pred) > 0:
             for x in np.nditer(np.nonzero(row_pred)):
-                print(x)
-                # print(idx2labels[x[0]], end='\t')
+                print(idx2labels[x], end='\t')
         print("------------------------------")
 
 
