@@ -27,7 +27,7 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
-from data_analysis import extract_hierarchy
+from data_analysis.data_analysis import extract_hierarchy
 from models.utils2 import write_reports_to_disk
 from utils import generate_submission_file, load_data
 
