@@ -157,6 +157,9 @@ def main():
     x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y,
                                                               labels2idx)
 
+    # load dev data
+    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+
     if not os.path.exists('global_classifier.h5'):
         model = build_neural_network(weight_matrix, max_input=x_train.shape[1],
                                      vocab_size=len(token2idx))
@@ -166,9 +169,6 @@ def main():
 
     else:
         model = load_model(filepath='global_classifier.h5')
-
-        # load dev data
-        dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     predictions = model.predict(dev_vector, verbose=1)
