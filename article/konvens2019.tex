@@ -371,24 +371,24 @@ We preformed a parameter search, on 3 folds over the training set, varying follo
 \item regularization C: \{0.1, 10, 100, 300\}
 \end{itemize}
 
-This classifier is also the one that reports the results for Sub-Task A.
+This classifier is also the one that reports the results for Sub-Task A. We also experimented with
+other methods for the root classifier, namely with:
 
-We also experimented with other methods for the root classifier, namely with
-
-% What other models did we tried ?
-% train_han
-% train_bag_of_tricks
-% train_bi_lstm
-% train_cnn_sent_class
-
-
+\begin{itemize}
+\item Hierarchical Attention Networks~\cite{yang-etal-2016-hierarchical}
+\item Bag-of-Tricks~\cite{joulin-etal-2017-bag}
+\item bi-LSTM~\cite{Hochreiter:1997:LSM:1246443.1246450}
+\item ConvNets~\cite{kim-2014-convolutional}
+\end{itemize}
 
 
 For Level 1 and 2 in the hierarchy tree we trained classifiers based the convolutional
 neural networks sentence classification model from~\citet{kim-2014-convolutional}.
 
 We implemented the variation of the proposed architecture based on pre-trained embeddings
-which are fine-tuned during learning, and we used the public available German fastText embeddings trained on Wikipedia, of dimension 300 and obtained using the skip-gram model described in ~\citet{bojanowski-etal-2017-enriching} with default parameters.
+which are fine-tuned during learning, and we used the public available German fastText embeddings
+trained on Wikipedia, of dimension 300 and obtained using the skip-gram model described in
+~\citet{bojanowski-etal-2017-enriching} with default parameters.
 
 We used rectified linear units in the activation functions of the 1D convolutions,
 filter windows (i.e., n-grams) of size 1 and 2 with 300 feature maps each and a
