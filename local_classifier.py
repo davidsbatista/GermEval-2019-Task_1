@@ -48,7 +48,7 @@ def train_bi_lstm(train_data_x, train_data_y):
     :param train_data_y:
     :return:
     """
-    token2idx, max_sent_len = build_token_index(train_data_x)
+    token2idx, max_sent_len, _ = build_token_index(train_data_x)
 
     # y_data: encode into one-hot vectors
     ml_binarizer = MultiLabelBinarizer()

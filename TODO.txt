@@ -1,18 +1,3 @@
-
-
-already tried:
-- all logit
-
-
-best:
-=====
-strategy_one
-    - top: logit
-    - 1st level: several cnn
-    - 2nd level: several cnn
-
-
-
 to try:
 =======
 - weight initialization for top-level + 1st level only
@@ -44,7 +29,6 @@ stem = GermanStemmer()
 https://www.nltk.org/api/nltk.stem.html
 
 
-
 - we perform TFIDF over all extracted n-grams, keep only those with a document frequency between
   0.01 and 0.0002 (i.e., those that are rare enough to carry some signal, but frequent enough to
   have a potential to generalize over unseen data).
@@ -52,8 +36,6 @@ https://www.nltk.org/api/nltk.stem.html
 - The document frequency thresholds were tuned by means of a grid search on a 90%/10% split of the
   training data, with the aim to maximize prediction scores of the base classifiers (see Section 4).
   We use the TFIDF score of the relevant n-grams as input features (
-
-
 
 - These two groups of features are based on the same idea: to perform TFIDF over the whole dataset,
   select the k most important types relative to each of the m classes
@@ -72,4 +54,3 @@ https://www.nltk.org/api/nltk.stem.html
 # ToDO: https://github.com/cambridgeltl/multilabel-nn
 # ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification
 # ToDo: https://github.com/locuslab/TCN
-
