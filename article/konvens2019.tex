@@ -327,9 +327,18 @@ Total Classifiers & 51       \\
 
 \subsection{Global Classifier}
 
+
+% global_classifier_init.png
+% global_classifier_nn.png
+
 \ \newline
 \textbf{TODO:}
 \ \newline
+
+
+
+
+
 
 
 \section{Experiments and Results}\label{experiments}
@@ -344,7 +353,7 @@ We randomly split the development data into training (70\%) and test (30\%) sets
 The training set was used to develop and trained classifiers, and the test set
 to evaluate the trained classifiers.
 
-\subsubsection{Local classifier per node}
+\subsubsection{Local classifier per node: root classifier}
 
 The best results were achieved with the following classifiers configuration.
 
@@ -352,7 +361,8 @@ For the root node we trained a logistic regression with TF-IDF weighted vectors
 in a one-versus-rest scenario using the scikit-learn 0.21.1~\cite{Pedregosa:2011:SML:1953048.2078195}.
 
 % class_weight='balanced', solver='sag', max_iter=50000
-% The "balanced" mode uses the values of y to automatically adjust weights inversely proportional to class frequencies in the input data as ``n_samples / (n_classes * np.bincount(y))``.
+% The "balanced" mode uses the values of y to automatically adjust weights inversely proportional to
+% class frequencies in the input data as ``n_samples / (n_classes * np.bincount(y))``.
 
 We pre-processed the data by first tokenising the blurbs into sentences, and then
 from sentences into tokens. We consider the title of the book a sentence. We used
@@ -372,15 +382,30 @@ We preformed a parameter search, on 3 folds over the training set, varying follo
 \end{itemize}
 
 This classifier is also the one that reports the results for Sub-Task A. We also experimented with
-other methods for the root classifier, namely with:
+other methods for the root classifier, namely with: Hierarchical Attention Networks~(HAN)~\cite{yang-etal-2016-hierarchical},
+Bag-of-Tricks~\cite{joulin-etal-2017-bag}, bi-LSTM~\cite{Hochreiter:1997:LSM:1246443.1246450}, ConvNets~\cite{kim-2014-convolutional}
 
-\begin{itemize}
-\item Hierarchical Attention Networks~\cite{yang-etal-2016-hierarchical}
-\item Bag-of-Tricks~\cite{joulin-etal-2017-bag}
-\item bi-LSTM~\cite{Hochreiter:1997:LSM:1246443.1246450}
-\item ConvNets~\cite{kim-2014-convolutional}
-\end{itemize}
 
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline\centering\textbf{Method}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
+\hline
+ Logit (TF-IDF) & 0.824 & 0.829 & 0.826 \\
+ HAN            & 0.824 & 0.829 & 0.826 \\
+ Bag-of-Tricks  & 0.693 & 0.560 & 0.619 \\
+ bi-LSTM        & 0.693 & 0.560 & 0.619 \\
+ ConvNets       & 0.693 & 0.560 & 0.619 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{devset-results} Results for different classifiers on the Sub-Task A}
+\end{table}
+
+
+
+
+\subsubsection{Local classifier per node: 1st and 2nd levels}
 
 For Level 1 and 2 in the hierarchy tree we trained classifiers based the convolutional
 neural networks sentence classification model from~\citet{kim-2014-convolutional}.
@@ -400,13 +425,10 @@ The neural network was implemented in Keras 2.2.4 with Tensorflow 1.13.1 backend
 
 % TODO: advantages and disadvantages of this method?
 
-\begin{comment}
 
-\end{comment}
-
-
-Table~\ref{devset-results} shows the results for both tasks with the system described
-above on the development set.
+We then applied the best classifiers and parameters on the dev set and run the evaluation.
+Table~\ref{devset-results} shows the results for both tasks with the system described above on the
+development set.
 
 \begin{table}
 \begin{center}
@@ -418,7 +440,7 @@ above on the development set.
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{devset-results} Best achieved results on the development set.}
+\caption{\label{devset-results} Best achieved results on the development set for both Sub-Tasks A and B.}
 \end{table}
 
 

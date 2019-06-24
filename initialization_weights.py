@@ -161,7 +161,7 @@ def main():
         model = build_neural_network(weight_matrix, max_input=x_train.shape[1],
                                      vocab_size=len(token2idx))
         model.summary()
-        model.fit(x=x_train, y=y_train, validation_split=0.2, verbose=1, epochs=5)
+        model.fit(x=x_train, y=y_train, validation_split=0.3, verbose=1, epochs=5)
         model.save('global_classifier.h5')  # creates a HDF5 file 'my_model.h5'
 
     else:
