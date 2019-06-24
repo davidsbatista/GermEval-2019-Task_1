@@ -108,7 +108,7 @@ def build_lstm_based_model(embeddings, label_encoder, max_sent_length):
 
     sequence_input = Input(shape=(max_sent_length,), dtype='int32', name='messages')
     embedded_sequences = embedding_layer(sequence_input)
-    l_lstm = Bidirectional(CuDNNLSTM(hidden_units))(embedded_sequences)
+    l_lstm = Bidirectional(LSTM(hidden_units))(embedded_sequences)
     l_lstm_w_drop = Dropout(dense_dropout)(l_lstm)
     preds = Dense(len(label_encoder.classes_),
                   activation='sigmoid', name='sigmoid')(l_lstm_w_drop)
