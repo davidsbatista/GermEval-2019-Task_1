@@ -207,6 +207,11 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     print(len(token2idx))
     print(max_sent_length)
 
+    PADDED = 1
+    UNKNOWN = 0
+    token2idx["PADDED"] = PADDED
+    token2idx["UNKNOWN"] = UNKNOWN
+
     bot.token2idx = token2idx
     bot.max_len = max_sent_length
 
@@ -810,6 +815,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
         if clf == 'bag-of-tricks':
             model, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,
                                                                                train_data_y)
+
+            print(token2idx)
 
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
             predictions = model.predict([test_vectors, test_vectors])
