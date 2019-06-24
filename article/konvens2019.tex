@@ -53,12 +53,17 @@
 \section{Introduction}
 
 This paper describes the approach taken for the GermEval'19 task 1 taken by the Comtravo data-science team.
+The task aimed at developing systems to tackle the task of multi-label hierachical classifiction of text.
+We took two distinct approaches, one based on a local classifier strategy, where different classifiers are
+trained according to the hierarchical structure of the label space. The second
 
-\ \newline
-\textbf{TODO:}
-\ \newline
 
-This paper is organized as follows, in Section~\ref{task} we describe task in detail and give a description of the dataset provided. In Section~\ref{hierarchical-clf} we describe some of the proposed approaches in the literature to performer hierarchical document classification. In Section~\ref{system} we describe the system we build to tackle the task and the approaches taken. Section~\ref{experiments} details the experiments done and the results, finally in Section~\ref{future} we outline some future work and ideas.
+This paper is organized as follows, in Section~\ref{task} we describe task in detail and give a
+description of the dataset provided. In Section~\ref{hierarchical-clf} we describe some of the
+proposed approaches in the literature to performer hierarchical document classification.
+In Section~\ref{system} we describe the system we build to tackle the task and the approaches taken.
+Section~\ref{experiments} details the experiments done and the results, finally in
+Section~\ref{future} we outline some future work and ideas.
 
 \section{Task}\label{task}
 
@@ -128,6 +133,44 @@ Nr. samples with leaf nodes at:            &                    \\
 
 
 \begin{table}
+\small
+\begin{center}
+\begin{tabular}{|l|r|}
+\hline\centering\textbf{Development dataset}  &                    \\
+\hline
+Avg. lenght of blurb (tokens)              &               \\
+Std. deviation $\sigma$ (tokens)           &               \\
+Avg. lenght of blurb (sentences)           &                \\
+Std. deviation $\sigma$ (sentences)        &                \\
+\hline
+Total number of genres                     &                 \\
+Possible genres per level (1;2;3)          &          \\
+Avg. genres per per blurb                  &                 \\
+Std. deviation $\sigma$                    &                \\
+Avg. genres per blurb at level (1;2;3)     &    \\
+Std. deviation $\sigma$                    &    \\
+\hline
+Avg. blurb per co-occurrence               &                \\
+Co-Occurrence std. deviation               &               \\
+\hline
+Nr. samples with leaf nodes at:            &                    \\
+ - Level 1                                 &         \\
+ - Level 2                                 &      \\
+ - Level 3                                 &      \\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{quantitivy-analysis-train}Quantitative analysis of the development dataset.}
+\end{table}
+
+
+
+
+
+
+
+
+\begin{table}
 \begin{center}
 \begin{tabular}{|l|r|}
 \hline\centering\textbf{Test dataset}  &         \\
@@ -139,7 +182,7 @@ Std. deviation $\sigma$ (sentences)        &  2.62              \\
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{quantitivy-analysis-test}Quantitative analysis of the test dataset.}
+\caption{\label{quantitivy-analysis-dev}Quantitative analysis of the test dataset.}
 \end{table}
 
 
@@ -229,6 +272,10 @@ co-occurrence These dedicated neurons are initialised to connect to the correspo
 labels with stronger weights than to others.
 
 
+\begin{comment}
+When the labels form a hi- erarchy, they share a hypernym–hyponym relation (Figure 1). When multiple labels are assigned to the text, if it is explicitly labeled by a subclass it must also implicitly include all of the its super- classes.
+The co-occurrence between subclasses and su- perclasses as labels for the input text contains in- formation we would like to leverage to improve multi-label classification using a neural network.
+\end{comment}
 
 
 

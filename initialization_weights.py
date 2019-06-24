@@ -203,11 +203,12 @@ def main():
         # subtask-b
         f_out.write(str('subtask_b\n'))
         for row_pred, sample in zip(pred_bin, dev_data_x):
-            print(sample['isbn'], end='\t')
+            f_out.write(sample['isbn'] + '\t')
             if np.count_nonzero(row_pred) > 0:
                 for x in np.nditer(np.nonzero(row_pred)):
-                    print(idx2labels[int(x)], end='\t')
-            print()
+                    label = idx2labels[int(x)]
+                    f_out.write(label+'\t')
+            f_out.write('\n')
 
 
 if __name__ == '__main__':
