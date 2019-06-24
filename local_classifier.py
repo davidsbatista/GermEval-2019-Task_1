@@ -784,12 +784,6 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
         predictions = model.predict(new_data_x)
 
-        # for pred, true in zip(predictions, dev_data_x):
-        #     print(pred)
-        #     all_zeros = not np.any(pred)
-        #     if all_zeros:
-        #         print(true)
-
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
             for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
@@ -993,10 +987,10 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
 
     # train subtask_b
-    subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
+    # subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')
 
 
 if __name__ == '__main__':
