@@ -189,7 +189,7 @@ def train_han(train_data_x, train_data_y):
     print(classification_report(test_y, np.array(binary_predictions),
                                 target_names=ml_binarizer.classes_))
 
-    return han_model, ml_binarizer, max_sent_len, token2idx
+    return han_model, ml_binarizer, max_sent_len, token2idx, max_sent, max_tokens
 
 
 def train_bag_of_tricks(train_data_x, train_data_y):
@@ -797,9 +797,39 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
                 f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
     else:
         if clf == 'han':
-            model, ml_binarizer, max_sent_len, token2idx = train_han(train_data_x, train_data_y)
-            test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
-            predictions = model.predict(test_vectors)
+            model, ml_binarizer, max_sent_len, token2idx, max_sent, max_tokens = \
+                train_han(train_data_x, train_data_y)
+
+            processed_x = np.zeros((len(train_data_x), max_sent, max_tokens), dtype='int32')
+
+            for i, x in enumerate(dev_data_x):
+                vectorized_sentences = []
+                text = x['title'] + " . " + x['body']
+                sentences = sent_tokenize(text, language='german')
+                for s in sentences:
+                    vectorized_sentences.append(
+                        vectorizer(word_tokenize(s, language='german'), token2idx))
+
+                padded_sentences = pad_sequences(vectorized_sentences, padding='post',
+                                                 truncating='post', maxlen=max_tokens,
+                                                 value=token2idx['PADDED'])
+
+                pad_size = max_sent - padded_sentences.shape[0]
+
+                if pad_size < 0:
+                    padded_sentences = padded_sentences[0:max_sent]
+                else:
+                    padded_sentences = np.pad(padded_sentences, ((0, pad_size), (0, 0)),
+                                              mode='constant',
+                                              constant_values=0)
+
+                # Store this observation as the i-th observation in the data matrix
+                processed_x[i] = padded_sentences[None, ...]
+
+            print(processed_x.shape)
+            
+            # test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+            predictions = model.predict(processed_x)
 
         if clf == 'lstm':
             model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
