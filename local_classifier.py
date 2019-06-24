@@ -193,7 +193,7 @@ def train_han(train_data_x, train_data_y):
     return han_model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_bag_of_tricks(train_data_x, train_data_y, level_label):
+def train_bag_of_tricks(train_data_x, train_data_y):
 
     bot = BagOfTricks()
     n_top_tokens = 80000
@@ -228,7 +228,7 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
 
     # build a neural network and train a model
     model = bot.build_neural_network(n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=100, verbose=1)
+    model.fit(train_x, train_y, batch_size=32, epochs=20, verbose=1)
 
     predictions = model.predict([test_x], verbose=1)
 
@@ -240,8 +240,6 @@ def train_bag_of_tricks(train_data_x, train_data_y, level_label):
     print(report)
 
     with open('classification_report.txt', 'at+') as f_out:
-        f_out.write(level_label + '\n')
-        f_out.write("=" * len(level_label) + '\n')
         f_out.write(report)
         f_out.write('\n')
 
@@ -804,6 +802,13 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
             predictions = model.predict([test_vectors, test_vectors])
 
+        if clf == 'bag-of-tricks':
+            model, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,
+                                                                                train_data_y)
+
+            test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+            predictions = model.predict([test_vectors, test_vectors])
+
         binary_predictions = []
         for pred, true in zip(predictions, dev_data_x):
             binary = [0 if i <= 0.5 else 1 for i in pred]
@@ -988,7 +993,7 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
 
     # train subtask_b
     # subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')

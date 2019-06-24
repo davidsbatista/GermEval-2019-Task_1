@@ -56,6 +56,50 @@ def build_token_index(x_data, lower=False):
     return token2idx, max_sent_length, token_freq
 
 
+def build_token_index_simple_tokenization(x_data, lower=False):
+    """
+
+    :param lower:
+    :param x_data:
+    :return:
+    """
+
+    # index of tokens
+    global token2idx
+    global max_sent_length
+
+    vocabulary = set()
+    token_freq = Counter()
+
+    stop_words = set(stopwords.words('german'))
+
+    for x in x_data:
+        text = x['title'] + " SEP " + x['body']
+        """
+        sentences = sent_tokenize(text, language='german')
+        for s in sentences:
+            tmp_len = 0
+            if lower is True:
+                words = [word.lower() for word in word_tokenize(s) if word not in stop_words]
+                vocabulary.update(words)
+                for token in words:
+                    token_freq[token] += 1
+            else:
+                words = word_tokenize(s)
+                vocabulary.update([word for word in word_tokenize(s) if word not in stop_words])
+                for token in words:
+                    token_freq[token] += 1
+            tmp_len += len(s)
+            max_sent_length = max(tmp_len, max_sent_length)
+        """
+
+    token2idx = {word: i + 2 for i, word in enumerate(vocabulary, 0)}
+    token2idx["PADDED"] = PADDED
+    token2idx["UNKNOWN"] = UNKNOWN
+
+    return token2idx, max_sent_length, token_freq
+
+
 def vectorizer(x_sample, token2idx):
     """
     Something like a Vectorizer, that converts your sentences into vectors,
