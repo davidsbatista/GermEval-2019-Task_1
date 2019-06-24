@@ -228,7 +228,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
 
     # build a neural network and train a model
     model = bot.build_neural_network(n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=20, verbose=1)
+    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=1)
 
     predictions = model.predict([test_x], verbose=1)
 
@@ -242,6 +242,10 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(report)
         f_out.write('\n')
+
+    # train on all data
+    model = bot.build_neural_network(n_classes)
+    model.fit(train_data_x, data_y, batch_size=32, epochs=1, verbose=1)
 
     return model, ml_binarizer, max_sent_length, token2idx
 
@@ -798,13 +802,14 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
         if clf == 'cnn':
             model, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
-                                                                                train_data_y)
+                                                                                train_data_y,
+                                                                                'top_level')
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
             predictions = model.predict([test_vectors, test_vectors])
 
         if clf == 'bag-of-tricks':
             model, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,
-                                                                                train_data_y)
+                                                                               train_data_y)
 
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
             predictions = model.predict([test_vectors, test_vectors])
