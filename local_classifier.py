@@ -179,11 +179,10 @@ def train_han(train_data_x, train_data_y):
     han_model.summary()
     han_model.compile(optimizer='adagrad', loss='binary_crossentropy', metrics=['acc'])
 
-    han_model.fit(train_x, train_y, batch_size=16, epochs=10, validation_split=0.2)
+    han_model.fit(train_x, train_y, batch_size=16, epochs=1, validation_split=0.2)
 
     predictions = han_model.predict(test_x, verbose=1)
 
-    # ToDo: there must be a more efficient way to do this, BucketEstimator
     binary_predictions = []
     for pred in predictions:
         binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
@@ -799,6 +798,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
     else:
         if clf == 'han':
             model, ml_binarizer, max_sent_len, token2idx = train_han(train_data_x, train_data_y)
+            test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+            predictions = model.predict(test_vectors)
 
         if clf == 'lstm':
             model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y)
