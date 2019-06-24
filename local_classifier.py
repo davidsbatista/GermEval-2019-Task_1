@@ -64,7 +64,7 @@ def train_bi_lstm(train_data_x, train_data_y):
         sentences = sent_tokenize(text, language='german')
         for s in sentences:
             tokens += word_tokenize(s)
-        vector = vectorizer(tokens)
+        vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                    truncating='post', value=token2idx['PADDED'])
@@ -75,7 +75,8 @@ def train_bi_lstm(train_data_x, train_data_y):
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
-                                                        test_size=0.20)
+                                                        test_size=0.30)
+
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
     model = build_lstm_based_model(static_embeddings, ml_binarizer, max_sent_len)
