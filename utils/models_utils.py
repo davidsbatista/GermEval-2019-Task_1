@@ -482,12 +482,6 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
                                                         random_state=42,
                                                         test_size=0.30)
 
-    """    
-    model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=5, verbose=True, validation_split=0.33)
-    predictions = model.predict([test_x], verbose=1)
-    """
-
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
 
