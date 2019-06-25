@@ -232,7 +232,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
 
     # build a neural network and train a model
     model = bot.build_neural_network(n_classes)
-    model.fit(train_x, train_y, batch_size=32, epochs=1, verbose=1)
+    model.fit(train_x, train_y, batch_size=32, epochs=30, verbose=1)
 
     predictions = model.predict([test_x], verbose=1)
 
@@ -1034,8 +1034,8 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
 
     # train subtask_b
     # subtask_b(train_data_x, train_data_y, dev_data_x, strategy='one')

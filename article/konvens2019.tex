@@ -403,10 +403,10 @@ Bag-of-Tricks~\cite{joulin-etal-2017-bag}, bi-LSTM~\cite{Hochreiter:1997:LSM:124
 \begin{tabular}{|l|r|r|r|}
 \hline\centering\textbf{Method}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
 \hline
- Logit (TF-IDF) & 0.824 & 0.829 & 0.826 \\
- HAN            & 0.824 & 0.829 & 0.826 \\
- Bag-of-Tricks  & 0.693 & 0.560 & 0.619 \\
+ Logit (TF-IDF) &        &        &        \\
+ HAN            & 0.8101 & 0.7574 & 0.7829 \\
  bi-LSTM        & 0.8016 & 0.7031 & 0.7492 \\
+ Bag-of-Tricks  & 0.693 & 0.560 & 0.619 \\
  ConvNets       & 0.693 & 0.560 & 0.619 \\
 \hline
 \end{tabular}
@@ -414,6 +414,7 @@ Bag-of-Tricks~\cite{joulin-etal-2017-bag}, bi-LSTM~\cite{Hochreiter:1997:LSM:124
 \caption{\label{devset-results} Results for different classifiers on the Sub-Task A}
 \end{table}
 
+Recall: '0.7574' <br> Precision: '0.8101' <br> F1_micro: '0.7829'<br> Subset_acc: '0.7220'<br><br>
 
 \subsubsection{Local classifier per node: 1st and 2nd levels}
 
