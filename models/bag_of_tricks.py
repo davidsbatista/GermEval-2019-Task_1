@@ -24,7 +24,7 @@ class BagOfTricks:
         self.ngram_range = 3
         self.max_len = 300
         self.batch_size = 32
-        self.embedding_dims = 50
+        self.embedding_dims = 100
         self.epochs = 10
         self.model = None
         self.max_features = None
@@ -63,8 +63,8 @@ class BagOfTricks:
         # we add a GlobalAveragePooling1D, which will average the embeddings
         # of all words in the document
         model.add(GlobalAveragePooling1D())
-        model.add(Dense(n_classes, activation='softmax'))
-        model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+        model.add(Dense(n_classes, activation='sigmoid'))
+        model.compile(loss='binary_crossentropy', optimizer='adam', metrics=['accuracy'])
         model.summary()
         return model
 

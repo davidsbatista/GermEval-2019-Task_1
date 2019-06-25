@@ -224,8 +224,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     n_classes = len(ml_binarizer.classes_)
 
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
-                                                        random_state=42,
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y, random_state=42,
                                                         test_size=0.30)
     print(train_x.shape)
     print(train_y.shape)
@@ -658,6 +657,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
                 f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
     else:
+
         if clf == 'han':
             model, ml_binarizer, max_sent_len, token2idx, max_sent, max_tokens = \
                 train_han(train_data_x, train_data_y)
