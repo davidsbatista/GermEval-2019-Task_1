@@ -178,7 +178,6 @@ def train_han(train_data_x, train_data_y):
 
 
 def train_bag_of_tricks(train_data_x, train_data_y):
-
     bot = BagOfTricks()
     n_top_tokens = 80000
 
@@ -321,8 +320,8 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
     with open('classification_report.txt', 'at+') as f_out:
-        f_out.write(level_label+'\n')
-        f_out.write("="*len(level_label)+'\n')
+        f_out.write(level_label + '\n')
+        f_out.write("=" * len(level_label) + '\n')
         f_out.write(report)
         f_out.write('\n')
 
@@ -414,8 +413,8 @@ def train_naive_bayes(train_data_x, train_data_y, level_label):
     report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
     print(report)
     with open('classification_report.txt', 'at+') as f_out:
-        f_out.write(level_label+'\n')
-        f_out.write("="*len(level_label)+'\n')
+        f_out.write(level_label + '\n')
+        f_out.write("=" * len(level_label) + '\n')
         f_out.write(report)
         f_out.write('\n')
 
@@ -433,7 +432,7 @@ def train_naive_bayes(train_data_x, train_data_y, level_label):
     return best_pipeline, ml_binarizer
 
 
-def train_cnn_sent_class(train_data_x, train_data_y, level_label):
+def train_cnn_sent_class(train_data_x, train_data_y, level_label, tokenisation):
     # ToDo: grid-search Keras:
 
     """
@@ -449,18 +448,21 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
 
     - See function above
     """
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
 
     token2idx, max_sent_len, _ = build_token_index(train_data_x,
-                                                   lowercase=True,
-                                                   simple=True,
-                                                   remove_stopwords=False)
+                                                   lowercase=low,
+                                                   simple=simple,
+                                                   remove_stopwords=stop)
 
     # vectorize, i.e. tokens to indexes and pad
     print("Vectorizing input data\n")
     vectors = []
     for x in train_data_x:
         text = x['title'] + " SEP " + x['body']
-        tokens = tokenise(text, lowercase=True, simple=True, remove_stopwords=False)
+        tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
         vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
     vectors_padded = pad_sequences(vectors,
@@ -517,8 +519,6 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         f_out.write(report)
         f_out.write('\n')
     """
-
-    print(train_data_x)
 
     # train on all data without validation split
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',

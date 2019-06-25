@@ -165,15 +165,15 @@ def vectorizer(x_sample, token2idx):
     return vector
 
 
-def vectorize_dev_data(dev_data_x, max_sent_len, token2idx):
+def vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation):
     print("Vectorizing dev data\n")
     vectors = []
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
     for x in dev_data_x:
-        tokens = []
         text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
+        tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
         vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
     test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
@@ -181,6 +181,7 @@ def vectorize_dev_data(dev_data_x, max_sent_len, token2idx):
     return test_vectors
 
 
+"""
 def vectorize_one_sample(x, max_sent_len, token2idx):
     tokens = []
     text = x['title'] + " SEP " + x['body']
@@ -191,13 +192,14 @@ def vectorize_one_sample(x, max_sent_len, token2idx):
     padded_vector = pad_sequences([vector], padding='post', maxlen=max_sent_len,
                                   truncating='post', value=token2idx['PADDED'])
     return padded_vector
+"""
 
-
+"""
 def plot_confusion_matrix(y_true, y_pred, normalize=False, title=None, cmap=plt.cm.Blues):
-    """
-    This function prints and plots the confusion matrix.
-    Normalization can be applied by setting `normalize=True`.
-    """
+    
+    # This function prints and plots the confusion matrix.
+    # Normalization can be applied by setting `normalize=True`.
+    
     if not title:
         if normalize:
             title = 'Normalized confusion matrix'
@@ -341,3 +343,4 @@ def write_reports_to_disk(all_preds, all_scores, all_true, model, classes, clf=N
                 out = str(precision[x]) + '\t' + str(recall[x]) + '\n'
                 f_out.write(out)
             f_out.write('\n\n')
+"""
