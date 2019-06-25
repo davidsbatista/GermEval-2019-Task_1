@@ -10,7 +10,7 @@ from nltk import sent_tokenize, wordpunct_tokenize
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from pre_processing import load_data
+from .pre_processing import load_data
 
 
 def top_words_per_class(train_data_x, train_data_y):
