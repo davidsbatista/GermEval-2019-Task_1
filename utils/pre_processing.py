@@ -90,11 +90,12 @@ def generate_submission_file(predictions, ml_binarizer, dev_data_x):
             f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
 
 
-def build_token_index(x_data, lowercase=False, simple=False):
+def build_token_index(x_data, lowercase=False, simple=False, remove_stopwords=False):
     """
     Tokenises the input data, it expects a list of strings, and returns the longest string in
     the dataset, the token2index mapping, and the frequency of each token
 
+    :param remove_stopwords:
     :param x_data:
     :param lowercase: if True lowercase the tokens
     :param simple: if True use a simple tokenisation method based on regex
@@ -103,47 +104,51 @@ def build_token_index(x_data, lowercase=False, simple=False):
 
     vocabulary = set()
     token_freq = Counter()
-    stop_words = set(stopwords.words('german'))
-    max_sent_length = 0
+    max_length = 0
 
-    if not simple:
-        for x in x_data:
-            text = x['title'] + " SEP " + x['body']
-            sentences = sent_tokenize(text, language='german')
-            for s in sentences:
-                tmp_len = 0
-                if lowercase is True:
-                    words = [word.lower() for word in word_tokenize(s) if word not in stop_words]
-                    vocabulary.update(words)
-                    for token in words:
-                        token_freq[token] += 1
-                else:
-                    words = word_tokenize(s)
-                    vocabulary.update([word for word in word_tokenize(s) if word not in stop_words])
-                    for token in words:
-                        token_freq[token] += 1
-                tmp_len += len(s)
-                max_sent_length = max(tmp_len, max_sent_length)
-
-    elif simple is True:
-        for x in x_data:
-            text = x['title'] + " SEP " + x['body']
-            tokens = re.findall(r'(?u)\b\w\w+\b', text)
-            vocabulary.update([word for word in tokens])
-            for token in tokens:
-                token_freq[token] += 1
+    for x in x_data:
+        text = x['title'] + " SEP " + x['body']
+        tokens = tokenise(text, lowercase, simple, remove_stopwords)
+        max_length = max(len(tokens), max_length)
+        vocabulary.update(tokens)
+        for token in tokens:
+            token_freq[token] += 1
 
     token2idx = {word: i + 2 for i, word in enumerate(vocabulary, 0)}
     token2idx["PADDED"] = PADDED
     token2idx["UNKNOWN"] = UNKNOWN
 
-    return token2idx, max_sent_length, token_freq
+    return token2idx, max_length, token_freq
+
+
+def tokenise(text, lowercase, simple, remove_stopwords):
+    """
+
+    :param text:
+    :param lowercase:
+    :param simple:
+    :param remove_stopwords:
+    :return:
+    """
+    stop_words = set(stopwords.words('german'))
+    if not simple:
+        words = []
+        sentences = sent_tokenize(text, language='german')
+        for s in sentences:
+            words.extend(word_tokenize(s))
+    else:
+        words = re.findall(r'(?u)\b\w\w+\b', text)
+    if remove_stopwords is True:
+        words = [word for word in words if word not in stop_words]
+    if lowercase is True:
+        words = [w.lower() for w in words]
+
+    return words
 
 
 def vectorizer(x_sample, token2idx):
     """
-    Something like a Vectorizer, that converts your sentences into vectors,
-    either one-hot-encodings or embeddings;
+    Converts tokenised sentences into vectors, i.e. one-hot-encodings;
 
     :return:
     """

@@ -21,7 +21,7 @@ from models.bag_of_tricks import BagOfTricks
 from models.convnets_utils import get_embeddings_layer, get_cnn_pre_trained_embeddings
 from models.keras_han.model import HAN
 from models.lstm_utils import build_lstm_based_model
-from utils.pre_processing import build_token_index, vectorizer
+from utils.pre_processing import build_token_index, vectorizer, tokenise
 
 
 def train_bi_lstm(train_data_x, train_data_y):
@@ -182,7 +182,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     bot = BagOfTricks()
     n_top_tokens = 80000
 
-    # build tokens maping and compute freq
+    # build tokens mapping and compute freq
     token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lowercase=True)
 
     # select only top-k tokens
@@ -435,31 +435,41 @@ def train_naive_bayes(train_data_x, train_data_y, level_label):
 
 def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     # ToDo: grid-search Keras:
+
     """
     - Grid search across different kernel sizes to find the optimal configuration for your problem,
       in the range 1-10.
+
     - Search the number of filters from 100-600 and explore a dropout of 0.0-0.5 as part of the
       same search.
+
     - Explore using tanh, relu, and linear activation functions.
+
     - https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
 
     - See function above
     """
 
-    token2idx, max_sent_len, _ = build_token_index(train_data_x)
+    token2idx, max_sent_len, _ = build_token_index(train_data_x,
+                                                   lowercase=True,
+                                                   simple=True,
+                                                   remove_stopwords=False)
 
-    # x_data: vectorize, i.e. tokens to indexes and pad
+    # vectorize, i.e. tokens to indexes and pad
     print("Vectorizing input data\n")
     vectors = []
     for x in train_data_x:
         text = x['title'] + " SEP " + x['body']
-        tokens = re.findall(r'(?u)\b\w\w+\b', text)
+        tokens = tokenise(text, lowercase=True, simple=True, remove_stopwords=False)
         vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
-    vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                   truncating='post', value=token2idx['PADDED'])
+    vectors_padded = pad_sequences(vectors,
+                                   padding='post',
+                                   maxlen=max_sent_len,
+                                   truncating='post',
+                                   value=token2idx['PADDED'])
 
-    # y_data: encode into one-hot vectors
+    # encode target into one-hot vectors
     ml_binarizer = MultiLabelBinarizer()
     y_labels = ml_binarizer.fit_transform(train_data_y)
     print('Total of {} classes'.format(len(ml_binarizer.classes_)))
@@ -468,11 +478,9 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     data_y = y_labels
 
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y, random_state=42,
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+                                                        random_state=42,
                                                         test_size=0.30)
-
-    print(train_x.shape)
-    print(train_y.shape)
 
     """    
     model = get_cnn_rand(200, len(token2idx) + 1, max_sent_len, n_classes)
@@ -515,6 +523,9 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
         f_out.write(report)
         f_out.write('\n')
     """
+
+    print(train_data_x)
+
     # train on all data without validation split
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
