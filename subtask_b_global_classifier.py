@@ -11,7 +11,7 @@ from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, Embedd
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize
 
-from data_analysis import extract_hierarchy
+from analysis import extract_hierarchy
 from models.utils import build_token_index, vectorize_dev_data, vectorizer
 from utils import load_data
 
