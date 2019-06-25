@@ -6,8 +6,9 @@ from collections import defaultdict
 from copy import deepcopy
 import numpy as np
 from statistical_analysis.data_analysis import extract_hierarchy
+
 from utils.models_utils import train_bag_of_tricks, train_cnn_sent_class, train_logit_tf_idf
-from utils.pre_processing import load_data, vectorize_one_sample
+from utils.pre_processing import load_data, vectorize_dev_data
 
 
 def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
@@ -36,9 +37,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
-    print("type_clfs")
-    print(type_clfs)
-    print()
+    tokenisation = {'low': True, 'simple': False, 'stop':  False}
 
     # train a classifier for each level
     print("\n\n=== TOP-LEVEL ===")
@@ -55,7 +54,8 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
     elif type_clfs['top'] == 'cnn':
         top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                               samples_y,
-                                                                              "top-level")
+                                                                              "top-level",
+                                                                              tokenisation)
         classifiers['top_level']['clf'] = top_clf
         classifiers['top_level']['binarizer'] = ml_binarizer
         classifiers['top_level']['token2idx'] = token2idx
@@ -101,8 +101,10 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_1'][k]['binarizer'] = ml_binarizer
 
         elif type_clfs['level_1'] == 'cnn':
-            clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y,
-                                                                              k)
+            clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
+                                                                              samples_y,
+                                                                              k,
+                                                                              tokenisation)
             classifiers['level_1'][k]['clf'] = clf
             classifiers['level_1'][k]['binarizer'] = ml_binarizer
             classifiers['level_1'][k]['token2idx'] = token2idx
@@ -110,6 +112,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
 
         print()
         print(classifiers['level_1'].keys())
+        print(len(classifiers['level_1'].keys()))
         print("----------------------------")
 
     print("\n\n=== LEVEL 2 ===")
@@ -134,8 +137,10 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_2'][k]['binarizer'] = ml_binarizer
 
         elif type_clfs['level_2'] == 'cnn':
-            clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x, samples_y,
-                                                                              k)
+            clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
+                                                                              samples_y,
+                                                                              k,
+                                                                              tokenisation)
             classifiers['level_2'][k]['clf'] = clf
             classifiers['level_2'][k]['binarizer'] = ml_binarizer
             classifiers['level_2'][k]['token2idx'] = token2idx
@@ -143,6 +148,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
 
         print()
         print(classifiers['level_2'].keys())
+        print(len(classifiers['level_2'].keys()))
         print("----------------------------")
 
     return classifiers
@@ -153,7 +159,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     out_file = 'results/classifiers.pkl'
 
     # possibilities: logit, bag-of-tricks, cnn
-    clfs = {'top': 'logit',
+    clfs = {'top': 'cnn',
             'level_1': 'cnn',
             'level_2': 'cnn'}
 
@@ -169,9 +175,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
     # apply on dev data
     # structure to store predictions on dev_data
-    levels = {0: [],
-              1: [],
-              2: []}
+    levels = {0: [], 1: [], 2: []}
     classification = {}
     for data in dev_data_x:
         classification[data['isbn']] = deepcopy(levels)
@@ -179,33 +183,33 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     #
     # apply the top-level classifier
     #
-    # top_level_clf = classifiers['top_level']['clf']
-    # binarizer = classifiers['top_level']['binarizer']
-    # token2idx = classifiers['top_level']['token2idx']
-    # max_sent_len = classifiers['top_level']['max_sent_len']
-    # dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
-    # print("Predicting on dev data")
-    # predictions = top_level_clf.predict([dev_vector], verbose=1)
-    # pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
-    # for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
-    #     if pred is None:
-    #         continue
-    #     classification[data['isbn']][0] = [p for p in pred]
-    #     print('\t'.join([p for p in pred]))
-    #     print("-----")
-
     top_level_clf = classifiers['top_level']['clf']
     binarizer = classifiers['top_level']['binarizer']
+    token2idx = classifiers['top_level']['token2idx']
+    max_sent_len = classifiers['top_level']['max_sent_len']
+    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
     print("Predicting on dev data")
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-    predictions = top_level_clf.predict(new_data_x)
-    predictions_bins = np.where(predictions >= 0.5, 1, 0)
-    for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
+    predictions = top_level_clf.predict([dev_vector], verbose=1)
+    pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
+    for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
         if pred is None:
             continue
         classification[data['isbn']][0] = [p for p in pred]
         print('\t'.join([p for p in pred]))
         print("-----")
+
+    # top_level_clf = classifiers['top_level']['clf']
+    # binarizer = classifiers['top_level']['binarizer']
+    # print("Predicting on dev data")
+    # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+    # predictions = top_level_clf.predict(new_data_x)
+    # predictions_bins = np.where(predictions >= 0.5, 1, 0)
+    # for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
+    #     if pred is None:
+    #         continue
+    #     classification[data['isbn']][0] = [p for p in pred]
+    #     print('\t'.join([p for p in pred]))
+    #     print("-----")
 
     #
     # apply level-1 classifiers for prediction from the top-level classifier
