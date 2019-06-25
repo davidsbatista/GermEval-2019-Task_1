@@ -90,13 +90,14 @@ def generate_submission_file(predictions, ml_binarizer, dev_data_x):
             f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
 
 
-def build_token_index(x_data, lower=False, simple=False):
+def build_token_index(x_data, lowercase=False, simple=False):
     """
-    Tokenises the input data, it expects a list of strings.
+    Tokenises the input data, it expects a list of strings, and returns the longest string in
+    the dataset, the token2index mapping, and the frequency of each token
 
     :param x_data:
-    :param lower:
-    :param simple:
+    :param lowercase: if True lowercase the tokens
+    :param simple: if True use a simple tokenisation method based on regex
     :return:
     """
 
@@ -111,7 +112,7 @@ def build_token_index(x_data, lower=False, simple=False):
             sentences = sent_tokenize(text, language='german')
             for s in sentences:
                 tmp_len = 0
-                if lower is True:
+                if lowercase is True:
                     words = [word.lower() for word in word_tokenize(s) if word not in stop_words]
                     vocabulary.update(words)
                     for token in words:

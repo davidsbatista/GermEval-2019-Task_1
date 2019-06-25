@@ -183,7 +183,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     n_top_tokens = 80000
 
     # build tokens maping and compute freq
-    token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lower=True)
+    token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lowercase=True)
 
     # select only top-k tokens
     print(len(token2idx))
