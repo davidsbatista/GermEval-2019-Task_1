@@ -5,8 +5,8 @@ import pickle
 from collections import defaultdict
 from copy import deepcopy
 import numpy as np
-from statistical_analysis.data_analysis import extract_hierarchy
 
+from utils.data_analysis import extract_hierarchy
 from utils.models_utils import train_bag_of_tricks, train_cnn_sent_class, train_logit_tf_idf
 from utils.pre_processing import load_data, vectorize_dev_data, vectorize_one_sample
 
@@ -157,18 +157,19 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
 def subtask_b(train_data_x, train_data_y, dev_data_x):
 
     out_file = 'results/classifiers.pkl'
+    tokenisation = {'low': True, 'simple': False, 'stop': False}
 
+    """
     # possibilities: logit, bag-of-tricks, cnn
     clfs = {'top': 'cnn',
             'level_1': 'cnn',
             'level_2': 'cnn'}
-
     classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
     print(f"Saving trained classifiers to {out_file} ...")
     with open(out_file, 'wb') as f_out:
         pickle.dump(classifiers, f_out)
-
+    """
     print(f"Reading trained classifiers to {out_file} ...")
     with open('results/classifiers.pkl', 'rb') as f_in:
         classifiers = pickle.load(f_in)
@@ -187,7 +188,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     binarizer = classifiers['top_level']['binarizer']
     token2idx = classifiers['top_level']['token2idx']
     max_sent_len = classifiers['top_level']['max_sent_len']
-    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     print("Predicting on dev data")
     predictions = top_level_clf.predict([dev_vector], verbose=1)
     pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
@@ -235,7 +236,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
             binarizer = classifiers['level_1'][pred]['binarizer']
             token2idx = classifiers['level_1'][pred]['token2idx']
             max_sent_len = classifiers['level_1'][pred]['max_sent_len']
-            dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
+            dev_vector = vectorize_one_sample(data, max_sent_len, token2idx, tokenisation)
             predictions = clf.predict([dev_vector], verbose=1)
             filtered = np.array(len(binarizer.classes_)*[0.5])
             pred_bin = (predictions > filtered).astype(int)
@@ -272,7 +273,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
             binarizer = classifiers['level_2'][pred]['binarizer']
             token2idx = classifiers['level_2'][pred]['token2idx']
             max_sent_len = classifiers['level_2'][pred]['max_sent_len']
-            dev_vector = vectorize_one_sample(data, max_sent_len, token2idx)
+            dev_vector = vectorize_one_sample(data, max_sent_len, token2idx, tokenisation)
             print("Predicting on dev data")
             predictions = clf.predict([dev_vector], verbose=1)
             filter_threshold = np.array(len(binarizer.classes_)*[0.5])
