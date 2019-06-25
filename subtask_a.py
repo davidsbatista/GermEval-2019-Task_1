@@ -83,7 +83,7 @@ def train_bi_lstm(train_data_x, train_data_y):
 
     # since we have imbalanced dataset
     # sample_weights = compute_sample_weight('balanced', train_y)
-    model.fit(train_x, train_y, batch_size=16, epochs=5, verbose=1, validation_split=0.2)
+    model.fit(train_x, train_y, batch_size=16, epochs=10, verbose=1, validation_split=0.2)
 
     predictions = model.predict(test_x)
 
@@ -728,10 +728,11 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
 
 
 if __name__ == '__main__':
