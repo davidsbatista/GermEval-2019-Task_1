@@ -1,9 +1,7 @@
-from keras import backend as K, constraints, initializers, regularizers
-from keras.engine.topology import Layer
-from keras.layers import Bidirectional, Dense, Dropout, Embedding, Input, LSTM, CuDNNLSTM
-from keras.models import Model
-
 import numpy as np
+from keras import Input, Model, optimizers, regularizers, constraints
+from keras.engine import Layer
+from keras.layers import Bidirectional, CuDNNLSTM, Dense, Dropout, Embedding, LSTM, initializers, K
 
 
 class Attention(Layer):
@@ -110,3 +108,50 @@ def make_glovevec(glovepath, max_features, embed_size, word_index, veclen=300):
         if embedding_vector is not None:
             embedding_matrix[i] = embedding_vector
     return embedding_matrix
+
+
+def build_lstm_based_model(embeddings, label_encoder, max_sent_length, token2idx):
+    """
+    Buils an bi-LSTM for doc. classification
+
+    :param max_sent_length:
+    :param embeddings: pre-trained static embeddings
+    :param label_encoder: the encoding of the y labels
+    :return:
+    """
+    hidden_units = 128
+    dropout = 0.2
+    recurrent_dropout = 0.3
+    dense_dropout = 0.1
+    learning_rate = 0.001
+
+    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
+    embedding_matrix = np.random.random((len(token2idx), embeddings.vector_size))
+    not_found = 0
+    for word, i in token2idx.items():
+        try:
+            embedding_vector = embeddings[word.lower()]
+            embedding_matrix[i] = embedding_vector
+        except KeyError:
+            not_found += 1
+
+    # model itself
+    embedding_layer = Embedding(len(token2idx), embeddings.vector_size,
+                                weights=[embedding_matrix], input_length=max_sent_length,
+                                trainable=True, name='embeddings')
+
+    sequence_input = Input(shape=(max_sent_length,), dtype='int32', name='messages')
+    embedded_sequences = embedding_layer(sequence_input)
+    l_lstm = Bidirectional(LSTM(hidden_units))(embedded_sequences)
+    l_lstm_w_drop = Dropout(dense_dropout)(l_lstm)
+    preds = Dense(len(label_encoder.classes_),
+                  activation='sigmoid', name='sigmoid')(l_lstm_w_drop)
+    model = Model(inputs=[sequence_input], outputs=[preds])
+
+    model.compile(loss='binary_crossentropy',
+                  optimizer=optimizers.Adam(lr=learning_rate),
+                  metrics=['acc'])
+
+    print('{} out of {} words randomly initialized'.format(not_found, len(token2idx)))
+
+    return model
