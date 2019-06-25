@@ -1,4 +1,4 @@
-from utils import load_data
+from .pre_processing import load_data
 
 
 def main():
