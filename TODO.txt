@@ -1,13 +1,10 @@
 to try:
 =======
-- weight initialization for top-level + 1st level only
-  hidden layer matrix: 14k x 8+93
-
 - samples with no predicted labels, for 1st and 2nd level, get 2nd best ranked prediction
 
 
 # pre-processing
-
+================
 - replaces the characters “#- ,;:/+)<>&” and line break characters by spaces and we replace
   the substring “’s” (as in “geht’s”) by a space.
 
