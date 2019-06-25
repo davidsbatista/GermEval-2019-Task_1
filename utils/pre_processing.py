@@ -15,7 +15,6 @@ from sklearn.utils.multiclass import unique_labels
 
 PADDED = 1
 UNKNOWN = 0
-max_sent_length = 0
 
 
 def load_data(file, dev=False):
@@ -95,6 +94,7 @@ def build_token_index(x_data, lower=False, simple=False):
     vocabulary = set()
     token_freq = Counter()
     stop_words = set(stopwords.words('german'))
+    max_sent_length = 0
 
     if not simple:
         for x in x_data:
