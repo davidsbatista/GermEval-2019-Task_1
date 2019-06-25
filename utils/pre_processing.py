@@ -1,13 +1,10 @@
-import datetime
 import re
 from collections import Counter, defaultdict
-from datetime import datetime
 from os.path import join
 
 import matplotlib.pyplot as plt
 import numpy as np
 from bs4 import BeautifulSoup, NavigableString, Tag
-from keras.utils import to_categorical
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize
 from nltk.corpus import stopwords

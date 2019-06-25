@@ -188,9 +188,17 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     binarizer = classifiers['top_level']['binarizer']
     token2idx = classifiers['top_level']['token2idx']
     max_sent_len = classifiers['top_level']['max_sent_len']
-    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+
     print("Predicting on dev data")
-    predictions = top_level_clf.predict([dev_vector], verbose=1)
+    test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+    predictions = top_level_clf.predict(test_vectors)
+
+    """
+    for pred, true in zip(predictions, dev_data_x):
+        binary = [0 if i <= 0.5 else 1 for i in pred]
+        binary_predictions.append(binary)
+    """
+    # predictions = top_level_clf.predict([dev_vector], verbose=1)
     pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
     for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
         if pred is None:
