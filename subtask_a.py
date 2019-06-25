@@ -76,7 +76,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
                                                                                 train_data_y,
                                                                                 'top_level')
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
-            predictions = model.predict([test_vectors, test_vectors])
+            predictions = model.predict(test_vectors)
 
         if clf == 'bag-of-tricks':
             model, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,

@@ -468,8 +468,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     data_y = y_labels
 
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
-                                                        random_state=42,
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y, random_state=42,
                                                         test_size=0.30)
 
     print(train_x.shape)
@@ -520,7 +519,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=1, verbose=True)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=5, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
