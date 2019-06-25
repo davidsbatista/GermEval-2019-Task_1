@@ -1,4 +1,5 @@
 import datetime
+import re
 from collections import Counter, defaultdict
 from datetime import datetime
 from os.path import join
@@ -90,6 +91,14 @@ def generate_submission_file(predictions, ml_binarizer, dev_data_x):
 
 
 def build_token_index(x_data, lower=False, simple=False):
+    """
+    Tokenises the input data, it expects a list of strings.
+
+    :param x_data:
+    :param lower:
+    :param simple:
+    :return:
+    """
 
     vocabulary = set()
     token_freq = Counter()
@@ -115,12 +124,17 @@ def build_token_index(x_data, lower=False, simple=False):
                 tmp_len += len(s)
                 max_sent_length = max(tmp_len, max_sent_length)
 
-        token2idx = {word: i + 2 for i, word in enumerate(vocabulary, 0)}
-        token2idx["PADDED"] = PADDED
-        token2idx["UNKNOWN"] = UNKNOWN
-
     elif simple is True:
-        pass
+        for x in x_data:
+            text = x['title'] + " SEP " + x['body']
+            tokens = re.findall(r'(?u)\b\w\w+\b', text)
+            vocabulary.update([word for word in tokens])
+            for token in tokens:
+                token_freq[token] += 1
+
+    token2idx = {word: i + 2 for i, word in enumerate(vocabulary, 0)}
+    token2idx["PADDED"] = PADDED
+    token2idx["UNKNOWN"] = UNKNOWN
 
     return token2idx, max_sent_length, token_freq
 

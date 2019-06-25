@@ -220,14 +220,14 @@ followed for the the other classes and lower levels in the hierarchy. There are 
 on how to select the positive and negative classes (see~\cite{}).
 
 During prediction a top-down strategy is applied, the output of each binary classifier will be a
-prediction of whether or not a given test sample belongs to the classifier’s predicted class. This approach
-is naturally multi-label since it is possible to predict multiple labels per class level.
+prediction of whether or not a given test sample belongs to the classifier’s predicted class. This
+approach is naturally multi-label since it is possible to predict multiple labels per class level.
 
-This approach however is prone to class-membership inconsistency, consider having again in the first level
-classes 1, 2 and 3, and in the second level, for instance, classes 1.1, 1.2, since the classifiers for nodes
-1 and 1.1 are independently trained, one can classify a sample as belonging to classes 1.2 and 1.1
-but not to class 1. This approach should also be complemented by a post-processing method that tries
-to correct the prediction inconsistency.
+This approach however is prone to class-membership inconsistency, consider having again in the first
+level classes 1, 2 and 3, and in the second level, for instance, classes 1.1, 1.2, since the
+classifiers for nodes 1 and 1.1 are independently trained, one can classify a sample as belonging to
+classes 1.2 and 1.1 but not to class 1. This approach should also be complemented by a
+post-processing method that tries to correct the prediction inconsistency.
 
 
 \subsubsection{A classifier per parent node} % Local Classifier Per Parent Node Approach
@@ -265,18 +265,24 @@ approach is the propagation of errors downwards the hierarchy.
 \subsection{Global Classifier: labels co-occurrence}
 
 Another type of strategy is to learn a classifier than can globally learn to output the predictions
-for each level in the hierarchical structure. This is done by leveraging on the labels co-occurrence.
+for each level in the hierarchical structure. This is done by flatenning and hierarchical structure
+and leveraging on the labels co-occurrence.
 
-\citet{kurata-etal-2016-improved} proposed a novel novel neural network initialisation method to
+\citet{kurata-etal-2016-improved} proposed a novel neural network initialisation method to
 treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label
 co-occurrence These dedicated neurons are initialised to connect to the corresponding co-occurring
 labels with stronger weights than to others.
 
 
 \begin{comment}
-When the labels form a hi- erarchy, they share a hypernym–hyponym relation (Figure 1). When multiple labels are assigned to the text, if it is explicitly labeled by a subclass it must also implicitly include all of the its super- classes.
-The co-occurrence between subclasses and su- perclasses as labels for the input text contains in- formation we would like to leverage to improve multi-label classification using a neural network.
+When the labels form a hierarchy, they share a hypernym–hyponym relation. When multiple
+ labels are assigned to the text, if it is explicitly labeled by a subclass it must also implicitly
+ include all of the its super- classes.
+The co-occurrence between subclasses and superclasses as labels for the input text contains
+information we would like to leverage to improve multi-label classification using a neural network.
 \end{comment}
+
+
 
 
 
@@ -407,7 +413,7 @@ Bag-of-Tricks~\cite{joulin-etal-2017-bag}, bi-LSTM~\cite{Hochreiter:1997:LSM:124
  HAN            & 0.8101 & 0.7574 & 0.7829 \\
  bi-LSTM        & 0.8016 & 0.7031 & 0.7492 \\
  Bag-of-Tricks  & 0.5325 & 0.4964 & 0.5138 \\
- ConvNets       &        &        &        \\
+ ConvNets       & 0.8648 & 0.7857 & 0.8233 \\
 \hline
 \end{tabular}
 \end{center}
