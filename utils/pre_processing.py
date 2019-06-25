@@ -181,18 +181,17 @@ def vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation):
     return test_vectors
 
 
-"""
-def vectorize_one_sample(x, max_sent_len, token2idx):
-    tokens = []
+def vectorize_one_sample(x, max_sent_len, token2idx, tokenisation):
     text = x['title'] + " SEP " + x['body']
-    sentences = sent_tokenize(text, language='german')
-    for s in sentences:
-        tokens += word_tokenize(s)
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
+    tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
     vector = vectorizer(tokens, token2idx)
     padded_vector = pad_sequences([vector], padding='post', maxlen=max_sent_len,
                                   truncating='post', value=token2idx['PADDED'])
     return padded_vector
-"""
+
 
 """
 def plot_confusion_matrix(y_true, y_pred, normalize=False, title=None, cmap=plt.cm.Blues):
