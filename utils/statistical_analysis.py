@@ -10,8 +10,6 @@ from nltk import sent_tokenize, wordpunct_tokenize
 from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 
-from utils.pre_processing import load_data
-
 
 def top_words_per_class(train_data_x, train_data_y):
 
@@ -197,18 +195,3 @@ def data_analysis(train_data_x, train_data_y, test_data_x):
     print(df_stats_level_2)
     df_stats_level_2.plot(y='counts', kind='bar', legend=False, grid=True, figsize=(15, 8))
     """
-
-
-def main():
-    # load train and test data
-    train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt')
-
-    # load dev data
-    dev_data_x, dev_data_y, labels = load_data('blurbs_train_all.txt')
-
-    # data analysis
-    data_analysis(train_data_x, train_data_y, test_data_x)
-
-
-if __name__ == '__main__':
-    main()
