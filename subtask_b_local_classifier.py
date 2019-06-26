@@ -38,7 +38,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
                    'level_2': defaultdict(dict)}
 
     # train a classifier for each level
-    tokenisation = {'low': True, 'simple': False, 'stop': False}
 
     print("\n\n=== TOP-LEVEL ===")
     print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
@@ -52,6 +51,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['binarizer'] = ml_binarizer
 
     elif type_clfs['top'] == 'cnn':
+        tokenisation = {'low': True, 'simple': True, 'stop': False}
         top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                               samples_y,
                                                                               "top-level",
@@ -101,6 +101,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_1'][k]['binarizer'] = ml_binarizer
 
         elif type_clfs['level_1'] == 'cnn':
+            tokenisation = {'low': True, 'simple': True, 'stop': False}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
                                                                               k,
@@ -137,6 +138,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_2'][k]['binarizer'] = ml_binarizer
 
         elif type_clfs['level_2'] == 'cnn':
+            tokenisation = {'low': True, 'simple': True, 'stop': False}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
                                                                               k,
