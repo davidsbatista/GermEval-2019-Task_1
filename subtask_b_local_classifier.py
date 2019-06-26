@@ -182,7 +182,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     tokenisation = {'low': True, 'simple': False, 'stop': False}
 
     # apply the top-level classifier
-    #
     top_level_clf = classifiers['top_level']['clf']
     binarizer = classifiers['top_level']['binarizer']
     token2idx = classifiers['top_level']['token2idx']
