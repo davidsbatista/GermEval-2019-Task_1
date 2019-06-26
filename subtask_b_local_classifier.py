@@ -13,6 +13,8 @@ from utils.pre_processing import load_data, vectorize_dev_data, vectorize_one_sa
 
 def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
 
+    tokenisation = {'low': True, 'simple': True, 'stop': False}
+
     # aggregate data for 3-level classifiers
     data_y_level_0 = []
     data_y_level_1 = []
@@ -51,7 +53,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['binarizer'] = ml_binarizer
 
     elif type_clfs['top'] == 'cnn':
-        tokenisation = {'low': True, 'simple': True, 'stop': False}
         top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                               samples_y,
                                                                               "top-level",
@@ -159,7 +160,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
 def subtask_b(train_data_x, train_data_y, dev_data_x):
 
     out_file = 'results/classifiers.pkl'
-    tokenisation = {'low': True, 'simple': False, 'stop': False}
 
     # possibilities: logit, bag-of-tricks, cnn
     clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
@@ -180,7 +180,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     for data in dev_data_x:
         classification[data['isbn']] = deepcopy(levels)
 
-    #
+    tokenisation = {'low': True, 'simple': True, 'stop': False}
+
     # apply the top-level classifier
     #
     top_level_clf = classifiers['top_level']['clf']
