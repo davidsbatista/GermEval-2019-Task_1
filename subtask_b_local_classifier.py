@@ -242,7 +242,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
             dev_vector = vectorize_one_sample(data, max_sent_len, token2idx, tokenisation)
             predictions = clf.predict([dev_vector], verbose=1)
-            filtered = np.array(len(binarizer.classes_)*[0.4])
+            filtered = np.array(len(binarizer.classes_)*[0.5])
             pred_bin = (predictions >= filtered).astype(int)
             indexes = pred_bin[0].nonzero()[0]
             if indexes.any():
@@ -280,7 +280,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
             dev_vector = vectorize_one_sample(data, max_sent_len, token2idx, tokenisation)
 
             predictions = clf.predict([dev_vector], verbose=1)
-            filter_threshold = np.array(len(binarizer.classes_)*[0.4])
+            filter_threshold = np.array(len(binarizer.classes_)*[0.5])
             pred_bin = (predictions >= filter_threshold).astype(int)
             indexes = pred_bin[0].nonzero()[0]
             if indexes.any():

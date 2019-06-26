@@ -34,9 +34,7 @@ clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
 top_level
 =========
 train/test same tokenisation = {'low': True, 'simple': False, 'stop': False}
-binary = [0 if i <= 0.4 else 1 for i in pred]
-if np.all(binary == 0):
-    binary = [0 if i <= 0.3 else 1 for i in pred]
+threshold at <= 0.4, if all zeros, set threshold at <= 0.3
 
 level_1
 ========
@@ -46,3 +44,27 @@ tokenisation = {'low': True, 'simple': False, 'stop': False}
 level_2
 ========
 tokenisation = {'low': True, 'simple': False, 'stop': False}
+
+
+====================================================================================================
+correct:1
+set1_score:0.8285252711747058
+set2_score:0.6114529914529914
+
+clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
+
+top_level
+=========
+train/test same tokenisation = {'low': True, 'simple': False, 'stop': False}
+threshold at <= 0.4, if all zeros, set threshold at <= 0.3
+
+level_1
+========
+tokenisation = {'low': True, 'simple': False, 'stop': False}
+threshold at <= 0.4
+
+
+level_2
+========
+tokenisation = {'low': True, 'simple': False, 'stop': False}
+threshold at <= 0.4
