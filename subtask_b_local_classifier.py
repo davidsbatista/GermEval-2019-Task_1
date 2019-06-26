@@ -38,7 +38,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
                    'level_2': defaultdict(dict)}
 
     # train a classifier for each level
-
     print("\n\n=== TOP-LEVEL ===")
     print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
     print(f'samples {len(data_y_level_0)}')
@@ -60,6 +59,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['binarizer'] = ml_binarizer
         classifiers['top_level']['token2idx'] = token2idx
         classifiers['top_level']['max_sent_len'] = max_sent_len
+        classifiers['top_level']['tokenisation'] = tokenisation
 
     elif type_clfs['top'] == 'bag-of-tricks':
         top_clf, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,
@@ -91,10 +91,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         print("samples: ", len(samples_y))
         print()
 
-        # total number of samples?  samples per classe?
-        # ToDo: Naive Bayes para low samples?
-        # ToDo: ver os que nao foram atribuidos nenhuma label, forcar tags com base nas palavras ?
-
         if type_clfs['level_1'] == 'logit':
             clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
             classifiers['level_1'][k]['clf'] = clf
@@ -110,6 +106,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_1'][k]['binarizer'] = ml_binarizer
             classifiers['level_1'][k]['token2idx'] = token2idx
             classifiers['level_1'][k]['max_sent_len'] = max_sent_len
+            classifiers['level_1'][k]['tokenisation'] = tokenisation
 
         print()
         print(classifiers['level_1'].keys())
@@ -147,6 +144,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_2'][k]['binarizer'] = ml_binarizer
             classifiers['level_2'][k]['token2idx'] = token2idx
             classifiers['level_2'][k]['max_sent_len'] = max_sent_len
+            classifiers['level_2'][k]['tokenisation'] = tokenisation
 
         print()
         print(classifiers['level_2'].keys())
@@ -179,15 +177,13 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     for data in dev_data_x:
         classification[data['isbn']] = deepcopy(levels)
 
-    tokenisation = {'low': True, 'simple': False, 'stop': False}
-
     # apply the top-level classifier
     top_level_clf = classifiers['top_level']['clf']
     binarizer = classifiers['top_level']['binarizer']
     token2idx = classifiers['top_level']['token2idx']
     max_sent_len = classifiers['top_level']['max_sent_len']
+    tokenisation = classifiers['top_level']['tokenisation']
 
-    print("Predicting on dev data")
     test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     predictions = top_level_clf.predict(test_vectors)
     pred_bin = []
@@ -225,6 +221,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         if len(top_level_pred) == 0:
             continue
         print("top_level_preds: ", top_level_pred)
+
         # call level-1 classifier for each pred from top-level
         for pred in top_level_pred:
 
@@ -241,13 +238,12 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
             binarizer = classifiers['level_1'][pred]['binarizer']
             token2idx = classifiers['level_1'][pred]['token2idx']
             max_sent_len = classifiers['level_1'][pred]['max_sent_len']
-            tokenisation = {'low': True, 'simple': False, 'stop': False}
+            tokenisation = classifiers['level_1'][pred]['tokenisation']
 
             dev_vector = vectorize_one_sample(data, max_sent_len, token2idx, tokenisation)
             predictions = clf.predict([dev_vector], verbose=1)
-            filtered = np.array(len(binarizer.classes_)*[0.5])
-            pred_bin = (predictions > filtered).astype(int)
-
+            filtered = np.array(len(binarizer.classes_)*[0.4])
+            pred_bin = (predictions >= filtered).astype(int)
             indexes = pred_bin[0].nonzero()[0]
             if indexes.any():
                 for x in np.nditer(indexes):
@@ -282,11 +278,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
             max_sent_len = classifiers['level_2'][pred]['max_sent_len']
             tokenisation = {'low': True, 'simple': False, 'stop': False}
             dev_vector = vectorize_one_sample(data, max_sent_len, token2idx, tokenisation)
-            print("Predicting on dev data")
-            predictions = clf.predict([dev_vector], verbose=1)
-            filter_threshold = np.array(len(binarizer.classes_)*[0.5])
-            pred_bin = (predictions > filter_threshold).astype(int)
 
+            predictions = clf.predict([dev_vector], verbose=1)
+            filter_threshold = np.array(len(binarizer.classes_)*[0.4])
+            pred_bin = (predictions >= filter_threshold).astype(int)
             indexes = pred_bin[0].nonzero()[0]
             if indexes.any():
                 for x in np.nditer(indexes):

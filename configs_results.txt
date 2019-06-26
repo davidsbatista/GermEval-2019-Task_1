@@ -25,6 +25,9 @@ test:  tokenisation = {'low': True, 'simple': False, 'stop': False}
 
 
 ====================================================================================================
+correct:1
+set1_score:0.8308755760368663
+set2_score:0.6135587124617875
 
 clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
 
@@ -37,11 +40,9 @@ if np.all(binary == 0):
 
 level_1
 ========
-train: tokenisation = {'low': True, 'simple': False, 'stop': False}
-test:  tokenisation = {'low': True, 'simple': False, 'stop': False}
+tokenisation = {'low': True, 'simple': False, 'stop': False}
 
 
 level_2
 ========
-train: tokenisation = {'low': True, 'simple': False, 'stop': False}
-test:  tokenisation = {'low': True, 'simple': False, 'stop': False}
+tokenisation = {'low': True, 'simple': False, 'stop': False}
