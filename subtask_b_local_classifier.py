@@ -37,9 +37,9 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
                    'level_1': defaultdict(dict),
                    'level_2': defaultdict(dict)}
 
-    tokenisation = {'low': True, 'simple': False, 'stop':  False}
-
     # train a classifier for each level
+    tokenisation = {'low': True, 'simple': False, 'stop': False}
+
     print("\n\n=== TOP-LEVEL ===")
     print(f'top classifier on {len(hierarchical_level_1.keys())} labels')
     print(f'samples {len(data_y_level_0)}')
