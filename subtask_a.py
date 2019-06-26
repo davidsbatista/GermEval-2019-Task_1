@@ -93,6 +93,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
         binary_predictions = []
         for pred in predictions:
             binary = [0 if i <= 0.4 else 1 for i in pred]
+            if np.all(binary == 0):
+                binary = [0 if i <= 0.3 else 1 for i in pred]
             binary_predictions.append(binary)
 
         generate_submission_file(np.array(binary_predictions), ml_binarizer, dev_data_x)
