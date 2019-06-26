@@ -1,6 +1,8 @@
+
 to try:
 =======
 - samples with no predicted labels, for 1st and 2nd level, get 2nd best ranked prediction
+
 
 
 # pre-processing
@@ -8,23 +10,26 @@ to try:
 - replaces the characters “#- ,;:/+)<>&” and line break characters by spaces and we replace
   the substring “’s” (as in “geht’s”) by a space.
 
-- for features with stemming we use the German stemmer of NLTK
-
-- for creating character-level features we concatenate (Join in Table 1) the resulting tokens
+- for creating character-level features we concatenate the resulting tokens
   with spaces into one string for extracting character-level n-grams.
 
 - CNGR extracts all character-level n-grams of length 3 to 7,
 - while TNGR extracts all stemmed token-level n-grams of length 1 to 3
 
-
 - top-scoring n-grams for each doc ?
 - top-scoring n-grams for each class
 
-from nltk.stem.snowball import GermanStemmer
-stem = GermanStemmer()
 
-https://www.nltk.org/api/nltk.stem.html
+# tokenisation
+==============
 
+ - from nltk.stem.snowball import GermanStemmer
+   stem = GermanStemmer()
+   https://www.nltk.org/api/nltk.stem.html
+
+
+# character n-grams for
+=======================
 
 - we perform TFIDF over all extracted n-grams, keep only those with a document frequency between
   0.01 and 0.0002 (i.e., those that are rare enough to carry some signal, but frequent enough to
@@ -46,6 +51,9 @@ https://www.nltk.org/api/nltk.stem.html
   selects the most distinguishing types per category, a related analysis is described in the blog
   of Thomas Buhrman.3
 
+
+# other ideas
+=============
 # ToDo: other embeddings? BRET, ELMo, Flair?
 # ToDo: language model based on char?
 # ToDO: https://github.com/cambridgeltl/multilabel-nn

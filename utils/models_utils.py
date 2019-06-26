@@ -520,7 +520,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label, tokenisation):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=True)
+    model.fit(train_data_x, data_y, batch_size=32, epochs=5, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 

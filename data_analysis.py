@@ -27,7 +27,6 @@ def main():
             dev_data_y.append(y)
 
     print(len(dev_data_x))
-    print(len(dev_data_y))
 
     # data analysis
     data_analysis(dev_data_x, dev_data_y, dev_data_x)
