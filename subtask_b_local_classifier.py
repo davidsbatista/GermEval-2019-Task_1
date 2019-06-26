@@ -194,6 +194,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         binary = [0 if i <= 0.4 else 1 for i in pred]
         if np.all(binary == 0):
             binary = [0 if i <= 0.3 else 1 for i in pred]
+            if np.all(binary == 0):
+                binary = [0 if i <= 0.2 else 1 for i in pred]
         pred_bin.append(binary)
 
     # predictions = top_level_clf.predict([dev_vector], verbose=1)
