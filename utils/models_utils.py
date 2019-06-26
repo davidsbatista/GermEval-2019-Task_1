@@ -1,5 +1,4 @@
 import pickle
-import re
 from collections import defaultdict
 
 import nltk
@@ -426,9 +425,6 @@ def train_naive_bayes(train_data_x, train_data_y, level_label):
     best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
     best_pipeline.fit(new_data_x, data_y)
 
-    with open('test.pkl', 'wb') as f_out:
-        pickle.dump(best_pipeline, f_out)
-
     return best_pipeline, ml_binarizer
 
 
@@ -524,7 +520,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label, tokenisation):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=5, verbose=True)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
