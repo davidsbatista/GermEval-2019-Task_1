@@ -161,11 +161,11 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
     # possibilities: logit, bag-of-tricks, cnn
     clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
-    classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
-
-    print(f"Saving trained classifiers to {out_file} ...")
-    with open(out_file, 'wb') as f_out:
-        pickle.dump(classifiers, f_out)
+    # classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
+    #
+    # print(f"Saving trained classifiers to {out_file} ...")
+    # with open(out_file, 'wb') as f_out:
+    #     pickle.dump(classifiers, f_out)
 
     print(f"Reading trained classifiers to {out_file} ...")
     with open('results/classifiers.pkl', 'rb') as f_in:
@@ -189,9 +189,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     print("Predicting on dev data")
     test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     predictions = top_level_clf.predict(test_vectors)
-
     pred_bin = []
-
     for pred, true in zip(predictions, dev_data_x):
         binary = [0 if i <= 0.4 else 1 for i in pred]
         if np.all(binary == 0):
@@ -200,7 +198,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
     # predictions = top_level_clf.predict([dev_vector], verbose=1)
     # pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
-    for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
+    for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
         if pred is None:
             continue
         classification[data['isbn']][0] = [p for p in pred]
