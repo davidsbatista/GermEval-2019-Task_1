@@ -6,7 +6,7 @@ from collections import defaultdict
 from copy import deepcopy
 import numpy as np
 
-from utils.data_analysis import extract_hierarchy
+from utils.statistical_analysis import extract_hierarchy
 from utils.models_utils import train_bag_of_tricks, train_cnn_sent_class, train_logit_tf_idf
 from utils.pre_processing import load_data, vectorize_dev_data, vectorize_one_sample
 
@@ -159,17 +159,14 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     out_file = 'results/classifiers.pkl'
     tokenisation = {'low': True, 'simple': False, 'stop': False}
 
-    """
     # possibilities: logit, bag-of-tricks, cnn
-    clfs = {'top': 'cnn',
-            'level_1': 'cnn',
-            'level_2': 'cnn'}
+    clfs = {'top': 'logit', 'level_1': 'cnn', 'level_2': 'cnn'}
     classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
     print(f"Saving trained classifiers to {out_file} ...")
     with open(out_file, 'wb') as f_out:
         pickle.dump(classifiers, f_out)
-    """
+
     print(f"Reading trained classifiers to {out_file} ...")
     with open('results/classifiers.pkl', 'rb') as f_in:
         classifiers = pickle.load(f_in)
