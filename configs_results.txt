@@ -1,0 +1,47 @@
+correct:1
+set1_score:0.8312528895053166
+set2_score:0.6039092753088696
+
+
+clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
+
+top_level
+=========
+train/test same tokenisation = {'low': True, 'simple': False, 'stop': False}
+binary = [0 if i <= 0.4 else 1 for i in pred]
+if np.all(binary == 0):
+    binary = [0 if i <= 0.3 else 1 for i in pred]
+
+level_1
+========
+train: tokenisation = {'low': True, 'simple': True, 'stop': False}
+test:  tokenisation = {'low': True, 'simple': False, 'stop': False}
+
+
+level_2
+========
+train: tokenisation = {'low': True, 'simple': True, 'stop': False}
+test:  tokenisation = {'low': True, 'simple': False, 'stop': False}
+
+
+====================================================================================================
+
+clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
+
+top_level
+=========
+train/test same tokenisation = {'low': True, 'simple': False, 'stop': False}
+binary = [0 if i <= 0.4 else 1 for i in pred]
+if np.all(binary == 0):
+    binary = [0 if i <= 0.3 else 1 for i in pred]
+
+level_1
+========
+train: tokenisation = {'low': True, 'simple': False, 'stop': False}
+test:  tokenisation = {'low': True, 'simple': False, 'stop': False}
+
+
+level_2
+========
+train: tokenisation = {'low': True, 'simple': False, 'stop': False}
+test:  tokenisation = {'low': True, 'simple': False, 'stop': False}
