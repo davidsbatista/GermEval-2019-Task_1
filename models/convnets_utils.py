@@ -1,13 +1,10 @@
 import os
+
 import numpy as np
-
-from sklearn.metrics import classification_report
-
-from keras.models import Model
 from keras.activations import relu
-from keras.layers import Input, Dense, Embedding, Flatten, Conv1D, MaxPooling1D, GlobalMaxPooling1D, \
-    regularizers
-from keras.layers import Dropout, concatenate
+from keras.layers import Conv1D, Dense, Dropout, Embedding, Flatten, Input, MaxPooling1D, \
+    concatenate
+from keras.models import Model
 
 
 def load_fasttext_embeddings():
@@ -45,7 +42,7 @@ def get_embeddings_layer(embeddings_matrix, name, max_len, trainable=False):
     return embedding_layer
 
 
-def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2], feature_maps=300):
+def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2, 3], feature_maps=300):
     branches = []
 
     for n in n_grams:
@@ -57,10 +54,7 @@ def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2], feature_maps=300):
                               strides=None, padding='valid',
                               name='MaxPooling_'+suffix+'_'+str(n))(branch)
 
-        # branch = GlobalMaxPooling1D(name='MaxPooling_'+suffix+'_'+str(n))(branch)
-
         branch = Flatten(name='Flatten_'+suffix+'_'+str(n))(branch)
-
         branches.append(branch)
 
     return branches
@@ -82,7 +76,7 @@ def get_cnn_rand(embedding_dim, vocab_size, max_len, num_classes):
     z = concatenate(branches, axis=-1)
     z = Dropout(0.5)(z)
 
-    # pass the concatenated vector to the predition layer
+    # pass the concatenated vector to the prediction layer
     o = Dense(num_classes, activation='sigmoid', name='output')(z)
 
     model = Model(inputs=i, outputs=o)
@@ -101,7 +95,7 @@ def get_cnn_pre_trained_embeddings(embedding_layer, max_len, num_classes):
     branches = get_conv_pool(x, 'static', max_len)
     z = concatenate(branches, axis=-1)
 
-    # pass the concatenated vector to the predition layer
+    # pass the concatenated vector to the prediction layer
     o = Dense(num_classes, activation='sigmoid', name='output')(z)
 
     model = Model(inputs=i, outputs=o)
