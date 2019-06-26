@@ -160,7 +160,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     tokenisation = {'low': True, 'simple': False, 'stop': False}
 
     # possibilities: logit, bag-of-tricks, cnn
-    clfs = {'top': 'logit', 'level_1': 'cnn', 'level_2': 'cnn'}
+    clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
     classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
     print(f"Saving trained classifiers to {out_file} ...")
@@ -190,13 +190,16 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     predictions = top_level_clf.predict(test_vectors)
 
-    """
+    pred_bin = []
+
     for pred, true in zip(predictions, dev_data_x):
-        binary = [0 if i <= 0.5 else 1 for i in pred]
-        binary_predictions.append(binary)
-    """
+        binary = [0 if i <= 0.4 else 1 for i in pred]
+        if np.all(binary == 0):
+            binary = [0 if i <= 0.3 else 1 for i in pred]
+        pred_bin.append(binary)
+
     # predictions = top_level_clf.predict([dev_vector], verbose=1)
-    pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
+    # pred_bin = (predictions > [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5]).astype(int)
     for pred, data in zip(binarizer.inverse_transform(pred_bin), dev_data_x):
         if pred is None:
             continue
