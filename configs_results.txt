@@ -61,10 +61,16 @@ threshold at <= 0.4, if all zeros, set threshold at <= 0.3
 level_1
 ========
 tokenisation = {'low': True, 'simple': False, 'stop': False}
-threshold at <= 0.4
+1 if threshold >= 0.5
 
 
 level_2
 ========
 tokenisation = {'low': True, 'simple': False, 'stop': False}
-threshold at <= 0.4
+1 if threshold >= 0.5
+
+
+====================================================================================================
+correct:1
+set1_score:0.8302145139205841
+set2_score:0.6081967213114754

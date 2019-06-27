@@ -276,7 +276,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
             binarizer = classifiers['level_2'][pred]['binarizer']
             token2idx = classifiers['level_2'][pred]['token2idx']
             max_sent_len = classifiers['level_2'][pred]['max_sent_len']
-            tokenisation = {'low': True, 'simple': False, 'stop': False}
+            tokenisation = classifiers['level_2'][pred]['tokenisation']
             dev_vector = vectorize_one_sample(data, max_sent_len, token2idx, tokenisation)
 
             predictions = clf.predict([dev_vector], verbose=1)
