@@ -1,4 +1,3 @@
-import pickle
 from collections import defaultdict
 
 import nltk
@@ -10,17 +9,17 @@ from nltk.corpus import stopwords
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import classification_report
-from sklearn.model_selection import train_test_split, GridSearchCV
+from sklearn.model_selection import GridSearchCV, train_test_split
 from sklearn.multiclass import OneVsRestClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.pipeline import Pipeline
 from sklearn.preprocessing import MultiLabelBinarizer
 
 from models.bag_of_tricks import BagOfTricks
-from models.convnets_utils import get_embeddings_layer, get_cnn_pre_trained_embeddings
+from models.convnets_utils import get_cnn_pre_trained_embeddings, get_embeddings_layer
 from models.keras_han.model import HAN
 from models.lstm_utils import build_lstm_based_model
-from utils.pre_processing import build_token_index, vectorizer, tokenise
+from utils.pre_processing import build_token_index, tokenise, vectorizer
 
 
 def train_bi_lstm(train_data_x, train_data_y, tokenisation):
@@ -191,10 +190,10 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lowercase=True)
 
     # select only top-k tokens
-    print(len(token2idx))
+    print("total nr. of tokens  : ", len(token2idx))
     token2idx = {k: i for i, (k, v) in enumerate(token_freq.most_common(n=n_top_tokens))}
-    print(len(token2idx))
-    print(max_sent_length)
+    print("selected top-k tokens: ", len(token2idx))
+    print("max_sent_length      : ", max_sent_length)
 
     PADDED = 1
     UNKNOWN = 0
@@ -481,10 +480,12 @@ def train_cnn_sent_class(train_data_x, train_data_y, level_label, tokenisation):
     train_data_x = vectors_padded
     data_y = y_labels
 
+    """
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
                                                         random_state=42,
                                                         test_size=0.30)
+    """
 
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')

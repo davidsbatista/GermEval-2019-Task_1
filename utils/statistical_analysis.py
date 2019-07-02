@@ -136,9 +136,9 @@ def count_sentences_tokens(train_data_x):
             # consider only alphanumeric tokens
             words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
             words_original = [w for w in nltk.Text(tokens) if w.isalpha()]
+            all_tokens.update(words_original)
             doc_tokens.extend(words)
         tokens_per_blurb.append(len(doc_tokens))
-        all_tokens.update(words_original)
 
     print("unique tokens original : ", len(all_tokens))
     print("unique tokens lowercase: ", len(set([t.lower() for t in all_tokens])))
