@@ -185,7 +185,7 @@ def train_han(train_data_x, train_data_y):
 
 def train_bag_of_tricks(train_data_x, train_data_y):
     bot = BagOfTricks()
-    n_top_tokens = 80000
+    n_top_tokens = 50000
 
     # build tokens mapping and compute freq
     token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lowercase=True)

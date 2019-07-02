@@ -128,9 +128,9 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
 
