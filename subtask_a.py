@@ -18,7 +18,7 @@ rn.seed(12345)
 from keras import backend as K
 # make random number generation in the TensorFlow backend have a well-defined initial state.
 tf.set_random_seed(1234)
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+sess = tf.Session(graph=tf.get_default_graph(), config=None)
 K.set_session(sess)
 
 
