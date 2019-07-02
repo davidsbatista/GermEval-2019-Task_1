@@ -121,6 +121,9 @@ def stats_genres_per_blurb(train_data_y):
 
 
 def count_sentences_tokens(train_data_x):
+    # to keep track of all the original tokens
+    all_tokens = set()
+
     # the title of the book is considered a sentence
     new_data_x = [x['title'] + ". " + x['body'] for x in train_data_x]
     sentences_per_blurb = []
@@ -132,8 +135,14 @@ def count_sentences_tokens(train_data_x):
             tokens = wordpunct_tokenize(s)
             # consider only alphanumeric tokens
             words = [w.lower() for w in nltk.Text(tokens) if w.isalpha()]
+            words_original = [w for w in nltk.Text(tokens) if w.isalpha()]
             doc_tokens.extend(words)
         tokens_per_blurb.append(len(doc_tokens))
+        all_tokens.update(words_original)
+
+    print("unique tokens original : ", len(all_tokens))
+    print("unique tokens lowercase: ", len(set([t.lower() for t in all_tokens])))
+
     return sentences_per_blurb, tokens_per_blurb
 
 

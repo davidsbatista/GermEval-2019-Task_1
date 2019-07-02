@@ -213,6 +213,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     print('Total of {} classes'.format(len(ml_binarizer.classes_)))
     n_classes = len(ml_binarizer.classes_)
 
+    """
     # split into train and hold out set
     train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y, random_state=42,
                                                         test_size=0.30)
@@ -235,10 +236,11 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     with open('classification_report.txt', 'at+') as f_out:
         f_out.write(report)
         f_out.write('\n')
+    """
 
     # train on all data
     model = bot.build_neural_network(n_classes)
-    model.fit(train_data_x, data_y, batch_size=32, epochs=1, verbose=1)
+    model.fit(train_data_x, data_y, batch_size=32, epochs=50, verbose=1)
 
     return model, ml_binarizer, max_sent_length, token2idx
 
