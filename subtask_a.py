@@ -13,7 +13,7 @@ np.random.seed(42)
 rn.seed(12345)
 
 # force TensorFlow to use single thread, multiple-threads can lead to non-reproducible results.
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+# session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 
 from keras import backend as K
 # make random number generation in the TensorFlow backend have a well-defined initial state.
