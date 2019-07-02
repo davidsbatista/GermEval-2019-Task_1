@@ -332,9 +332,6 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
     best_pipeline.fit(new_data_x, data_y)
 
-    with open('test.pkl', 'wb') as f_out:
-        pickle.dump(best_pipeline, f_out)
-
     return best_pipeline, ml_binarizer
 
 
