@@ -74,3 +74,7 @@ tokenisation = {'low': True, 'simple': False, 'stop': False}
 correct:1
 set1_score:0.8302145139205841
 set2_score:0.6081967213114754
+
+correct:1
+set1_score:0.8275862068965518
+set2_score:0.6106661812886786

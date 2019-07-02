@@ -6,6 +6,24 @@ from collections import defaultdict
 from copy import deepcopy
 import numpy as np
 
+import tensorflow as tf
+import random as rn
+
+# necessary for starting Numpy generated random numbers in a well-defined initial state.
+np.random.seed(42)
+
+# necessary for starting core Python generated random numbers in a well-defined state.
+rn.seed(12345)
+
+# force TensorFlow to use single thread, multiple-threads can lead to non-reproducible results.
+session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+
+from keras import backend as K
+# make random number generation in the TensorFlow backend have a well-defined initial state.
+tf.set_random_seed(1234)
+sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+K.set_session(sess)
+
 from utils.statistical_analysis import extract_hierarchy
 from utils.models_utils import train_bag_of_tricks, train_cnn_sent_class, train_logit_tf_idf
 from utils.pre_processing import load_data, vectorize_dev_data, vectorize_one_sample

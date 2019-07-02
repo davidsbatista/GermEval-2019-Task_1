@@ -1,4 +1,10 @@
 
+
+CUDA_VISIBLE_DEVICES="" PYTHONHASHSEED=0 python your_program.py
+
+
+
+
 to try:
 =======
 - samples with no predicted labels, for 1st and 2nd level, get 2nd best ranked prediction
