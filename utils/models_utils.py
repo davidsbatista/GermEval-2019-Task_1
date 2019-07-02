@@ -23,7 +23,7 @@ from models.lstm_utils import build_lstm_based_model
 from utils.pre_processing import build_token_index, vectorizer, tokenise
 
 
-def train_bi_lstm(train_data_x, train_data_y):
+def train_bi_lstm(train_data_x, train_data_y, tokenisation):
     """
     Trains a biLSTM classifier, message is represented by the concatenation of the two last
     states from each LSTM.
@@ -32,34 +32,41 @@ def train_bi_lstm(train_data_x, train_data_y):
     :param train_data_y:
     :return:
     """
-    token2idx, max_sent_len, _ = build_token_index(train_data_x)
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
+
+    token2idx, max_sent_len, _ = build_token_index(train_data_x,
+                                                   lowercase=low,
+                                                   simple=simple,
+                                                   remove_stopwords=stop)
+
+    # vectorize, i.e. tokens to indexes and pad
+    print("Vectorizing input data\n")
+    vectors = []
+    for x in train_data_x:
+        text = x['title'] + " SEP " + x['body']
+        tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
+        vector = vectorizer(tokens, token2idx)
+        vectors.append(vector)
+    vectors_padded = pad_sequences(vectors,
+                                   padding='post',
+                                   maxlen=max_sent_len,
+                                   truncating='post',
+                                   value=token2idx['PADDED'])
 
     # y_data: encode into one-hot vectors
     ml_binarizer = MultiLabelBinarizer()
     y_labels = ml_binarizer.fit_transform(train_data_y)
     print('Total of {} classes'.format(len(ml_binarizer.classes_)))
 
-    # x_data: vectorize, i.e. tokens to indexes and pad
-    print("Vectorizing input data\n")
-    vectors = []
-    for x in train_data_x:
-        tokens = []
-        text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
-        vector = vectorizer(tokens, token2idx)
-        vectors.append(vector)
-    vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
-                                   truncating='post', value=token2idx['PADDED'])
-
     train_data_x = vectors_padded
     data_y = y_labels
 
     # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
-                                                        random_state=42,
-                                                        test_size=0.30)
+    # train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+    #                                                    random_state=42,
+    #                                                    test_size=0.30)
 
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
@@ -67,16 +74,16 @@ def train_bi_lstm(train_data_x, train_data_y):
 
     # since we have imbalanced dataset
     # sample_weights = compute_sample_weight('balanced', train_y)
-    model.fit(train_x, train_y, batch_size=16, epochs=10, verbose=1, validation_split=0.2)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=1, validation_split=0.2)
 
-    predictions = model.predict(test_x)
+    # predictions = model.predict(test_x)
 
     # ToDo: there must be a more efficient way to do this
-    binary_predictions = []
-    for pred in predictions:
-        binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
-    print(classification_report(test_y, np.array(binary_predictions),
-                                target_names=ml_binarizer.classes_))
+    # binary_predictions = []
+    # for pred in predictions:
+    #    binary_predictions.append([0 if i <= 0.5 else 1 for i in pred])
+    # print(classification_report(test_y, np.array(binary_predictions),
+    #                            target_names=ml_binarizer.classes_))
 
     return model, ml_binarizer, max_sent_len, token2idx
 
