@@ -1,8 +1,27 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 
 import numpy as np
+
+import tensorflow as tf
+import random as rn
+
+# necessary for starting Numpy generated random numbers in a well-defined initial state.
+np.random.seed(42)
+
+# necessary for starting core Python generated random numbers in a well-defined state.
+rn.seed(12345)
+
+# force TensorFlow to use single thread, multiple-threads can lead to non-reproducible results.
+# session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+
+from keras import backend as K
+# make random number generation in the TensorFlow backend have a well-defined initial state.
+tf.set_random_seed(1234)
+sess = tf.Session(graph=tf.get_default_graph(), config=None)
+K.set_session(sess)
+
+import os
 import tensorflow as tf
 from keras import Input, Model, backend as K
 from keras.engine.saving import load_model
