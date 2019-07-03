@@ -245,6 +245,18 @@ def train_bag_of_tricks(train_data_x, train_data_y, tokenisation):
 
     # train on all data
     model = bot.build_neural_network(n_classes)
+
+    print("model.stop_words  :  ", model.stop_words)
+    print("model.n_top_tokens:  ", model.n_top_tokens)
+    print("model.ngram_range :  ", model.ngram_range)
+    print("model.max_len     :  ", model.max_len)
+    print("model.batch_size  :  ", model.batch_size)
+    print("embedding_dims    :  ", model.embedding_dims)
+    print("model.max_features:  ", model.max_features)
+    print("model.token_freq  :  ", model.token_freq)
+    print("model.token2idx   :  ", model.token2idx)
+    print("model.token_indice:  ", model.token_indice)
+
     model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=1, validation_split=0.2)
 
     return model, ml_binarizer, max_sent_len, token2idx

@@ -106,36 +106,6 @@ class BagOfTricks:
 
         return x
 
-    def update_token_mapping(self, data_x):
-        """
-        Creates a token to index mapping, considering token replacements - see text_or_ent();
-        The index considers only the top-'self.max_features' occurring tokens
-
-        Parameters
-        ----------
-        message
-        message_ent
-
-        Returns
-        -------
-
-        """
-        self.token_freq = Counter()
-        self.token2idx = {}
-        token_idx = 1
-        for m in data_x:
-            for t in m.attach_token_properties(ent_slots=y):
-                token = self.text_or_ent(t)
-                if token is None:
-                    break
-                self.token_freq[token] += 1
-                if token not in self.token2idx:
-                    self.token2idx[token] = token_idx
-                    token_idx += 1
-
-        self.token2idx = {k: i for i, (k, v) in
-                          enumerate(self.token_freq.most_common(n=self.n_top_tokens))}
-
     @classmethod
     def create_ngram_set(cls, input_list, ngram_value=2):
         """
