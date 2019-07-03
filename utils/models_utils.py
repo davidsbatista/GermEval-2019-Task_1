@@ -182,18 +182,24 @@ def train_han(train_data_x, train_data_y):
     return han_model, ml_binarizer, max_sent_len, token2idx, max_sent, max_tokens
 
 
-def train_bag_of_tricks(train_data_x, train_data_y):
+def train_bag_of_tricks(train_data_x, train_data_y, tokenisation):
     bot = BagOfTricks()
-    n_top_tokens = 50000
+    n_top_tokens = 100000
 
-    # build tokens mapping and compute freq
-    token2idx, max_sent_length, token_freq = build_token_index(train_data_x, lowercase=True)
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
+
+    token2idx, max_sent_len, token_freq = build_token_index(train_data_x,
+                                                            lowercase=low,
+                                                            simple=simple,
+                                                            remove_stopwords=stop)
 
     # select only top-k tokens
     print("total nr. of tokens  : ", len(token2idx))
     token2idx = {k: i for i, (k, v) in enumerate(token_freq.most_common(n=n_top_tokens))}
     print("selected top-k tokens: ", len(token2idx))
-    print("max_sent_length      : ", max_sent_length)
+    print("max_sent_length      : ", max_sent_len)
 
     PADDED = 1
     UNKNOWN = 0
@@ -201,7 +207,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     token2idx["UNKNOWN"] = UNKNOWN
 
     bot.token2idx = token2idx
-    bot.max_len = max_sent_length
+    bot.max_len = max_sent_len
 
     # map data to vectors of n-grams
     train_data_x = bot.map_data(train_data_x, train_data_y)
@@ -241,7 +247,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
     model = bot.build_neural_network(n_classes)
     model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=1, validation_split=0.2)
 
-    return model, ml_binarizer, max_sent_length, token2idx
+    return model, ml_binarizer, max_sent_len, token2idx
 
 
 def dummy_fun(doc):

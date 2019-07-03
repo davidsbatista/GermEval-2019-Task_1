@@ -103,9 +103,10 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             predictions = model.predict(test_vectors)
 
         if clf == 'bag-of-tricks':
-            tokenisation = {'low': True, 'simple': False, 'stop': False}
+            tokenisation = {'low': True, 'simple': True, 'stop': True}
             model, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,
-                                                                               train_data_y)
+                                                                               train_data_y,
+                                                                               tokenisation)
 
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
             predictions = model.predict(test_vectors)
