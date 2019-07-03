@@ -20,7 +20,7 @@ class BagOfTricks:
 
     def __init__(self, stopwords=None):
         self.stop_words = stopwords
-        self.n_top_tokens = None
+        self.n_top_tokens = 50000
         self.ngram_range = 2
         self.max_len = 300
         self.batch_size = 16
