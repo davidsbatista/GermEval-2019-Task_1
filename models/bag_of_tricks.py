@@ -20,11 +20,11 @@ class BagOfTricks:
 
     def __init__(self, stopwords=None):
         self.stop_words = stopwords
-        self.n_top_tokens = 15000
-        self.ngram_range = 3
+        self.n_top_tokens = None
+        self.ngram_range = 2
         self.max_len = 300
-        self.batch_size = 32
-        self.embedding_dims = 100
+        self.batch_size = 16
+        self.embedding_dims = 300
         self.epochs = 10
         self.model = None
         self.max_features = None
