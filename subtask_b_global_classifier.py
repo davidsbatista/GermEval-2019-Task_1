@@ -11,9 +11,8 @@ from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, Embedd
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize
 
-from statistical_analysis import extract_hierarchy
-from models.utils import build_token_index, vectorize_dev_data, vectorizer
-from utils import load_data
+from utils.pre_processing import build_token_index, vectorizer, load_data, vectorize_dev_data
+from utils.statistical_analysis import extract_hierarchy
 
 
 def create_weight_matrix(n_samples):

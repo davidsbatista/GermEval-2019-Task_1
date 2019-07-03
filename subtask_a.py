@@ -51,8 +51,9 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
     else:
         if clf == 'han':
+            tokenisation = {'low': True, 'simple': True, 'stop': True}
             model, ml_binarizer, max_sent_len, token2idx, max_sent, max_tokens = \
-                train_han(train_data_x, train_data_y)
+                train_han(train_data_x, train_data_y, tokenisation)
 
             processed_x = np.zeros((len(train_data_x), max_sent, max_tokens), dtype='int32')
 

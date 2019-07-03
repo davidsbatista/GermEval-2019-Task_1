@@ -87,8 +87,16 @@ def train_bi_lstm(train_data_x, train_data_y, tokenisation):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-def train_han(train_data_x, train_data_y):
-    token2idx, max_sent_len, _ = build_token_index(train_data_x)
+def train_han(train_data_x, train_data_y, tokenisation):
+
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
+
+    token2idx, max_sent_len, _ = build_token_index(train_data_x,
+                                                   lowercase=low,
+                                                   simple=simple,
+                                                   remove_stopwords=stop)
 
     # y_data: encode into one-hot vectors
     ml_binarizer = MultiLabelBinarizer()
