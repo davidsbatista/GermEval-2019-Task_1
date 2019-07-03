@@ -86,7 +86,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             predictions = model.predict(processed_x)
 
         if clf == 'lstm':
-            tokenisation = {'low': True, 'simple': False, 'stop': False}
+            tokenisation = {'low': True, 'simple': True, 'stop': True}
             model, ml_binarizer, max_sent_len, token2idx = train_bi_lstm(train_data_x, train_data_y,
                                                                          tokenisation)
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
@@ -129,9 +129,9 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
 
