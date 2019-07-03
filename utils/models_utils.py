@@ -254,8 +254,8 @@ def train_bag_of_tricks(train_data_x, train_data_y, tokenisation):
     print("embedding_dims    :  ", bot.embedding_dims)
     print("model.max_features:  ", bot.max_features)
     print("model.token_freq  :  ", bot.token_freq)
-    print("model.token2idx   :  ", bot.token2idx)
-    print("model.token_indice:  ", bot.token_indice)
+    print("model.token2idx   :  ", len(bot.token2idx))
+    print("model.token_indice:  ", len(bot.token_indice))
 
     model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=1, validation_split=0.2)
 
