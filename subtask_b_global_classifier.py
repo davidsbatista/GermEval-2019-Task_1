@@ -120,10 +120,17 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     return model
 
 
-def build_vectors(train_data_x, train_data_y, labels2idx):
+def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
     # ToDo: vectorize input data and target
 
-    token2idx, max_sent_len, _ = build_token_index(train_data_x)
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
+
+    token2idx, max_sent_len, _ = build_token_index(train_data_x,
+                                                   lowercase=low,
+                                                   simple=simple,
+                                                   remove_stopwords=stop)
 
     print("token2idx: ", len(token2idx))
 
@@ -172,8 +179,10 @@ def main():
 
     # fill-in weight matrix
     weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
+
+    tokenisation = {'low': True, 'simple': True, 'stop': True}
     x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y,
-                                                              labels2idx)
+                                                              labels2idx, tokenisation)
 
     # load dev data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
@@ -188,7 +197,6 @@ def main():
     else:
         model = load_model(filepath='global_classifier.h5')
 
-    tokenisation = {'low': True, 'simple': True, 'stop': True}
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     predictions = model.predict(dev_vector, verbose=1)
 
