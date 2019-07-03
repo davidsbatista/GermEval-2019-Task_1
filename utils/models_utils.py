@@ -239,7 +239,7 @@ def train_bag_of_tricks(train_data_x, train_data_y):
 
     # train on all data
     model = bot.build_neural_network(n_classes)
-    model.fit(train_data_x, data_y, batch_size=32, epochs=50, verbose=1)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=10, verbose=1, validation_data=0.2)
 
     return model, ml_binarizer, max_sent_length, token2idx
 
