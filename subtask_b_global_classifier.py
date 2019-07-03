@@ -103,8 +103,7 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
     # Fully connected layers
     for fl in fully_connected_layers:
-        x = Dense(fl, activation='selu', kernel_initializer='lecun_normal')(x)
-        # x = Dense(fl, activation='tanh', kernel_initializer='random_uniform')(x)
+        x = Dense(fl, activation='selu', kernel_initializer='random_uniform')(x)
         x = AlphaDropout(dropout_p)(x)
 
     # Output layer
