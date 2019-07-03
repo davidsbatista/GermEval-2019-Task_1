@@ -188,7 +188,8 @@ def main():
     else:
         model = load_model(filepath='global_classifier.h5')
 
-    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx)
+    tokenisation = {'low': True, 'simple': True, 'stop': True}
+    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     predictions = model.predict(dev_vector, verbose=1)
 
     # ToDo:
