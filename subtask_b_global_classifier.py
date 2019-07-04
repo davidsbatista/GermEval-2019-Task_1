@@ -286,6 +286,9 @@ def main():
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
 
+    for x in dev_vector:
+        print(x)
+
     print(dev_vector.shape)
 
     predictions = model.predict(dev_vector, verbose=1)
@@ -298,9 +301,6 @@ def main():
     # - initialize weigh matrix
 
     filtered = np.array(len(labels2idx) * [0.001])
-
-    print(filtered)
-
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
     write_submission_file(dev_data_x, idx2labels, pred_bin)
