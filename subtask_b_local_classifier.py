@@ -177,7 +177,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     out_file = 'results/classifiers.pkl'
 
     # possibilities: logit, bag-of-tricks, cnn
-    clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
+    clfs = {'top': 'logit', 'level_1': 'cnn', 'level_2': 'cnn'}
     classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
     print(f"Saving trained classifiers to {out_file} ...")
