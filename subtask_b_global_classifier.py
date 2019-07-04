@@ -285,12 +285,11 @@ def main():
         model = load_model(filepath='global_classifier.h5')
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
-    predictions = model.predict(dev_vector, verbose=1)
 
-    for p in predictions:
+    for p in dev_vector:
         print(p)
 
-    print(predictions.shape)
+    predictions = model.predict(dev_vector, verbose=1)
 
     # ToDo:
     # - tune threshold for different levels?
