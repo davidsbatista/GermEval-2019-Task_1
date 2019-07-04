@@ -110,7 +110,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             tokenisation = {'low': True, 'simple': True, 'stop': True}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
-                                                                              k,
                                                                               tokenisation)
             classifiers['level_1'][k]['clf'] = clf
             classifiers['level_1'][k]['binarizer'] = ml_binarizer
@@ -148,7 +147,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             tokenisation = {'low': True, 'simple': True, 'stop': True}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
-                                                                              k,
                                                                               tokenisation)
             classifiers['level_2'][k]['clf'] = clf
             classifiers['level_2'][k]['binarizer'] = ml_binarizer
