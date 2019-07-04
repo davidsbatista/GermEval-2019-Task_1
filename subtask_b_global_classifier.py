@@ -274,9 +274,8 @@ def main():
     x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y,
                                                               labels2idx, tokenisation)
 
-    print(x_train)
-    print()
-    print(y_train)
+    for x in y_train:
+        print(x)
     exit(-1)
 
     if not os.path.exists('global_classifier.h5'):
