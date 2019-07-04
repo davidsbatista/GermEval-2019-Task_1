@@ -276,7 +276,7 @@ def main():
         model.summary()
         model.fit(x=x_train, y=y_train, batch_size=128,
                   validation_split=0.4,
-                  verbose=3,
+                  verbose=2,
                   epochs=50)
         model.save('global_classifier.h5')
     else:
