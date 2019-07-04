@@ -286,7 +286,7 @@ def main():
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
 
-    predictions = model.predict(dev_vector, verbose=1)
+    predictions = model.predict([dev_vector], verbose=1)
 
     for x in predictions:
         print(np.nonzero(x))
