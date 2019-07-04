@@ -286,12 +286,17 @@ def main():
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
 
+    """
     for x in dev_vector:
         print(x)
-
     print(dev_vector.shape)
+    """
 
     predictions = model.predict(dev_vector, verbose=1)
+
+    for x in predictions:
+        print(x)
+    print(dev_vector.shape)
 
     # ToDo:
     # - tune threshold for different levels?
