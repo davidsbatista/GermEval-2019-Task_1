@@ -7,6 +7,10 @@ import tensorflow as tf
 import random as rn
 
 # necessary for starting Numpy generated random numbers in a well-defined initial state.
+from gensim.models import KeyedVectors
+
+from models.convnets_utils import get_embeddings_layer
+
 np.random.seed(42)
 
 # necessary for starting core Python generated random numbers in a well-defined state.
@@ -26,13 +30,37 @@ import tensorflow as tf
 from keras import Input, Model, backend as K
 from keras.engine.saving import load_model
 from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, Embedding, \
-    GlobalMaxPooling1D
+    GlobalMaxPooling1D, Conv1D, MaxPooling1D, Flatten, concatenate
 from keras_preprocessing.sequence import pad_sequences
-from nltk import sent_tokenize, word_tokenize
+
 
 from utils.pre_processing import build_token_index, vectorizer, load_data, vectorize_dev_data, \
     tokenise
 from utils.statistical_analysis import extract_hierarchy
+
+
+def write_submission_file(dev_data_x, idx2labels, pred_bin):
+    with open('answer.txt', 'wt') as f_out:
+        # subtask-a
+        f_out.write(str('subtask_a\n'))
+        for row_pred, sample in zip(pred_bin, dev_data_x):
+            f_out.write(sample['isbn'] + '\t')
+            if np.count_nonzero(row_pred) > 0:
+                for x in np.nditer(np.nonzero(row_pred)):
+                    if int(x) <= 7:
+                        label = idx2labels[int(x)]
+                        f_out.write(label + '\t')
+            f_out.write('\n')
+
+        # subtask-b
+        f_out.write(str('subtask_b\n'))
+        for row_pred, sample in zip(pred_bin, dev_data_x):
+            f_out.write(sample['isbn'] + '\t')
+            if np.count_nonzero(row_pred) > 0:
+                for x in np.nditer(np.nonzero(row_pred)):
+                    label = idx2labels[int(x)]
+                    f_out.write(label + '\t')
+            f_out.write('\n')
 
 
 def create_weight_matrix(n_samples):
@@ -105,7 +133,7 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
     # Fully connected layers
     for fl in fully_connected_layers:
-        x = Dense(fl, activation='selu', kernel_initializer='random_uniform')(x)
+        x = Dense(fl, activation='sigmoid', kernel_initializer='random_uniform')(x)
         x = AlphaDropout(dropout_p)(x)
 
     # Output layer
@@ -117,6 +145,68 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
     from keras.utils import plot_model
     # plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
+
+    return model
+
+
+def build_neural_network_2(weight_matrix, max_sent_len, vocab_size, token2idx):
+
+    num_of_classes = weight_matrix.shape[1]
+
+    # embeddings layer
+    print("Loading pre-trained Embeddings\n")
+    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
+    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
+    not_found = 0
+    for word, i in token2idx.items():
+        try:
+            embedding_vector = static_embeddings[word.lower()]
+            embedding_matrix[i] = embedding_vector
+        except KeyError:
+            not_found += 1
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
+                                           max_sent_len, trainable=True)
+
+    # connect the input with the embedding layer
+    i = Input(shape=(max_sent_len,), dtype='int32', name='main_input')
+    x_input = embedding_layer(i)
+
+    # generate several branches in the network, each for a different convolution+pooling operation,
+    # and concatenate the result of each branch into a single vector
+    n_grams = [3, 5, 7, 10]
+    feature_maps = 256
+    branches = []
+    suffix = 'dynamic_embeddings'
+    for n in n_grams:
+        branch = Conv1D(filters=feature_maps, kernel_size=n, activation='relu',
+                        # kernel_regularizer=regularizers.l2(0.01),
+                        name='Conv_' + suffix + '_' + str(n))(x_input)
+
+        branch = MaxPooling1D(pool_size=(max_sent_len - n + 1),
+                              strides=None, padding='valid',
+                              name='MaxPooling_' + suffix + '_' + str(n))(branch)
+        branch = Flatten(name='Flatten_' + suffix + '_' + str(n))(branch)
+        branches.append(branch)
+
+    z = concatenate(branches, axis=-1)
+    x = Dense(weight_matrix.shape[0], activation='selu', kernel_initializer='random_uniform')(z)
+
+    # pass the concatenated vector to the prediction layer
+    o = Dense(num_of_classes, activation='sigmoid', name='output')(x)
+
+    model = Model(inputs=i, outputs=o)
+    model.compile(loss={'output': 'binary_crossentropy'}, optimizer='adam', metrics=['accuracy'])
+
+    """
+    model.fit(train_x, train_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
+    predictions = model.predict([test_x], verbose=1)
+    # train on all data without validation split
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
+                                           max_sent_len, trainable=True)
+    model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=5, verbose=True)
+    """
 
     return model
 
@@ -197,41 +287,16 @@ def main():
     predictions = model.predict(dev_vector, verbose=1)
 
     # ToDo:
-
-    # tune threshold for different levels?
-    # 0-7 top-level: 0.5
-    # 8-X 1st_level: 0.3
-    # X-343 2nd_level: 0.1
-
-    # initialize weigh matrix
+    # - tune threshold for different levels?
+    #   0-7 top-level: 0.5
+    #   8-X 1st_level: 0.3
+    #   X-343 2nd_level: 0.1
+    # - initialize weigh matrix
 
     filtered = np.array(len(labels2idx) * [0.3])
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
-
-    # f_out.write(str(isbn) + '\t' + '\t'.join(classification[isbn][0]) + '\n')
-
-    with open('answer.txt', 'wt') as f_out:
-        # subtask-a
-        f_out.write(str('subtask_a\n'))
-        for row_pred, sample in zip(pred_bin, dev_data_x):
-            f_out.write(sample['isbn'] + '\t')
-            if np.count_nonzero(row_pred) > 0:
-                for x in np.nditer(np.nonzero(row_pred)):
-                    if int(x) <= 7:
-                        label = idx2labels[int(x)]
-                        f_out.write(label+'\t')
-            f_out.write('\n')
-
-        # subtask-b
-        f_out.write(str('subtask_b\n'))
-        for row_pred, sample in zip(pred_bin, dev_data_x):
-            f_out.write(sample['isbn'] + '\t')
-            if np.count_nonzero(row_pred) > 0:
-                for x in np.nditer(np.nonzero(row_pred)):
-                    label = idx2labels[int(x)]
-                    f_out.write(label+'\t')
-            f_out.write('\n')
+    write_submission_file(dev_data_x, idx2labels, pred_bin)
 
 
 if __name__ == '__main__':
