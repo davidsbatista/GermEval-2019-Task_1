@@ -276,6 +276,8 @@ def main():
 
     for x in y_train:
         print(x)
+        print(np.nonzero(x))
+        print(np.count_nonzero(x))
     exit(-1)
 
     if not os.path.exists('global_classifier.h5'):
