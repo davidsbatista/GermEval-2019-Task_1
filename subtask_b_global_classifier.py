@@ -274,10 +274,6 @@ def main():
     x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y,
                                                               labels2idx, tokenisation)
 
-    for x in y_train:
-        print(np.nonzero(x))
-    exit(-1)
-
     if not os.path.exists('global_classifier.h5'):
         model = build_neural_network(weight_matrix,
                                      max_input=x_train.shape[1],
@@ -290,16 +286,10 @@ def main():
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
 
-    """
-    for x in dev_vector:
-        print(x)
-    print(dev_vector.shape)
-    """
-
     predictions = model.predict(dev_vector, verbose=1)
 
     for x in predictions:
-        print(x)
+        print(np.nonzero(x))
     print(dev_vector.shape)
 
     # ToDo:
