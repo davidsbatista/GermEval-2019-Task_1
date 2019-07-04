@@ -186,6 +186,10 @@ def vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation):
 
     test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                  truncating='post', value=token2idx['PADDED'])
+
+    for x in test_vectors:
+        print(x)
+
     return test_vectors
 
 

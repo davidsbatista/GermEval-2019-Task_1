@@ -285,6 +285,9 @@ def main():
         model = load_model(filepath='global_classifier.h5')
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+
+    print(dev_vector.shape)
+
     predictions = model.predict(dev_vector, verbose=1)
 
     # ToDo:
