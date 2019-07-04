@@ -279,7 +279,10 @@ def main():
                                      max_input=x_train.shape[1],
                                      vocab_size=len(token2idx))
         model.summary()
-        model.fit(x=x_train, y=y_train, validation_split=0.3, verbose=1, epochs=2)
+        model.fit(x=x_train, y=y_train, batch_size=32,
+                  validation_split=0.3,
+                  verbose=1,
+                  epochs=50)
         model.save('global_classifier.h5')
     else:
         model = load_model(filepath='global_classifier.h5')
