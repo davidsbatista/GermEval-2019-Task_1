@@ -42,7 +42,7 @@ def get_embeddings_layer(embeddings_matrix, name, max_len, trainable=False):
     return embedding_layer
 
 
-def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2, 3], feature_maps=200):
+def get_conv_pool(x_input, suffix, max_len, n_grams=[1, 2, 3, 5, 7], feature_maps=300):
     branches = []
 
     for n in n_grams:
