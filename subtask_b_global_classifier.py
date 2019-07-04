@@ -277,6 +277,7 @@ def main():
     print(x_train)
     print()
     print(y_train)
+    exit(-1)
 
     if not os.path.exists('global_classifier.h5'):
         model = build_neural_network(weight_matrix,
