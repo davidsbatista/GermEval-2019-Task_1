@@ -16,12 +16,12 @@ np.random.seed(42)
 rn.seed(12345)
 
 # force TensorFlow to use single thread, multiple-threads can lead to non-reproducible results.
-session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
+# session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 
 from keras import backend as K
 # make random number generation in the TensorFlow backend have a well-defined initial state.
 tf.set_random_seed(1234)
-sess = tf.Session(graph=tf.get_default_graph(), config=session_conf)
+sess = tf.Session(graph=tf.get_default_graph(), config=None)
 K.set_session(sess)
 
 from utils.statistical_analysis import extract_hierarchy
@@ -68,7 +68,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['binarizer'] = ml_binarizer
 
     elif type_clfs['top'] == 'cnn':
-        tokenisation = {'low': True, 'simple': False, 'stop': False}
+        tokenisation = {'low': True, 'simple': True, 'stop': True}
         top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                               samples_y,
                                                                               "top-level",
@@ -115,7 +115,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_1'][k]['binarizer'] = ml_binarizer
 
         elif type_clfs['level_1'] == 'cnn':
-            tokenisation = {'low': True, 'simple': False, 'stop': False}
+            tokenisation = {'low': True, 'simple': True, 'stop': True}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
                                                                               k,
@@ -153,7 +153,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
             classifiers['level_2'][k]['binarizer'] = ml_binarizer
 
         elif type_clfs['level_2'] == 'cnn':
-            tokenisation = {'low': True, 'simple': False, 'stop': False}
+            tokenisation = {'low': True, 'simple': True, 'stop': True}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
                                                                               k,
