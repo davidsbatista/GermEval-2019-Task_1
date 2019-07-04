@@ -71,7 +71,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         tokenisation = {'low': True, 'simple': True, 'stop': True}
         top_clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                               samples_y,
-                                                                              "top-level",
                                                                               tokenisation)
         classifiers['top_level']['clf'] = top_clf
         classifiers['top_level']['binarizer'] = ml_binarizer
@@ -224,9 +223,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         print('\t'.join([p for p in pred]))
         print("-----")
 
-    #
     # apply level-1 classifiers for prediction from the top-level classifier
-    #
     for data in dev_data_x:
         top_level_pred = classification[data['isbn']][0]
         if len(top_level_pred) == 0:
@@ -255,9 +252,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
                     classification[data['isbn']][1].append(str(label))
                 print("\n=====")
 
-    #
     # apply level-2 classifiers for prediction from the top-level classifier
-    #
     for data in dev_data_x:
         level_1_pred = classification[data['isbn']][1]
         if len(level_1_pred) == 0:

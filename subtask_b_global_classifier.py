@@ -71,7 +71,7 @@ def init_weight_matrix(matrix, train_data_y, labels2idx):
 def build_neural_network(weight_matrix, max_input, vocab_size):
     input_size = max_input
     alphabet_size = vocab_size
-    embedding_size = 1
+    embedding_size = 200
     conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
     dropout_p = 0.1
