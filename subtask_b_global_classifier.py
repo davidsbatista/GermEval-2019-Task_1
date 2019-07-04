@@ -286,9 +286,6 @@ def main():
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     predictions = model.predict(dev_vector, verbose=1)
 
-    for p in predictions:
-        print(p)
-
     # ToDo:
     # - tune threshold for different levels?
     #   0-7 top-level: 0.5
@@ -298,6 +295,10 @@ def main():
 
     filtered = np.array(len(labels2idx) * [0.3])
     pred_bin = (predictions > filtered).astype(int)
+
+    for p in pred_bin:
+        print(p)
+
     idx2labels = {v: k for k, v in labels2idx.items()}
     write_submission_file(dev_data_x, idx2labels, pred_bin)
 
