@@ -26,7 +26,7 @@ K.set_session(sess)
 
 from utils.statistical_analysis import extract_hierarchy
 from utils.models_utils import train_cnn_sent_class, train_logit_tf_idf
-from utils.pre_processing import load_data, vectorize_dev_data, vectorize_one_sample
+from utils.pre_processing import load_data, vectorize_one_sample
 
 
 def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):

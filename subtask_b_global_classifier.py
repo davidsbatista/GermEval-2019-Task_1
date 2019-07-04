@@ -30,7 +30,8 @@ from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, Embedd
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize
 
-from utils.pre_processing import build_token_index, vectorizer, load_data, vectorize_dev_data
+from utils.pre_processing import build_token_index, vectorizer, load_data, vectorize_dev_data, \
+    tokenise
 from utils.statistical_analysis import extract_hierarchy
 
 
@@ -121,7 +122,6 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
 
 def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
-    # ToDo: vectorize input data and target
 
     low = tokenisation['low']
     simple = tokenisation['simple']
@@ -143,15 +143,12 @@ def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
                 all_labels[labels2idx[label]] = 1
         train_y.append(all_labels)
 
-    # x_data: vectorize, i.e. tokens to indexes and pad
+    # vectorize, i.e. tokens to indexes and pad
     print("Vectorizing input data\n")
     vectors = []
     for x in train_data_x:
-        tokens = []
         text = x['title'] + " SEP " + x['body']
-        sentences = sent_tokenize(text, language='german')
-        for s in sentences:
-            tokens += word_tokenize(s)
+        tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
         vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
     vectors_padded = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
@@ -161,6 +158,7 @@ def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
 
 
 def my_init(shape, dtype=None):
+    # ToDo
     return K.random_normal(shape, dtype=dtype)
 
 
@@ -174,26 +172,24 @@ def main():
     # load train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
-    # create matrix
-    weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
+    # load dev data
+    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
-    # fill-in weight matrix
+    # create matrix and fill-in weight matrix
+    weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
     weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
 
+    # tokenise training data
     tokenisation = {'low': True, 'simple': True, 'stop': True}
     x_train, y_train, token2idx, max_sent_len = build_vectors(train_data_x, train_data_y,
                                                               labels2idx, tokenisation)
-
-    # load dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     if not os.path.exists('global_classifier.h5'):
         model = build_neural_network(weight_matrix, max_input=x_train.shape[1],
                                      vocab_size=len(token2idx))
         model.summary()
         model.fit(x=x_train, y=y_train, validation_split=0.3, verbose=1, epochs=5)
-        model.save('global_classifier.h5')  # creates a HDF5 file 'my_model.h5'
-
+        model.save('global_classifier.h5')
     else:
         model = load_model(filepath='global_classifier.h5')
 
