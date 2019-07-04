@@ -284,11 +284,10 @@ def main():
     else:
         model = load_model(filepath='global_classifier.h5')
 
+    for x in dev_data_x:
+        print(x)
+
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
-
-    for p in dev_vector:
-        print(p)
-
     predictions = model.predict(dev_vector, verbose=1)
 
     # ToDo:
