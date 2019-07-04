@@ -459,7 +459,7 @@ def train_naive_bayes(train_data_x, train_data_y, level_label):
     return best_pipeline, ml_binarizer
 
 
-def train_cnn_sent_class(train_data_x, train_data_y, level_label, tokenisation):
+def train_cnn_sent_class(train_data_x, train_data_y, tokenisation):
     # ToDo: grid-search Keras:
 
     """
