@@ -275,7 +275,8 @@ def main():
                                                               labels2idx, tokenisation)
 
     if not os.path.exists('global_classifier.h5'):
-        model = build_neural_network(weight_matrix, max_input=x_train.shape[1],
+        model = build_neural_network(weight_matrix,
+                                     max_input=x_train.shape[1],
                                      vocab_size=len(token2idx))
         model.summary()
         model.fit(x=x_train, y=y_train, validation_split=0.3, verbose=1, epochs=2)
@@ -293,12 +294,18 @@ def main():
     #   X-343 2nd_level: 0.1
     # - initialize weigh matrix
 
-    filtered = np.array(len(labels2idx) * [0.3])
+    filtered = np.array(len(labels2idx) * [0.5])
+
+    print(filtered)
+
     pred_bin = (predictions > filtered).astype(int)
 
     for p in pred_bin:
         print(p)
-
+        print(np.count_nonzero(p))
+        print(np.nonzero(p))
+        print()
+    
     idx2labels = {v: k for k, v in labels2idx.items()}
     write_submission_file(dev_data_x, idx2labels, pred_bin)
 
