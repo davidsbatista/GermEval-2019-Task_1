@@ -294,7 +294,7 @@ def main():
     #   X-343 2nd_level: 0.1
     # - initialize weigh matrix
 
-    filtered = np.array(len(labels2idx) * [0.5])
+    filtered = np.array(len(labels2idx) * [0.001])
 
     print(filtered)
 
@@ -305,7 +305,7 @@ def main():
         print(np.count_nonzero(p))
         print(np.nonzero(p))
         print()
-    
+
     idx2labels = {v: k for k, v in labels2idx.items()}
     write_submission_file(dev_data_x, idx2labels, pred_bin)
 
