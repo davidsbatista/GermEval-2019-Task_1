@@ -79,14 +79,6 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         classifiers['top_level']['max_sent_len'] = max_sent_len
         classifiers['top_level']['tokenisation'] = tokenisation
 
-    elif type_clfs['top'] == 'bag-of-tricks':
-        top_clf, ml_binarizer, max_sent_len, token2idx = train_bag_of_tricks(train_data_x,
-                                                                             samples_y,)
-        classifiers['top_level']['clf'] = top_clf
-        classifiers['top_level']['binarizer'] = ml_binarizer
-        classifiers['top_level']['token2idx'] = token2idx
-        classifiers['top_level']['max_sent_len'] = max_sent_len
-
     print("\n\n=== LEVEL 1 ===")
     for k, v in sorted(hierarchical_level_1.items()):
 
@@ -196,40 +188,43 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         classification[data['isbn']] = deepcopy(levels)
 
     # apply the top-level classifier
-    top_level_clf = classifiers['top_level']['clf']
-    binarizer = classifiers['top_level']['binarizer']
-    token2idx = classifiers['top_level']['token2idx']
-    max_sent_len = classifiers['top_level']['max_sent_len']
-    tokenisation = classifiers['top_level']['tokenisation']
 
-    test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
-    predictions = top_level_clf.predict(test_vectors)
-    pred_bin = []
-    for pred, true in zip(predictions, dev_data_x):
-        binary = [0 if i <= 0.4 else 1 for i in pred]
-        if np.all(binary == 0):
-            binary = [0 if i <= 0.3 else 1 for i in pred]
-        pred_bin.append(binary)
-
-    for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
-        if pred is None:
-            continue
-        classification[data['isbn']][0] = [p for p in pred]
-        print('\t'.join([p for p in pred]))
-        print("-----")
-
+    # CNN
     # top_level_clf = classifiers['top_level']['clf']
     # binarizer = classifiers['top_level']['binarizer']
-    # print("Predicting on dev data")
-    # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-    # predictions = top_level_clf.predict(new_data_x)
-    # predictions_bins = np.where(predictions >= 0.5, 1, 0)
-    # for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
+    # token2idx = classifiers['top_level']['token2idx']
+    # max_sent_len = classifiers['top_level']['max_sent_len']
+    # tokenisation = classifiers['top_level']['tokenisation']
+    #
+    # test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+    # predictions = top_level_clf.predict(test_vectors)
+    # pred_bin = []
+    # for pred, true in zip(predictions, dev_data_x):
+    #     binary = [0 if i <= 0.4 else 1 for i in pred]
+    #     if np.all(binary == 0):
+    #         binary = [0 if i <= 0.3 else 1 for i in pred]
+    #     pred_bin.append(binary)
+    #
+    # for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
     #     if pred is None:
     #         continue
     #     classification[data['isbn']][0] = [p for p in pred]
     #     print('\t'.join([p for p in pred]))
     #     print("-----")
+
+    # Logit
+    top_level_clf = classifiers['top_level']['clf']
+    binarizer = classifiers['top_level']['binarizer']
+    print("Predicting on dev data")
+    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+    predictions = top_level_clf.predict(new_data_x)
+    predictions_bins = np.where(predictions >= 0.5, 1, 0)
+    for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
+        if pred is None:
+            continue
+        classification[data['isbn']][0] = [p for p in pred]
+        print('\t'.join([p for p in pred]))
+        print("-----")
 
     #
     # apply level-1 classifiers for prediction from the top-level classifier
@@ -242,14 +237,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
         # call level-1 classifier for each pred from top-level
         for pred in top_level_pred:
-
-            # TF-IDF logit
-            # clf = classifiers['level_1'][pred]['clf']
-            # binarizer = classifiers['level_1'][pred]['binarizer']
-            # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-            # print("Predicting on dev data")
-            # predictions = clf.predict(new_data_x)
-            # pred_bin = np.where(predictions >= 0.5, 1, 0)
 
             # CNN
             clf = classifiers['level_1'][pred]['clf']
@@ -282,13 +269,6 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
             # call level-2 classifier for each pred from top-level
             if pred not in classifiers['level_2']:
                 continue
-
-            # clf = classifiers['level_2'][pred]['clf']
-            # binarizer = classifiers['level_2'][pred]['binarizer']
-            # new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-            # print("Predicting on dev data")
-            # predictions = clf.predict(new_data_x)
-            # pred_bin = np.where(predictions >= 0.5, 1, 0)
 
             clf = classifiers['level_2'][pred]['clf']
             binarizer = classifiers['level_2'][pred]['binarizer']
