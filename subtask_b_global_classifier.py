@@ -289,9 +289,8 @@ def main():
 
     for p in predictions:
         print(p)
-    
-    print(predictions.shape)
 
+    print(predictions.shape)
 
     # ToDo:
     # - tune threshold for different levels?
@@ -305,13 +304,6 @@ def main():
     print(filtered)
 
     pred_bin = (predictions > filtered).astype(int)
-
-    for p in pred_bin:
-        print(p)
-        print(np.count_nonzero(p))
-        print(np.nonzero(p))
-        print()
-
     idx2labels = {v: k for k, v in labels2idx.items()}
     write_submission_file(dev_data_x, idx2labels, pred_bin)
 
