@@ -168,11 +168,18 @@ def vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation):
     low = tokenisation['low']
     simple = tokenisation['simple']
     stop = tokenisation['stop']
+
     for x in dev_data_x:
         text = x['title'] + " SEP " + x['body']
         tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
         vector = vectorizer(tokens, token2idx)
+
+        print(text)
+        print(vector)
+        print()
+
         vectors.append(vector)
+
     test_vectors = pad_sequences(vectors, padding='post', maxlen=max_sent_len,
                                  truncating='post', value=token2idx['PADDED'])
     return test_vectors
