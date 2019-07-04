@@ -104,14 +104,12 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     # conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
     conv_layers = [[300, 1], [300, 2], [300, 3]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
-    dropout_p = 0.1
+    # dropout_p = 0.1
+    dropout_p = 0.5
     num_of_classes = weight_matrix.shape[1]
     optimizer = "adam"
     loss = "binary_crossentropy"
     threshold = 1e-6
-
-    print("number of units in hidden layer : ", weight_matrix.shape[0])
-    print("number of labels in output layer: ", weight_matrix.shape[1])
 
     # Input layer
     inputs = Input(shape=(input_size,), name='sent_input', dtype='int64')
@@ -133,7 +131,7 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
 
     # Fully connected layers
     for fl in fully_connected_layers:
-        x = Dense(fl, activation='sigmoid', kernel_initializer='random_uniform')(x)
+        x = Dense(fl, activation='relu', kernel_initializer='random_uniform')(x)
         x = AlphaDropout(dropout_p)(x)
 
     # Output layer
@@ -142,9 +140,6 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     # Build and compile model
     model = Model(inputs=inputs, outputs=predictions)
     model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
-
-    from keras.utils import plot_model
-    # plot_model(model, to_file='model.png', show_shapes=True, show_layer_names=True)
 
     return model
 
