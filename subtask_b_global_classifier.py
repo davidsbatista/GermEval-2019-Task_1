@@ -98,25 +98,42 @@ def init_weight_matrix(matrix, train_data_y, labels2idx):
     return matrix
 
 
-def build_neural_network(weight_matrix, max_input, vocab_size):
-    input_size = max_input
-    alphabet_size = vocab_size
-    embedding_size = 100
-    conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
-    # conv_layers = [[300, 1], [300, 2], [300, 3]]
+def build_neural_network(weight_matrix, input_size, token2idx):
+    # alphabet_size = vocab_size
+    embedding_size = 300
+    conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3], [256, 2], [256, 1]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
-    # dropout_p = 0.1
     dropout_p = 0.5
     num_of_classes = weight_matrix.shape[1]
     loss = "binary_crossentropy"
     threshold = 1e-6
+    vocab_size = len(token2idx)
 
+
+    # embeddings layer
+    print("Loading pre-trained Embeddings\n")
+    static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
+    embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
+    not_found = 0
+    for word, i in token2idx.items():
+        try:
+            embedding_vector = static_embeddings[word.lower()]
+            embedding_matrix[i] = embedding_vector
+        except KeyError:
+            not_found += 1
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings', input_size, trainable=True)
+
+    # connect the input with the embedding layer
+    inputs = Input(shape=(input_size,), dtype='int64', name='main_input')
+    x = embedding_layer(inputs)
+
+    """
     # Input layer
     inputs = Input(shape=(input_size,), name='sent_input', dtype='int64')
-
     # Embedding layers
-    x = Embedding(alphabet_size + 1, embedding_size, input_length=input_size,
-                  trainable=True)(inputs)
+    x = Embedding(vocab_size + 1, embedding_size, input_length=input_size, trainable=True)(inputs)
+    """
 
     # Convolution layers
     convolution_output = []
@@ -139,7 +156,7 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     predictions = Dense(num_of_classes, activation='sigmoid')(x)
 
     # Build and compile model
-    sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
     adam = optimizers.adam(lr=0.001, beta_1=0.9, beta_2=0.999)
 
     model = Model(inputs=inputs, outputs=predictions)
@@ -274,9 +291,7 @@ def main():
                                                               labels2idx, tokenisation)
 
     if not os.path.exists('global_classifier.h5'):
-        model = build_neural_network(weight_matrix,
-                                     max_input=x_train.shape[1],
-                                     vocab_size=len(token2idx))
+        model = build_neural_network(weight_matrix, max_input=x_train.shape[1], token2idx)
         model.summary()
         model.fit(x=x_train, y=y_train,
                   batch_size=128,
