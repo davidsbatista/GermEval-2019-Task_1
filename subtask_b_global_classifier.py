@@ -19,7 +19,8 @@ rn.seed(12345)
 # force TensorFlow to use single thread, multiple-threads can lead to non-reproducible results.
 # session_conf = tf.ConfigProto(intra_op_parallelism_threads=1, inter_op_parallelism_threads=1)
 
-from keras import backend as K
+from keras import backend as K, optimizers
+
 # make random number generation in the TensorFlow backend have a well-defined initial state.
 tf.set_random_seed(1234)
 sess = tf.Session(graph=tf.get_default_graph(), config=None)
@@ -101,13 +102,12 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     input_size = max_input
     alphabet_size = vocab_size
     embedding_size = 100
-    # conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
-    conv_layers = [[300, 1], [300, 2], [300, 3]]
+    conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3]]
+    # conv_layers = [[300, 1], [300, 2], [300, 3]]
     fully_connected_layers = [weight_matrix.shape[0], weight_matrix.shape[0]]
     # dropout_p = 0.1
     dropout_p = 0.5
     num_of_classes = weight_matrix.shape[1]
-    optimizer = "adam"
     loss = "binary_crossentropy"
     threshold = 1e-6
 
@@ -115,7 +115,8 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     inputs = Input(shape=(input_size,), name='sent_input', dtype='int64')
 
     # Embedding layers
-    x = Embedding(alphabet_size + 1, embedding_size, input_length=input_size)(inputs)
+    x = Embedding(alphabet_size + 1, embedding_size, input_length=input_size,
+                  trainable=True)(inputs)
 
     # Convolution layers
     convolution_output = []
@@ -138,8 +139,11 @@ def build_neural_network(weight_matrix, max_input, vocab_size):
     predictions = Dense(num_of_classes, activation='sigmoid')(x)
 
     # Build and compile model
+    sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    adam = optimizers.adam(lr=0.001, beta_1=0.9, beta_2=0.999)
+
     model = Model(inputs=inputs, outputs=predictions)
-    model.compile(optimizer=optimizer, loss=loss, metrics=['accuracy'])
+    model.compile(optimizer=adam, loss=loss, metrics=['accuracy'])
 
     return model
 
