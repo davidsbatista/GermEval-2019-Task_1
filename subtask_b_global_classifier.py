@@ -109,7 +109,6 @@ def build_neural_network(weight_matrix, input_size, token2idx):
     threshold = 1e-6
     vocab_size = len(token2idx)
 
-
     # embeddings layer
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
@@ -291,7 +290,7 @@ def main():
                                                               labels2idx, tokenisation)
 
     if not os.path.exists('global_classifier.h5'):
-        model = build_neural_network(weight_matrix, max_input=x_train.shape[1], token2idx)
+        model = build_neural_network(weight_matrix, x_train.shape[1], token2idx)
         model.summary()
         model.fit(x=x_train, y=y_train,
                   batch_size=128,
