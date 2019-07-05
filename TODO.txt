@@ -1,10 +1,5 @@
 
 
-CUDA_VISIBLE_DEVICES="" PYTHONHASHSEED=0 python your_program.py
-
-
-
-
 to try:
 =======
 - samples with no predicted labels, for 1st and 2nd level, get 2nd best ranked prediction
@@ -61,7 +56,5 @@ to try:
 # other ideas
 =============
 # ToDo: other embeddings? BRET, ELMo, Flair?
-# ToDo: language model based on char?
-# ToDO: https://github.com/cambridgeltl/multilabel-nn
 # ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification
 # ToDo: https://github.com/locuslab/TCN

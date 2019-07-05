@@ -289,8 +289,7 @@ def main():
         model = load_model(filepath='global_classifier.h5')
 
     dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
-
-    predictions = model.predict([dev_vector], verbose=1)
+    predictions = model.predict(dev_vector, verbose=1)
 
     for x in predictions:
         print(np.nonzero(x))
@@ -303,7 +302,7 @@ def main():
     #   X-343 2nd_level: 0.1
     # - initialize weigh matrix
 
-    filtered = np.array(len(labels2idx) * [0.001])
+    filtered = np.array(len(labels2idx) * [0.4])
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
     write_submission_file(dev_data_x, idx2labels, pred_bin)
