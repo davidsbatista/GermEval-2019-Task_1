@@ -121,7 +121,11 @@ def build_neural_network(weight_matrix, input_size, token2idx):
             embedding_matrix[i] = embedding_vector
         except KeyError:
             not_found += 1
-    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings', input_size, trainable=True)
+
+    print("embedding_matrix: ", embedding_matrix.shape)
+
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings', input_size,
+                                           trainable=True)
 
     # connect the input with the embedding layer
     inputs = Input(shape=(input_size,), dtype='int64', name='main_input')
