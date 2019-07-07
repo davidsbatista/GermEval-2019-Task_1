@@ -123,18 +123,23 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
 
 def main():
-    # load train data
+    # load dev/train data
     train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
-    # load dev data
+    # load dev/test data
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
+    # model = subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
+
+    # load submission/test data
+    train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
+    test_data_x, _, _ = load_data('blurbs_train_all.txt', dev=False)
+    subtask_a(train_data_x, train_data_y, test_data_x, clf='logit')
 
 
 if __name__ == '__main__':
