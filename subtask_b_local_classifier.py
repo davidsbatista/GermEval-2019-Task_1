@@ -99,13 +99,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
         print(f'classifier {k} on {len(v)} labels')
         print("samples: ", len(samples_y))
         print()
-
-        if type_clfs['level_1'] == 'logit':
-            clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-            classifiers['level_1'][k]['clf'] = clf
-            classifiers['level_1'][k]['binarizer'] = ml_binarizer
-
-        elif type_clfs['level_1'] == 'cnn':
+        if type_clfs['level_1'] == 'cnn':
             tokenisation = {'low': True, 'simple': True, 'stop': True}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
@@ -137,12 +131,7 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
                         target.append(label)
                 samples_y.append(target)
         print("samples: ", len(samples_x))
-        if type_clfs['level_2'] == 'logit':
-            clf, ml_binarizer, = train_logit_tf_idf(samples_x, samples_y, k)
-            classifiers['level_2'][k]['clf'] = clf
-            classifiers['level_2'][k]['binarizer'] = ml_binarizer
-
-        elif type_clfs['level_2'] == 'cnn':
+        if type_clfs['level_2'] == 'cnn':
             tokenisation = {'low': True, 'simple': True, 'stop': True}
             clf, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(samples_x,
                                                                               samples_y,
@@ -320,7 +309,7 @@ def main():
 
     # load submission/test data
     train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
-    test_data_x, _, _ = load_data('blurbs_train_all.txt', dev=False)
+    test_data_x, _, _ = load_data('blurbs_test_participants.txt', dev=False)
     subtask_b(train_data_x, train_data_y, test_data_x)
 
 

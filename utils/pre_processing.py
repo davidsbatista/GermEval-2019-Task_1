@@ -27,8 +27,8 @@ def load_data(file, dev=False):
         base_path = 'data/blurbs_dev_participants/'
     else:
         base_path = 'data/blurbs_test_participants/'
-    full_path = join(base_path, file)
 
+    full_path = join(base_path, file)
     labels_by_level = {'0': defaultdict(int),
                        '1': defaultdict(int),
                        '2': defaultdict(int)}
