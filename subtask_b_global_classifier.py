@@ -295,7 +295,7 @@ def main():
 
         print(model.trainable_weights[13])
         print(model.trainable_weights[13].value())
-        model.trainable_weights[11] = w_init_var
+        model.trainable_weights[13] = w_init_var
         print(model.trainable_weights[13])
         print(model.trainable_weights[13].value())
 
