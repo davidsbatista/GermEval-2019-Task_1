@@ -299,8 +299,6 @@ def main():
         print(model.trainable_weights[13])
         print(model.trainable_weights[13].value())
 
-        exit(-1)
-
         model.fit(x=x_train, y=y_train,
                   batch_size=128,
                   shuffle=True,
