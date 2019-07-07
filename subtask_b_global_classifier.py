@@ -158,11 +158,11 @@ def build_neural_network(weight_matrix, input_size, token2idx):
 
     # Fully connected layers
     # for fl in fully_connected_layers:
-    x = Dense(weight_matrix.shape[0], activation='relu', kernel_initializer=my_init)(x)
+    x = Dense(weight_matrix.shape[0], activation='relu', kernel_initializer='glorot_uniform')(x)
     x = AlphaDropout(dropout_p)(x)
 
     # Output layer
-    predictions = Dense(num_of_classes, activation='sigmoid')(x)
+    predictions = Dense(num_of_classes, activation='sigmoid', trainable=True)(x)
 
     # Build and compile model
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
