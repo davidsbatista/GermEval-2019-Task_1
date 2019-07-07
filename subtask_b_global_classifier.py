@@ -290,14 +290,8 @@ def main():
                     layer.kernel.initializer.run(session=session)
         """
 
-        weights_init = tf.convert_to_tensor(weight_matrix, tf.float32)
-        w_init_var = tf.get_variable("weight_init", dtype=tf.float32, initializer=weights_init)
-
-        print(model.trainable_weights[13])
-        print(model.trainable_weights[13].value())
-        model.trainable_weights[13] = w_init_var
-        print(model.trainable_weights[13])
-        print(model.trainable_weights[13].value())
+        bias = np.zeros(weight_matrix.shape[1])
+        model.layers[-1].set_weights([weight_matrix, bias])
 
         model.fit(x=x_train, y=y_train,
                   batch_size=128,
