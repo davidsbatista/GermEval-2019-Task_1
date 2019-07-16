@@ -3,6 +3,8 @@ from collections import defaultdict
 import nltk
 import numpy as np
 from gensim.models import KeyedVectors
+from keras import Sequential
+from keras.legacy import layers
 from keras_preprocessing.sequence import pad_sequences
 from nltk import sent_tokenize, word_tokenize, wordpunct_tokenize
 from nltk.corpus import stopwords
@@ -455,21 +457,7 @@ def train_naive_bayes(train_data_x, train_data_y, level_label):
 
 
 def train_cnn_sent_class(train_data_x, train_data_y, tokenisation):
-    # ToDo: grid-search Keras:
 
-    """
-    - Grid search across different kernel sizes to find the optimal configuration for your problem,
-      in the range 1-10.
-
-    - Search the number of filters from 100-600 and explore a dropout of 0.0-0.5 as part of the
-      same search.
-
-    - Explore using tanh, relu, and linear activation functions.
-
-    - https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
-
-    - See function above
-    """
     low = tokenisation['low']
     simple = tokenisation['simple']
     stop = tokenisation['stop']
@@ -553,8 +541,61 @@ def train_cnn_sent_class(train_data_x, train_data_y, tokenisation):
     return model, ml_binarizer, max_sent_len, token2idx
 
 
-"""
-def keras_grid_search():
+def train_cnn_sent_class_grid_search(train_data_x, train_data_y, tokenisation):
+    # ToDo: grid-search Keras:
+
+    """
+    - Grid search across different kernel sizes to find the optimal configuration for your problem,
+      in the range 1-10.
+
+    - Search the number of filters from 100-600 and explore a dropout of 0.0-0.5 as part of the
+      same search.
+
+    - Explore using tanh, relu, and linear activation functions.
+
+    - https://realpython.com/python-keras-text-classification/#convolutional-neural-networks-cnn
+
+    - See function above
+    """
+
+    """        
+    low = tokenisation['low']
+    simple = tokenisation['simple']
+    stop = tokenisation['stop']
+
+    token2idx, max_sent_len, _ = build_token_index(train_data_x,
+                                                   lowercase=low,
+                                                   simple=simple,
+                                                   remove_stopwords=stop)
+
+    # vectorize, i.e. tokens to indexes and pad
+    print("Vectorizing input data\n")
+    vectors = []
+    for x in train_data_x:
+        text = x['title'] + " SEP " + x['body']
+        tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
+        vector = vectorizer(tokens, token2idx)
+        vectors.append(vector)
+    vectors_padded = pad_sequences(vectors,
+                                   padding='post',
+                                   maxlen=max_sent_len,
+                                   truncating='post',
+                                   value=token2idx['PADDED'])
+
+    # encode target into one-hot vectors
+    ml_binarizer = MultiLabelBinarizer()
+    y_labels = ml_binarizer.fit_transform(train_data_y)
+    print('Total of {} classes'.format(len(ml_binarizer.classes_)))
+    n_classes = len(ml_binarizer.classes_)
+    train_data_x = vectors_padded
+    data_y = y_labels
+
+
+    # split into train and hold out set
+    train_x, test_x, train_y, test_y = train_test_split(train_data_x, data_y,
+                                                        random_state=42,
+                                                        test_size=0.30)
+
     def create_model(num_filters, kernel_size, vocab_size, embedding_dim, maxlen):
         model = Sequential()
         model.add(layers.Embedding(vocab_size, embedding_dim, input_length=maxlen))
@@ -562,16 +603,8 @@ def keras_grid_search():
         model.add(layers.GlobalMaxPooling1D())
         model.add(layers.Dense(10, activation='relu'))
         model.add(layers.Dense(1, activation='sigmoid'))
-        model.compile(optimizer='adam',
-                      loss='binary_crossentropy',
-                      metrics=['accuracy'])
+        model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy'])
         return model
-
-    param_grid = dict(num_filters=[32, 64, 128],
-                      kernel_size=[3, 5, 7],
-                      vocab_size=[5000],
-                      embedding_dim=[50],
-                      maxlen=[100])
 
     from keras.wrappers.scikit_learn import KerasClassifier
     from sklearn.model_selection import RandomizedSearchCV
@@ -582,57 +615,58 @@ def keras_grid_search():
     maxlen = 100
     output_file = 'data/output.txt'
 
-    # Run grid search for each source (yelp, amazon, imdb)
-    for source, frame in df.groupby('source'):
-        print('Running grid search for data set :', source)
-        sentences = df['sentence'].values
-        y = df['label'].values
+    # sentences = df['sentence'].values
+    # y = df['label'].values
 
-        # Train-test split
-        sentences_train, sentences_test, y_train, y_test = train_test_split(
-            sentences, y, test_size=0.25, random_state=1000)
 
-        # Tokenize words
-        tokenizer = Tokenizer(num_words=5000)
-        tokenizer.fit_on_texts(sentences_train)
-        X_train = tokenizer.texts_to_sequences(sentences_train)
-        X_test = tokenizer.texts_to_sequences(sentences_test)
+    # Train-test split
+    sentences_train, sentences_test, y_train, y_test = train_test_split(
+        sentences, y, test_size=0.25, random_state=1000)
 
-        # Adding 1 because of reserved 0 index
-        vocab_size = len(tokenizer.word_index) + 1
+    # Tokenize words
+    tokenizer = Tokenizer(num_words=5000)
+    tokenizer.fit_on_texts(sentences_train)
+    X_train = tokenizer.texts_to_sequences(sentences_train)
+    X_test = tokenizer.texts_to_sequences(sentences_test)
 
-        # Pad sequences with zeros
-        X_train = pad_sequences(X_train, padding='post', maxlen=maxlen)
-        X_test = pad_sequences(X_test, padding='post', maxlen=maxlen)
+    # Adding 1 because of reserved 0 index
+    vocab_size = len(tokenizer.word_index) + 1
 
-        # Parameter grid for grid search
-        param_grid = dict(num_filters=[32, 64, 128],
-                          kernel_size=[3, 5, 7],
-                          vocab_size=[vocab_size],
-                          embedding_dim=[embedding_dim],
-                          maxlen=[maxlen])
-        model = KerasClassifier(build_fn=create_model,
-                                epochs=epochs, batch_size=10,
-                                verbose=False)
-        grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
-                                  cv=4, verbose=1, n_iter=5)
-        grid_result = grid.fit(X_train, y_train)
+    # Pad sequences with zeros
+    X_train = pad_sequences(X_train, padding='post', maxlen=maxlen)
+    X_test = pad_sequences(X_test, padding='post', maxlen=maxlen)
 
-        # Evaluate testing set
-        test_accuracy = grid.score(X_test, y_test)
+    # Parameter grid for grid search
+    param_grid = dict(num_filters=[32, 64, 128],
+                      kernel_size=[3, 5, 7],
+                      vocab_size=[vocab_size],
+                      embedding_dim=[embedding_dim],
+                      maxlen=[maxlen])
 
-        # Save and evaluate results
-        prompt = input(f'finished {source}; write to file and proceed? [y/n]')
-        if prompt.lower() not in {'y', 'true', 'yes'}:
-            break
-        with open(output_file, 'a') as f:
-            s = ('Running {} data set\nBest Accuracy : '
-                 '{:.4f}\n{}\nTest Accuracy : {:.4f}\n\n')
-            output_string = s.format(
-                source,
-                grid_result.best_score_,
-                grid_result.best_params_,
-                test_accuracy)
-            print(output_string)
-            f.write(output_string)
-"""
+    model = KerasClassifier(build_fn=create_model,
+                            epochs=epochs, batch_size=10,
+                            verbose=False)
+
+    grid = RandomizedSearchCV(estimator=model, param_distributions=param_grid,
+                              cv=4, verbose=1, n_iter=5)
+
+    grid_result = grid.fit(X_train, y_train)
+
+    # Evaluate testing set
+    test_accuracy = grid.score(X_test, y_test)
+
+    # Save and evaluate results
+    prompt = input(f'finished {source}; write to file and proceed? [y/n]')
+    if prompt.lower() not in {'y', 'true', 'yes'}:
+        break
+    with open(output_file, 'a') as f:
+        s = ('Running {} data set\nBest Accuracy : '
+             '{:.4f}\n{}\nTest Accuracy : {:.4f}\n\n')
+        output_string = s.format(
+            source,
+            grid_result.best_score_,
+            grid_result.best_params_,
+            test_accuracy)
+        print(output_string)
+        f.write(output_string)
+    """

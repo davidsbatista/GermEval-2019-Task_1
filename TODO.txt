@@ -1,59 +1,17 @@
-
-
 to try:
 =======
+
 - samples with no predicted labels, for 1st and 2nd level, get 2nd best ranked prediction
-
-
-
-# pre-processing
-================
-- replaces the characters “#- ,;:/+)<>&” and line break characters by spaces and we replace
-  the substring “’s” (as in “geht’s”) by a space.
-
-- for creating character-level features we concatenate the resulting tokens
-  with spaces into one string for extracting character-level n-grams.
-
-- CNGR extracts all character-level n-grams of length 3 to 7,
-- while TNGR extracts all stemmed token-level n-grams of length 1 to 3
-
-- top-scoring n-grams for each doc ?
-- top-scoring n-grams for each class
 
 
 # tokenisation
 ==============
-
  - from nltk.stem.snowball import GermanStemmer
    stem = GermanStemmer()
    https://www.nltk.org/api/nltk.stem.html
 
 
-# character n-grams for
-=======================
-
-- we perform TFIDF over all extracted n-grams, keep only those with a document frequency between
-  0.01 and 0.0002 (i.e., those that are rare enough to carry some signal, but frequent enough to
-  have a potential to generalize over unseen data).
-
-- The document frequency thresholds were tuned by means of a grid search on a 90%/10% split of the
-  training data, with the aim to maximize prediction scores of the base classifiers (see Section 4).
-  We use the TFIDF score of the relevant n-grams as input features (
-
-- These two groups of features are based on the same idea: to perform TFIDF over the whole dataset,
-  select the k most important types relative to each of the m classes
-  (m = 2 in Task 1, m = 4 in Task 2).
-
-  We determine importance by ranking features according to their average TFIDF value in all documents
-  in the respective class. Based on the resulting  list of k ·m most important type/class combinations
-  we create a feature for each k ·m combination.
-
-  For CIMP each type is a character n-gram, while for TIMP each type is a token. Intuitively this
-  selects the most distinguishing types per category, a related analysis is described in the blog
-  of Thomas Buhrman.3
-
-
-# other ideas
+# Future Work
 =============
 # ToDo: other embeddings? BRET, ELMo, Flair?
 # ToDo: https://github.com/SarthakMehta/CNN-HAN-for-document-classification

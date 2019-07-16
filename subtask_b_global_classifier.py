@@ -294,7 +294,7 @@ def main():
         model.layers[-1].set_weights([weight_matrix, bias])
 
         model.fit(x=x_train, y=y_train,
-                  batch_size=128,
+                  batch_size=64,
                   shuffle=True,
                   validation_split=0.4,
                   verbose=1,
