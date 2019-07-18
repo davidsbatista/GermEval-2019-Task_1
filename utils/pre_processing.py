@@ -15,7 +15,7 @@ PADDED = 1
 UNKNOWN = 0
 
 
-def load_data(file, dev=False):
+def load_data(file, dev=False, most_specific_only=False):
     """
     Parses and loads the training/dev/test data into a list of dicts
 
@@ -53,6 +53,8 @@ def load_data(file, dev=False):
                     topics = {}
                     for t in categ:
                         if isinstance(t, Tag):
+                            if most_specific_only and not t.get('label'):
+                                continue
                             level = int(t['d'])
                             topics[level] = t.text
                             labels_by_level[str(level)][t.text] += 1
@@ -194,10 +196,10 @@ def vectorize_one_sample(x, max_sent_len, token2idx, tokenisation):
 
 """
 def plot_confusion_matrix(y_true, y_pred, normalize=False, title=None, cmap=plt.cm.Blues):
-    
+
     # This function prints and plots the confusion matrix.
     # Normalization can be applied by setting `normalize=True`.
-    
+
     if not title:
         if normalize:
             title = 'Normalized confusion matrix'
