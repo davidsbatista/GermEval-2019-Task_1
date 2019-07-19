@@ -15,7 +15,7 @@ PADDED = 1
 UNKNOWN = 0
 
 
-def load_data(file, dev=False, most_specific_only=False):
+def load_data(file, dev=False):
     """
     Parses and loads the training/dev/test data into a list of dicts
 
@@ -53,8 +53,6 @@ def load_data(file, dev=False, most_specific_only=False):
                     topics = {}
                     for t in categ:
                         if isinstance(t, Tag):
-                            if most_specific_only and not t.get('label'):
-                                continue
                             level = int(t['d'])
                             topics[level] = t.text
                             labels_by_level[str(level)][t.text] += 1

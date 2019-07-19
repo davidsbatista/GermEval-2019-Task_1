@@ -51,6 +51,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, train=True):
                                                   loss='multilabel-softmargin')
         bert_mdl.post_epoch_hook = evaluate_after_epoch 
         try:
+            generate
+            _data_x, _data_y = 
             bert_mdl.fit(train_data_x, y_labels, dev=(_data_x, _data_y))
         finally:
             torch.save(bert_mdl, './pretrained-bert-level-bce-LVL0.pt')
