@@ -68,7 +68,7 @@ def load_data(file, dev=False, most_specific_only=False):
     return data_x, data_y, labels_by_level
 
 
-def generate_submission_file(predictions, ml_binarizer, dev_data_x):
+def generate_submission_file(predictions, ml_binarizer, dev_data_x, suffix=''):
     """
     All submissions should be formatted as shown below (submissions to both tasks) and written
     into a file called answer.txt and uploaded as a zipped file:
@@ -83,7 +83,7 @@ def generate_submission_file(predictions, ml_binarizer, dev_data_x):
     :return:
     """
 
-    with open('answer.txt', 'wt') as f_out:
+    with open(f'answer{suffix}.txt', 'wt') as f_out:
         f_out.write(str('subtask_a\n'))
         for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
             f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
