@@ -1,3 +1,3 @@
 correct:1
-set1_score:0.826336721166593
+set1_score:0.8073039742212674
 set2_score:0.0
