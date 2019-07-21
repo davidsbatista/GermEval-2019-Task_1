@@ -1,4 +1,7 @@
 #!/bin/bash
+MODEL=${MODEL:="one_per_parent"}
+NUM_EPOCHS=${NUM_EPOCHS:=10}
+LOSS=${LOSS:="bce"}
 
 WORKDIR="BERT_01"
 if [ ! -d "$WORKDIR" ]; then
@@ -8,16 +11,16 @@ if [ ! -d "$WORKDIR" ]; then
 fi
 cd $WORKDIR
 
-SAMPLING_MINMAX_RATIO=3
-LOSS_MINMAX_RATIO=1
-NUM_EPOCHS=10
-LOSS="bce"
+SAMPLING_MINMAX_RATIO=2
+LOSS_MINMAX_RATIO=2
 echo "SAMPLING_MINMAX_RATIO = ${SAMPLING_MINMAX_RATIO}" > params.txt
+echo "MODEL = ${MODEL}" > params.txt
 echo "LOSS_MINMAX_RATIO = ${LOSS_MINMAX_RATIO}" >> params.txt
 echo "NUM_EPOCHS = ${NUM_EPOCHS}" >> params.txt
 echo "LOSS = ${LOSS}" >> params.txt
 PYTHONPATH=../ python ../subtask_a_pretrained_bert.py
-cd..
+PYTHONPATH=../ python ../plot_loss.py
+cd ..
 
 
 ####
@@ -29,15 +32,15 @@ if [ ! -d "$WORKDIR" ]; then
 fi
 cd $WORKDIR
 
-SAMPLING_MINMAX_RATIO=3
-LOSS_MINMAX_RATIO=3
-NUM_EPOCHS=10
-LOSS="bce"
+SAMPLING_MINMAX_RATIO=4
+LOSS_MINMAX_RATIO=4
 echo "SAMPLING_MINMAX_RATIO = ${SAMPLING_MINMAX_RATIO}" > params.txt
+echo "MODEL = ${MODEL}" > params.txt
 echo "LOSS_MINMAX_RATIO = ${LOSS_MINMAX_RATIO}" >> params.txt
 echo "NUM_EPOCHS = ${NUM_EPOCHS}" >> params.txt
 echo "LOSS = ${LOSS}" >> params.txt
 PYTHONPATH=../ python ../subtask_a_pretrained_bert.py
+PYTHONPATH=../ python ../plot_loss.py
 cd ..
 
 ###
@@ -50,13 +53,13 @@ fi
 cd $WORKDIR
 SAMPLING_MINMAX_RATIO=3
 LOSS_MINMAX_RATIO=6
-NUM_EPOCHS=10
-LOSS="bce"
 echo "SAMPLING_MINMAX_RATIO = ${SAMPLING_MINMAX_RATIO}" > params.txt
+echo "MODEL = ${MODEL}" > params.txt
 echo "LOSS_MINMAX_RATIO = ${LOSS_MINMAX_RATIO}" >> params.txt
 echo "NUM_EPOCHS = ${NUM_EPOCHS}" >> params.txt
 echo "LOSS = ${LOSS}" >> params.txt
 PYTHONPATH=../ python ../subtask_a_pretrained_bert.py
+PYTHONPATH=../ python ../plot_loss.py
 cd ..
 
 
@@ -70,11 +73,11 @@ fi
 cd $WORKDIR
 SAMPLING_MINMAX_RATIO=6
 LOSS_MINMAX_RATIO=3
-NUM_EPOCHS=10
-LOSS="bce"
 echo "SAMPLING_MINMAX_RATIO = ${SAMPLING_MINMAX_RATIO}" > params.txt
+echo "MODEL = ${MODEL}" > params.txt
 echo "LOSS_MINMAX_RATIO = ${LOSS_MINMAX_RATIO}" >> params.txt
 echo "NUM_EPOCHS = ${NUM_EPOCHS}" >> params.txt
 echo "LOSS = ${LOSS}" >> params.txt
 PYTHONPATH=../ python ../subtask_a_pretrained_bert.py
+PYTHONPATH=../ python ../plot_loss.py
 cd ..
