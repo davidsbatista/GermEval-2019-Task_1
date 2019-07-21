@@ -25,7 +25,6 @@ class PretrainedBert:
                  gradient_accumulation_steps=8, n_epochs=3, hierarchical=False,
                  label_hierarchy=None, loss='bce'):
         self.batch_size = batch_size
-        self.label_map = {k: v for v, k in enumerate(['O', 'X', '[CLS]', '[SEP]'], 1)}
         self.model = None
         self.model_path = None
         self.tokenizer = None
@@ -38,14 +37,6 @@ class PretrainedBert:
         if loss not in {'bce', 'multilabel-softmargin'}:
             raise ValueError('loss needs to be one of ["bce", "multilabel-softmargin"]')
         self.loss = loss
-
-    def label2idx(self, label):
-        if label is None:
-            return self.label_map['O']
-
-        if label not in self.label_map:
-            self.label_map.update({label: len(self.label_map) + 1})  # pad label is not in the map
-        return self.label_map[label]
 
     def tokenize_one_(self, msg: str, tokenizer: BertTokenizer = None):
         bert_tokens = []
@@ -114,14 +105,31 @@ class PretrainedBert:
         y = torch.FloatTensor(y)
         train_data = TensorDataset(tokens, y, masks)
 
+        # compute class and instance weights for sampling
+        # for the hierarchical task the weights are computed per column group
+        minmax_ratio = int(os.environ.get('SAMPLING_MINMAX_RATIO', -1))
         if self.hierarchical:
             class_weights = y.sum(dim=0)
             for lvl, idx in self.label_hierarchy.items():
-                class_weights[idx] = (lvl + 1) - (class_weights[idx] / class_weights[idx].sum())
+                weights_ = class_weights[idx]
+                if weights_.min() == weights_.max():
+                    class_weights[idx] = minmax_ratio / 2
+                    continue
+                if minmax_ratio == -1:
+                    minmax_ratio = int(weights_.max() / weights_.min())
+                inverted = (weights_.max() - weights_) + 1
+                class_weights_ = (((inverted - inverted.min()) * (minmax_ratio - 1)) / (inverted.max() - inverted.min())) + 1
+                class_weights[idx] = class_weights_
             instance_weights = (y * class_weights).mean(dim=1)
         else:
-            class_weights = 1.0 - (y.sum(dim=0).clamp(400, 6000) / y.sum())
+            counts = y.sum(dim=0) + 1
+            if minmax_ratio == -1:
+                minmax_ratio = int(counts.max() / counts.min())
+            inverted = (counts.max() - counts) + 1
+            class_weights = (((inverted - inverted.min()) * (minmax_ratio - 1)) / (inverted.max() - inverted.min())) + 1
             instance_weights = (y * class_weights).max(dim=1)[0]
+
+        print(class_weights)
         train_sampler = WeightedRandomSampler(instance_weights, len(X), replacement=True)
         train_dataloader = DataLoader(train_data, sampler=train_sampler,
                                       batch_size=self.batch_size)
@@ -161,14 +169,29 @@ class PretrainedBert:
 
         DEVICE = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
         self.model = model.to(DEVICE)
+        minmax_ratio = int(os.environ.get('LOSS_MINMAX_RATIO', -1))
         if self.hierarchical:
-            class_weights = y.sum(dim=0)
+            class_weights = y.sum(dim=0) + 1
             for lvl, idx in self.label_hierarchy.items():
-                lo, hi = class_weights[idx].min(), class_weights[idx].max()
-                class_weights[idx] = 1.0 - class_weights[idx].clamp(2*lo, hi*0.75) / class_weights[idx].sum()
+                weights_ = class_weights[idx]
+                if weights_.min() == weights_.max():
+                    class_weights[idx] = minmax_ratio / 2
+                    continue
+                if minmax_ratio == -1:
+                    minmax_ratio = int(weights_.max() / weights_.min())
+                inverted = weights_.max() - weights_
+                class_weights_ = (((inverted - inverted.min()) * (minmax_ratio - 1)) / (inverted.max() - inverted.min())) + 1
+                class_weights[idx] = class_weights_
+            instance_weights = (y * class_weights).mean(dim=1)
         else:
-            class_weights = (1.0 - (y.sum(dim=0).clamp(200, 4000) / y.sum()))
+            counts = y.sum(dim=0) + 1
+            if minmax_ratio == -1:
+                minmax_ratio = int(counts.max() / counts.min())
+            inverted = counts.max() - counts
+            class_weights = (((inverted - inverted.min()) * (minmax_ratio - 1)) / (inverted.max() - inverted.min())) + 1
+            instance_weights = (y * class_weights).max(dim=1)[0]
 
+        print(class_weights)
         class_weights = class_weights.to(DEVICE)
         i_step = 1  # stop pylint from complaining
         start_time = time.time()

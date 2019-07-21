@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
+import os
 import random as rn
 import pickle
 
@@ -12,6 +13,7 @@ from torch.utils.data import (TensorDataset, DataLoader, RandomSampler,
 import nltk.tokenize
 from nltk.tokenize import sent_tokenize, word_tokenize
 
+from sklearn.base import clone
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import MultiLabelBinarizer
 
@@ -24,6 +26,12 @@ np.random.seed(42)
 
 # necessary for starting core Python generated random numbers in a well-defined state.
 rn.seed(12345)
+
+
+os.environ['SAMPLING_MINMAX_RATIO'] = os.environ.get('SAMPLING_MINMAX_RATIO', '3')
+os.environ['LOSS_MINMAX_RATIO'] = os.environ.get('LOSS_MINMAX_RATIO', '1')
+os.environ['NUM_EPOCHS'] = os.environ.get('NUM_EPOCHS', '1')
+os.environ['LOSS'] = os.environ.get('LOSS', 'bce')
 
 
 def get_label_hierarchy():
@@ -43,8 +51,8 @@ def get_label_hierarchy():
     for i_lbl, lbl in enumerate(label_hierarchy['0']):
         for i, child in enumerate(hierarchy[lbl]):
             label_hierarchy[f'1 - {i_lbl}'] = label_hierarchy.get(f'1 - {i_lbl}', []) + [child]
-            for child_ in enumerate(hierarchy[child]):
-                label_hierarchy[f'2 - {i_lbl}.{i}'] = label_hierarchy.get(f'2 - {i_lbl}.{i}', []) + [child_]
+            for child_ in hierarchy[child]:
+                label_hierarchy[f'2 - {i_lbl}:{i}'] = label_hierarchy.get(f'2 - {i_lbl}:{i}', []) + [child_]
     return label_hierarchy, parents
 
 
@@ -55,8 +63,7 @@ def evaluate_after_epoch(mdl, i_epoch, dev):
     generate_submission_file(np.array(binary_predictions),
                              ml_binarizer,
                              dev_data_x, suffix=f'-EPOCH_{i_epoch:02d}')
-    # torch.save(mdl, f'./pretrained-bert-TASK_A-bce-LVL0_EPOCH{i_epoch:02d}.pt')
-    torch.save(mdl, f'./pretrained-bert-TASK_B-bce_EPOCH{i_epoch:02d}.pt')
+    torch.save(mdl, f'./bert-EPOCH{i_epoch:02d}.pt')
 
     x_dev, y_dev, *_ = dev
     tokens, masks = mdl.tokenize(x_dev)
@@ -117,7 +124,9 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, train=True):
 
 
 def subtask_b_one_per_level(train_data_x, train_data_y, dev_data_x, train=True):
-    label_hierarchy = {0: set(), 1: set(), 2: set()}
+    label_hierarchy, parents = get_label_hierarchy()
+    for lvl, items in label_hierarchy.items():
+        label_hierarchy[lvl] = items + ['[N/A]']
     data_y = []
     for y_labels in train_data_y:
         targets = set()
@@ -127,8 +136,6 @@ def subtask_b_one_per_level(train_data_x, train_data_y, dev_data_x, train=True):
             # instance
             label = {**{0: '[N/A]', 1: '[N/A]', 2: '[N/A]'}, **label}
             targets.update(label.values())
-            for level, lbl in label.items():
-                label_hierarchy[level].add(lbl)
         data_y.append(list(targets))
     train_data_y = data_y
 
@@ -136,7 +143,14 @@ def subtask_b_one_per_level(train_data_x, train_data_y, dev_data_x, train=True):
     y_labels = ml_binarizer.fit_transform(train_data_y).astype(np.float32)
     label_hierarchy = {k: np.where(ml_binarizer.transform([list(v)]).flatten())[0]for k, v in label_hierarchy.items()}
 
-    bert_mdl = pretrained_bert.PretrainedBert(hierarchical=True, label_hierarchy=label_hierarchy)
+    num_epochs = int(os.environ['NUM_EPOCHS'])
+    loss = os.environ['LOSS']
+    bert_mdl = pretrained_bert.PretrainedBert(n_epochs=num_epochs,
+                                              hierarchical=True,
+                                              label_hierarchy=label_hierarchy,
+                                              gradient_accumulation_steps=10,
+                                              batch_size=10,
+                                              loss=loss)
     if train:
         # bert_mdl.post_epoch_hook = evaluate_after_epoch
         try:
@@ -155,54 +169,71 @@ def subtask_b_one_per_level(train_data_x, train_data_y, dev_data_x, train=True):
 
     # for each column group (classifier head), set all predictions to False IF the NOT_APPLICABLE
     # label was predicted
-    na_idx = ml_binarizer.transform(['[N/A]'])
+    na_idx = np.where(ml_binarizer.transform([['[N/A]']]))[1]
     for level_idx, col_idx in label_hierarchy.items():
-        if level_idx == 0:
+        if level_idx == 0 or na_idx not in col_idx:
             continue
-        na_predicted = pred[:, col_idx][na_idx] is True
-        pred[na_predicted, col_idx] = False
+        na_predicted = pred[:, col_idx][:, col_idx == na_idx]
+        na_predicted = np.where(na_predicted)[0].reshape(-1, 1)
+        col_idx_ = [idx for idx in col_idx if idx != na_idx]
+        pred[na_predicted, [col_idx_] * na_predicted.shape[0]] = False
 
     # drop the N/A column from the predictions before passing them to the evaluate script
     not_na_idx = [i for i, cl in enumerate(ml_binarizer.classes_) if cl != '[N/A]']
     final_predictions = pred.copy()[:, not_na_idx]
-    generate_submission_file(np.array(final_predictions), ml_binarizer, dev_data_x, suffix='-bert-bce-B_ONE_PER_LEVEL')
+    ml_binarizer_ = clone(ml_binarizer)
+    ml_binarizer_.classes_ = np.asarray([cl for cl in ml_binarizer.classes_ if cl != '[N/A]'])
+    generate_submission_file(np.array(final_predictions), ml_binarizer_, dev_data_x, suffix='-bert-bce-B_ONE_PER_LEVEL')
 
     # enforce the label hierarchy for the predictions:
     # if the parent label was not predicted, ignore the child prediction as well
     label_hierarchy, parents = get_label_hierarchy()
     for child, parent in parents.items():
-        child_idx = ml_binarizer.transform([child])
-        parent_idx = ml_binarizer.transform([parent])
-        parent_not_predicted = pred[:, parent_idx] is False
-        pred[parent_not_predicted, child_idx] = False
+        child_idx = np.where(ml_binarizer.transform([[child]]))[1]
+        if len(child_idx) == 0:  # this child was never seen during training
+            continue
+        parent_idx = np.where(ml_binarizer.transform([[parent]]))[1]
+        parent_not_predicted = pred[:, parent_idx] == False
+        pred[parent_not_predicted.flatten(), child_idx] = False
 
     not_na_idx = [i for i, cl in enumerate(ml_binarizer.classes_) if cl != '[N/A]']
     final_predictions = pred.copy()[:, not_na_idx]
-    generate_submission_file(np.array(final_predictions), ml_binarizer, dev_data_x, suffix='-bert-bce-B_ONE_PER_LEVEL-STRICT')
+    ml_binarizer_ = clone(ml_binarizer)
+    ml_binarizer_.classes_ = np.asarray([cl for cl in ml_binarizer.classes_ if cl != '[N/A]'])
+    generate_submission_file(np.array(final_predictions), ml_binarizer_, dev_data_x, suffix='-bert-bce-B_ONE_PER_LEVEL')
 
 
-def subtask_b_one_per_parent_node(train_data_x, train_data_y, dev_data_x, train=True):
-    with open('label_hierarchy.pkl', 'rb') as fh:
-        label_hierarchy = pickle.load(fh)
+def subtask_b_one_per_parent(train_data_x, train_data_y, dev_data_x, train=True):
+    label_hierarchy, parents = get_label_hierarchy()
     for lvl, items in label_hierarchy.items():
         label_hierarchy[lvl] = items + ['[N/A]']
 
     data_y = []
     for y_labels in train_data_y:
-        targets = []
+        targets = set()
         for label in y_labels:
+            # each level should have an extra NOT_APPLICABLE label to allow the loss function to
+            # propagate the loss to that label in case nothing from that level was assigned to an
+            # instance
             label = {**{0: '[N/A]', 1: '[N/A]', 2: '[N/A]'}, **label}
-            targets.append(label)
+            targets.update(label.values())
         data_y.append(list(targets))
     train_data_y = data_y
 
     ml_binarizer = MultiLabelBinarizer()
     y_labels = ml_binarizer.fit_transform(train_data_y).astype(np.float32)
-    label_hierarchy = {k: np.where(ml_binarizer.transform([list(v)]).flatten())[0]for k, v in label_hierarchy.items()}
+    label_hierarchy = {k: np.where(ml_binarizer.transform([list(v)]).flatten())[0] for k, v in label_hierarchy.items()}
 
-    bert_mdl = pretrained_bert.PretrainedBert(hierarchical=True, label_hierarchy=label_hierarchy)
+    num_epochs = int(os.environ['NUM_EPOCHS'])
+    loss = os.environ['LOSS']
+    bert_mdl = pretrained_bert.PretrainedBert(n_epochs=num_epochs,
+                                              hierarchical=True,
+                                              label_hierarchy=label_hierarchy,
+                                              gradient_accumulation_steps=10,
+                                              batch_size=10,
+                                              loss=loss)
     if train:
-        bert_mdl.post_epoch_hook = evaluate_after_epoch
+        # bert_mdl.post_epoch_hook = evaluate_after_epoch
         try:
             train, test = train_test_split(list(range(len(train_data_x))), test_size=0.2, random_state=89734)
             _data_x, _data_y = [train_data_x[idx] for idx in test], [y_labels[idx] for idx in test]
@@ -217,30 +248,38 @@ def subtask_b_one_per_parent_node(train_data_x, train_data_y, dev_data_x, train=
 
     # for each column group (classifier head), set all predictions to False IF the NOT_APPLICABLE
     # label was predicted
-    na_idx = ml_binarizer.transform(['[N/A]'])
+    na_idx = np.where(ml_binarizer.transform([['[N/A]']]))[1]
     for level_idx, col_idx in label_hierarchy.items():
-        if level_idx == 0:
+        if level_idx == 0 or na_idx not in col_idx:
             continue
-        na_predicted = pred[:, col_idx][na_idx] is True
-        pred[na_predicted, col_idx] = False
+        na_predicted = pred[:, col_idx][:, col_idx == na_idx]
+        na_predicted = np.where(na_predicted)[0].reshape(-1, 1)
+        col_idx_ = [idx for idx in col_idx if idx != na_idx]
+        pred[na_predicted, [col_idx_] * na_predicted.shape[0]] = False
 
     # drop the N/A column from the predictions before passing them to the evaluate script
     not_na_idx = [i for i, cl in enumerate(ml_binarizer.classes_) if cl != '[N/A]']
     final_predictions = pred.copy()[:, not_na_idx]
-    generate_submission_file(np.array(final_predictions), ml_binarizer, dev_data_x, suffix='-bert-bce-B_ONE_PER_PARENT')
+    ml_binarizer_ = clone(ml_binarizer)
+    ml_binarizer_.classes_ = np.asarray([cl for cl in ml_binarizer.classes_ if cl != '[N/A]'])
+    generate_submission_file(np.array(final_predictions), ml_binarizer_, dev_data_x, suffix='-bert-bce-B_ONE_PER_LEVEL')
 
     # enforce the label hierarchy for the predictions:
     # if the parent label was not predicted, ignore the child prediction as well
     label_hierarchy, parents = get_label_hierarchy()
     for child, parent in parents.items():
-        child_idx = ml_binarizer.transform([child])
-        parent_idx = ml_binarizer.transform([parent])
-        parent_not_predicted = pred[:, parent_idx] is False
-        pred[parent_not_predicted, child_idx] = False
+        child_idx = np.where(ml_binarizer.transform([[child]]))[1]
+        if len(child_idx) == 0:  # this child was never seen during training
+            continue
+        parent_idx = np.where(ml_binarizer.transform([[parent]]))[1]
+        parent_not_predicted = pred[:, parent_idx] == False
+        pred[parent_not_predicted.flatten(), child_idx] = False
 
     not_na_idx = [i for i, cl in enumerate(ml_binarizer.classes_) if cl != '[N/A]']
     final_predictions = pred.copy()[:, not_na_idx]
-    generate_submission_file(np.array(final_predictions), ml_binarizer, dev_data_x, suffix='-bert-bce-B_ONE_PER_PARENT-STRICT')
+    ml_binarizer_ = clone(ml_binarizer)
+    ml_binarizer_.classes_ = np.asarray([cl for cl in ml_binarizer.classes_ if cl != '[N/A]'])
+    generate_submission_file(np.array(final_predictions), ml_binarizer_, dev_data_x, suffix='-bert-bce-B_ONE_PER_LEVEL')
 
 
 def main():
@@ -251,9 +290,9 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    # subtask_a(train_data_x, train_data_y, dev_data_x, train=True)
-    subtask_b_flat(train_data_x[:16], train_data_y[:16], dev_data_x[:16], train=True)
-    subtask_b_one_per_parent_node(train_data_x, train_data_y, dev_data_x, train=True)
+    # subtask_a(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
+    subtask_b_one_per_level(train_data_x[:64], train_data_y[:64], dev_data_x[:64], train=os.environ.get('TRAIN', True))
+    subtask_b_one_per_parent(train_data_x[:64], train_data_y[:64], dev_data_x[:64], train=os.environ.get('TRAIN', True))
     # model = subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
