@@ -200,22 +200,22 @@ class PretrainedBert:
                                           f'avg. loss {train_loss / (i_step + 1):.4f}')
 
                     with open('loss.txt', 'a') as fh:
-                        fh.write(f'batch\t{batch_loss:.10f}\ttrain\n')
+                        fh.write(f'batch\t{i_step}\t{batch_loss:.10f}\ttrain\n')
                     optimizer.step()
                     scheduler.step()
                     optimizer.zero_grad()
                     batch_loss = 0
 
-            if self.post_epoch_hook:
+            if callable(self.post_epoch_hook):
                 self.post_epoch_hook(self, i_epoch, dev)
 
             with open('loss.txt', 'a') as fh:
-                fh.write(f'epoch\t{i_epoch}\t{train_loss / i_step:.10f}\n')
+                fh.write(f'epoch\t{i_epoch}\t{train_loss / i_step:.10f}\ttrain\n')
             steps.close()
             epochs.set_postfix_str(f'avg. loss {train_loss / i_step:.4f}')
         self.model = model.to('cpu')
         return self
-    
+
     def predict(self, X, return_all_scores=False):
         tokens, masks = self.tokenize(X)
         tokens = torch.LongTensor(tokens)
@@ -234,7 +234,8 @@ class PretrainedBert:
                 batch = (b_.to(DEVICE) for b_ in batch)
                 tokens_batch, mask_batch = batch
                 output = model(tokens_batch, token_type_ids=None,
-                               attention_mask=mask_batch, labels=None)
+                               attention_mask=mask_batch, labels=None,
+                               label_hierarchy=self.label_hierarchy)
                 if return_all_scores:
                     outputs.append((output.detach(), mask_batch.detach()))
                 else:
@@ -292,16 +293,21 @@ class BertForHierarchicalMultilabelSequenceClassification(BertPreTrainedModel):
 
     def set_hierarchy(self, label_hierarchy):
         self.label_hierarchy = label_hierarchy
+        num_labels = set()
         for k, v in label_hierarchy.items():
+            num_labels.update(v)
             dropout = nn.Dropout(self.config.hidden_dropout_prob)
             classifier = nn.Linear(self.config.hidden_size, len(v))
             self.dropouts[f'{k}'] = dropout
             self.classifiers[f'{k}'] = classifier
+        self.num_labels = len(num_labels)
         self.apply(self.init_weights)
 
-    def forward(self, input_ids, label_hierarchy, token_type_ids=None, attention_mask=None,
+    def forward(self, input_ids, label_hierarchy=None, token_type_ids=None, attention_mask=None,
                 labels=None, position_ids=None, head_mask=None,
                 class_weights=None, **kwargs):
+        if label_hierarchy is None:
+            label_hierarchy = self.label_hierarchy
         outputs = self.bert(input_ids,
                             position_ids=position_ids,
                             token_type_ids=token_type_ids,
@@ -312,7 +318,7 @@ class BertForHierarchicalMultilabelSequenceClassification(BertPreTrainedModel):
         loss_fct = MultiLabelSoftMarginLoss()
 
         loss = torch.FloatTensor([0])
-        logits = torch.zeros((input_ids.size()[0], labels.size()[1]), dtype=torch.float32, device=input_ids.device)
+        logits = torch.zeros((input_ids.size()[0], self.num_labels), dtype=torch.float32, device=input_ids.device)
 
         # go through the label hierarchy and get predictions from the corresponding models
         for k, idx_ in label_hierarchy.items():
@@ -320,7 +326,7 @@ class BertForHierarchicalMultilabelSequenceClassification(BertPreTrainedModel):
             logits_ = self.classifiers[f'{k}'](pooled_output_)
             if labels is not None:
                 labels_ = labels[:, idx_]
-                loss_fct = BCEWithLogitsLoss(weight=class_weights[idx_])
+                loss_fct = BCEWithLogitsLoss(weight=class_weights[idx_] if class_weights is not None else None)
                 loss += loss_fct(logits_, labels_.float())
             logits[:, idx_] = logits_
 
