@@ -53,6 +53,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
                     predictions_bins = np.where(pred >= 0.4, 1, 0)
                     if np.all(predictions_bins == 0):
                         predictions_bins = np.where(pred >= 0.3, 1, 0)
+                        if np.all(predictions_bins == 0):
+                            predictions_bins = np.where(pred >= 0.2, 1, 0)
 
                 print(predictions_bins)
                 print()
