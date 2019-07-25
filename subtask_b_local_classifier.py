@@ -206,6 +206,18 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     print("Predicting on dev data")
     new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
     predictions = top_level_clf.predict(new_data_x)
+
+    """
+    ToDo: try this
+    predictions_bins = np.where(pred > 0.5, 1, 0)
+    if np.all(predictions_bins == 0):
+        predictions_bins = np.where(pred > 0.4, 1, 0)
+
+    print(predictions_bins)
+    labels = ml_binarizer.inverse_transform(np.array([predictions_bins]))[0]
+    print(labels)
+    """
+
     predictions_bins = np.where(predictions >= 0.5, 1, 0)
     for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
         if pred is None:
