@@ -48,9 +48,12 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             f_out.write(str('subtask_a\n'))
             for pred, data in zip(predictions_prob, dev_data_x):
 
-                print(pred)
                 predictions_bins = np.where(pred >= 0.5, 1, 0)
-                print()
+                if np.all(predictions_bins == 0):
+                    predictions_bins = np.where(pred >= 0.4, 1, 0)
+                    if np.all(predictions_bins == 0):
+                        predictions_bins = np.where(pred >= 0.3, 1, 0)
+
                 print(predictions_bins)
                 print()
                 labels = ml_binarizer.inverse_transform(np.array([predictions_bins]))[0]
