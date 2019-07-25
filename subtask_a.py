@@ -56,8 +56,8 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
                 labels = ml_binarizer.inverse_transform(np.array([predictions_bins]))
                 print()
                 print(labels)
-                
-                f_out.write(data['isbn'] + '\t' + '\t'.join([l for l in labels]) + '\n')
+
+                # f_out.write(data['isbn'] + '\t' + '\t'.join([l for l in labels]) + '\n')
 
     else:
         if clf == 'han':
