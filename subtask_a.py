@@ -45,7 +45,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
         predictions_prob = model.predict_proba(new_data_x)
 
-        predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
+        predictions_bins = np.where(predictions_prob >= 0.4, 1, 0)
         predictions = predictions_bins
 
         with open('answer.txt', 'wt') as f_out:
