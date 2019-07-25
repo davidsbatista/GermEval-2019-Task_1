@@ -43,10 +43,10 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
     if clf == 'logit':
         model, ml_binarizer = train_logit_tf_idf(train_data_x, train_data_y, 'top_level')
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-        predictions = model.predict_proba(new_data_x)
+        predictions_prob = model.predict_proba(new_data_x)
 
-        for p in predictions:
-            print(p)
+        predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
+        predictions = predictions_bins
 
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
