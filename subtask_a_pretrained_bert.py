@@ -290,11 +290,14 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_a
-    # subtask_a(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
+    subtask_a(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
+    """
     if os.environ['MODEL'] == 'one_per_level':
         subtask_b_one_per_level(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
     if os.environ['MODEL'] == 'one_per_parent':
         subtask_b_one_per_parent(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
+    """
+
     # model = subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
