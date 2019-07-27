@@ -385,11 +385,11 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
             ('tfidf', TfidfVectorizer(stop_words=None, ngram_range=(2, 7),
                                       max_df=0.75, analyzer='char')),
             ('clf', OneVsRestClassifier(
-                LogisticRegression(
-                    class_weight='balanced', solver='sag', max_iter=5000), n_jobs=10))
+                LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
+                n_jobs=10))
         ])
 
-        pipeline.fit(new_data_x, data_y, clf__n_jobs=10, clf__verbose=2)
+        pipeline.fit(new_data_x, data_y, clf__verbose=2)
 
         return pipeline, ml_binarizer
 
