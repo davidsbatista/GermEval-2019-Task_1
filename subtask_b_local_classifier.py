@@ -26,7 +26,7 @@ K.set_session(sess)
 
 from utils.statistical_analysis import extract_hierarchy
 from utils.models_utils import train_cnn_sent_class, train_logit_tf_idf
-from utils.pre_processing import load_data, vectorize_one_sample
+from utils.pre_processing import load_data, vectorize_one_sample, vectorize_dev_data
 
 
 def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
@@ -177,28 +177,29 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
     # apply the top-level classifier
     if classifiers['top_level']['clf'] == 'cnn':
-        # CNN
-        # top_level_clf = classifiers['top_level']['clf']
-        # binarizer = classifiers['top_level']['binarizer']
-        # token2idx = classifiers['top_level']['token2idx']
-        # max_sent_len = classifiers['top_level']['max_sent_len']
-        # tokenisation = classifiers['top_level']['tokenisation']
-        #
-        # test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
-        # predictions = top_level_clf.predict(test_vectors)
-        # pred_bin = []
-        # for pred, true in zip(predictions, dev_data_x):
-        #     binary = [0 if i <= 0.4 else 1 for i in pred]
-        #     if np.all(binary == 0):
-        #         binary = [0 if i <= 0.3 else 1 for i in pred]
-        #     pred_bin.append(binary)
-        #
-        # for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
-        #     if pred is None:
-        #         continue
-        #     classification[data['isbn']][0] = [p for p in pred]
-        #     print('\t'.join([p for p in pred]))
-        #     print("-----")
+        # ConvNets
+        top_level_clf = classifiers['top_level']['clf']
+        binarizer = classifiers['top_level']['binarizer']
+        token2idx = classifiers['top_level']['token2idx']
+        max_sent_len = classifiers['top_level']['max_sent_len']
+        tokenisation = classifiers['top_level']['tokenisation']
+
+        test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+        predictions = top_level_clf.predict(test_vectors)
+        pred_bin = []
+        for pred, true in zip(predictions, dev_data_x):
+            binary = [0 if i <= 0.4 else 1 for i in pred]
+            if np.all(binary == 0):
+                binary = [0 if i <= 0.3 else 1 for i in pred]
+            pred_bin.append(binary)
+
+        for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
+            if pred is None:
+                continue
+            classification[data['isbn']][0] = [p for p in pred]
+            print('\t'.join([p for p in pred]))
+            print("-----")
+
     elif classifiers['top_level']['clf'] == 'logit':
 
         # Logit
