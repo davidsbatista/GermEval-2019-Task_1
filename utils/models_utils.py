@@ -323,22 +323,17 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
                                       max_df=0.75,
                                       analyzer='char')),
             ('clf', OneVsRestClassifier(
-                LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
-                n_jobs=10))
+                LogisticRegression(class_weight='balanced', solver='sag', max_iter=4000),
+                n_jobs=8))
         ])
-        parameters = {
-            "clf__estimator__C": [300]
-        }
 
-        """
         parameters = {
             'tfidf__max_df': (0.25, 0.5, 0.75),
-            'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
-            'clf__estimator__C': (1e-2, 1e-3)
+            'tfidf__ngram_range': [(2, 3), (2, 4), (2, 5), (2, 6), (2, 7)],
+            'clf__estimator__C': [300]
         }
-        """
 
-        grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
+        grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=20, verbose=2)
         grid_search_tune.fit(train_x, train_y)
 
         # measuring performance on test set
