@@ -7,6 +7,8 @@ import tensorflow as tf
 import random as rn
 
 # necessary for starting Numpy generated random numbers in a well-defined initial state.
+from joblib import dump
+
 np.random.seed(42)
 
 # necessary for starting core Python generated random numbers in a well-defined state.
@@ -42,6 +44,11 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
     if clf == 'logit':
         model, ml_binarizer = train_logit_tf_idf(train_data_x, train_data_y, 'top_level')
+
+        # save model to disk
+        dump(clf, 'logit.joblib')
+
+        # apply on test dev data
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
         predictions_prob = model.predict_proba(new_data_x)
         with open('answer.txt', 'wt') as f_out:

@@ -309,7 +309,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     #     all_doc_tokens.append(doc_tokens)
     # new_data_x = all_doc_tokens
 
-    tuning = False
+    tuning = True
 
     if tuning is True:
         # split into train and hold out set
