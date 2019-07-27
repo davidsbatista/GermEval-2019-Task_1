@@ -309,74 +309,91 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     #     all_doc_tokens.append(doc_tokens)
     # new_data_x = all_doc_tokens
 
-    # split into train and hold out set
-    train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y,
-                                                        random_state=42,
-                                                        test_size=0.30)
+    tuning = False
 
-    stop_words = set(stopwords.words('german'))
-    pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=None,
-                                  ngram_range=(3, 7),
-                                  max_df=0.75,
-                                  analyzer='char')),
-        ('clf', OneVsRestClassifier(
-            LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
-            n_jobs=10))
-    ])
-    parameters = {
-        "clf__estimator__C": [300]
-    }
+    if tuning is True:
+        # split into train and hold out set
+        train_x, test_x, train_y, test_y = train_test_split(new_data_x, data_y, random_state=42,
+                                                            test_size=0.30)
 
-    """
-    parameters = {
-        'tfidf__max_df': (0.25, 0.5, 0.75),
-        'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
-        'clf__estimator__C': (1e-2, 1e-3)
-    }
-    """
+        stop_words = set(stopwords.words('german'))
+        pipeline = Pipeline([
+            ('tfidf', TfidfVectorizer(stop_words=None,
+                                      ngram_range=(2, 7),
+                                      max_df=0.75,
+                                      analyzer='char')),
+            ('clf', OneVsRestClassifier(
+                LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
+                n_jobs=10))
+        ])
+        parameters = {
+            "clf__estimator__C": [300]
+        }
 
-    grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
-    grid_search_tune.fit(train_x, train_y)
+        """
+        parameters = {
+            'tfidf__max_df': (0.25, 0.5, 0.75),
+            'tfidf__ngram_range': [(1, 1), (1, 2), (1, 3)],
+            'clf__estimator__C': (1e-2, 1e-3)
+        }
+        """
 
-    # measuring performance on test set
-    print("Applying best classifier on test data:")
-    best_clf = grid_search_tune.best_estimator_
-    print()
-    print("Best Classifier parameters:")
-    print(best_clf)
-    print()
-    predictions_prob = best_clf.predict_proba(test_x)
+        grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=10, verbose=2)
+        grid_search_tune.fit(train_x, train_y)
 
-    predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
+        # measuring performance on test set
+        print("Applying best classifier on test data:")
+        best_clf = grid_search_tune.best_estimator_
+        print()
+        print("Best Classifier parameters:")
+        print(best_clf)
+        print()
+        predictions_prob = best_clf.predict_proba(test_x)
 
-    pred_labels = ml_binarizer.inverse_transform(predictions_bins)
-    true_labels = ml_binarizer.inverse_transform(test_y)
+        predictions_bins = np.where(predictions_prob >= 0.5, 1, 0)
 
-    top_missed = defaultdict(int)
-    missed = 0
-    for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_prob):
-        if len(pred) == 0:
-            missed += 1
-            top_missed[true] += 1
+        pred_labels = ml_binarizer.inverse_transform(predictions_bins)
+        true_labels = ml_binarizer.inverse_transform(test_y)
 
-    print("Missing labels for samples")
-    for k, v in top_missed.items():
-        print(k, v)
-    print("total missed: ", missed)
+        top_missed = defaultdict(int)
+        missed = 0
+        for pred, true, text, probs in zip(pred_labels, true_labels, test_x, predictions_prob):
+            if len(pred) == 0:
+                missed += 1
+                top_missed[true] += 1
 
-    report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
-    print(report)
+        print("Missing labels for samples")
+        for k, v in top_missed.items():
+            print(k, v)
+        print("total missed: ", missed)
 
-    # train a classifier on all data using the parameters that yielded best result
-    print("Training classifier with best parameters on all data")
-    best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
-    clf = grid_search_tune.best_estimator_.steps[1][1]
+        report = classification_report(test_y, predictions_bins, target_names=ml_binarizer.classes_)
+        print(report)
 
-    best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
-    best_pipeline.fit(new_data_x, data_y)
+        # train a classifier on all data using the parameters that yielded best result
+        print("Training classifier with best parameters on all data")
+        best_tf_idf = grid_search_tune.best_estimator_.steps[0][1]
+        clf = grid_search_tune.best_estimator_.steps[1][1]
 
-    return best_pipeline, ml_binarizer
+        best_pipeline = Pipeline([('tfidf', best_tf_idf), ('clf', clf)])
+        best_pipeline.fit(new_data_x, data_y)
+
+        return best_pipeline, ml_binarizer
+
+    else:
+        pipeline = Pipeline([
+            ('tfidf', TfidfVectorizer(stop_words=None,
+                                      ngram_range=(2, 7),
+                                      max_df=0.75,
+                                      analyzer='char')),
+            ('clf', OneVsRestClassifier(
+                LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
+                n_jobs=10))
+        ])
+
+        pipeline.fit(new_data_x, data_y)
+
+        return pipeline, ml_binarizer
 
 
 def train_cnn_sent_class(train_data_x, train_data_y, tokenisation):
