@@ -279,10 +279,14 @@ def init_f(shape, dtype=None):
 
 def main():
     # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
+    # train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
     # load dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+    # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+
+    # load submission/test data
+    train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
+    test_data_x, _, _ = load_data('blurbs_test_participants.txt', dev=False)
 
     # create matrix and fill-in weight matrix
     weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
@@ -306,7 +310,11 @@ def main():
     else:
         model = load_model(filepath='global_classifier.h5')
 
-    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+    # dev data
+    # dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+
+    # submission: test_data
+    dev_vector = vectorize_dev_data(test_data_x, max_sent_len, token2idx, tokenisation)
     predictions = model.predict(dev_vector, verbose=1)
 
     for x in predictions:
@@ -323,7 +331,7 @@ def main():
     filtered = np.array(len(labels2idx) * [0.4])
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
-    write_submission_file(dev_data_x, idx2labels, pred_bin)
+    write_submission_file(test_data_x, idx2labels, pred_bin)
 
 
 if __name__ == '__main__':
