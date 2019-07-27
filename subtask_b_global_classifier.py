@@ -298,7 +298,7 @@ def main():
                   shuffle=True,
                   validation_split=0.4,
                   verbose=1,
-                  epochs=250)
+                  epochs=125)
         model.save('global_classifier.h5')
     else:
         model = load_model(filepath='global_classifier.h5')
