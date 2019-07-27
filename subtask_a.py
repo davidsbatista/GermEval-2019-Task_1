@@ -46,7 +46,7 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
         model, ml_binarizer = train_logit_tf_idf(train_data_x, train_data_y, 'top_level')
 
         # save model to disk
-        dump(clf, 'logit.joblib')
+        dump(model, 'logit.joblib')
 
         # apply on test dev data
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
