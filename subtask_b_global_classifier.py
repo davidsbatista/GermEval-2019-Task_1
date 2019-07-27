@@ -294,11 +294,11 @@ def main():
         model.layers[-1].set_weights([weight_matrix, bias])
 
         model.fit(x=x_train, y=y_train,
-                  batch_size=16,
+                  batch_size=128,
                   shuffle=True,
                   validation_split=0.4,
                   verbose=1,
-                  epochs=125)
+                  epochs=250)
         model.save('global_classifier.h5')
     else:
         model = load_model(filepath='global_classifier.h5')

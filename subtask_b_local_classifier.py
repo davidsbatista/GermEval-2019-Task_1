@@ -206,7 +206,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, train=True):
             print("-----")
 
     elif isinstance(classifiers['top_level']['clf'], Pipeline):
-        
+
         # Logit
         top_level_clf = classifiers['top_level']['clf']
         binarizer = classifiers['top_level']['binarizer']
