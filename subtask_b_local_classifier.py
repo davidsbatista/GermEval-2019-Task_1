@@ -205,19 +205,10 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     binarizer = classifiers['top_level']['binarizer']
     print("Predicting on dev data")
     new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+
+    # old strategy
+    """
     predictions = top_level_clf.predict(new_data_x)
-
-    """
-    ToDo: try this
-    predictions_bins = np.where(pred > 0.5, 1, 0)
-    if np.all(predictions_bins == 0):
-        predictions_bins = np.where(pred > 0.4, 1, 0)
-
-    print(predictions_bins)
-    labels = ml_binarizer.inverse_transform(np.array([predictions_bins]))[0]
-    print(labels)
-    """
-
     predictions_bins = np.where(predictions >= 0.5, 1, 0)
     for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
         if pred is None:
@@ -225,6 +216,21 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         classification[data['isbn']][0] = [p for p in pred]
         print('\t'.join([p for p in pred]))
         print("-----")
+    """
+
+    # new strategy
+    predictions_prob = top_level_clf.predict_proba(new_data_x)
+    for pred, data in zip(predictions_prob, dev_data_x):
+
+        predictions_bins = np.where(pred > 0.5, 1, 0)
+        if np.all(predictions_bins == 0):
+            predictions_bins = np.where(pred > 0.4, 1, 0)
+
+        print(predictions_bins)
+        labels = binarizer.inverse_transform(np.array([predictions_bins]))[0]
+        print(labels)
+
+        classification[data['isbn']][0] = [l for l in labels]
 
     # apply level-1 classifiers for prediction from the top-level classifier
     for data in dev_data_x:
