@@ -4,6 +4,8 @@
 import pickle
 from collections import defaultdict
 from copy import deepcopy
+
+import keras
 import numpy as np
 
 import tensorflow as tf
@@ -176,7 +178,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, train=True):
         classification[data['isbn']] = deepcopy(levels)
 
     # apply the top-level classifier
-    if classifiers['top_level']['clf'] == 'cnn':
+    if isinstance(classifiers['top_level']['clf'], keras.engine.training.Model):
         # ConvNets
         top_level_clf = classifiers['top_level']['clf']
         binarizer = classifiers['top_level']['binarizer']
