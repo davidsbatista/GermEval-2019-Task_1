@@ -12,6 +12,8 @@ import tensorflow as tf
 import random as rn
 
 # necessary for starting Numpy generated random numbers in a well-defined initial state.
+from sklearn.pipeline import Pipeline
+
 np.random.seed(42)
 
 # necessary for starting core Python generated random numbers in a well-defined state.
@@ -203,8 +205,8 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, train=True):
             print('\t'.join([p for p in pred]))
             print("-----")
 
-    elif classifiers['top_level']['clf'] == 'logit':
-
+    elif isinstance(classifiers['top_level']['clf'], Pipeline):
+        
         # Logit
         top_level_clf = classifiers['top_level']['clf']
         binarizer = classifiers['top_level']['binarizer']
