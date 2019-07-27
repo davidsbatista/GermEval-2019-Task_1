@@ -155,7 +155,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
     out_file = 'results/classifiers.pkl'
 
     # possibilities: logit, bag-of-tricks, cnn
-    clfs = {'top': 'logit', 'level_1': 'cnn', 'level_2': 'cnn'}
+    clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
     classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
     """
@@ -176,61 +176,62 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         classification[data['isbn']] = deepcopy(levels)
 
     # apply the top-level classifier
+    if classifiers['top_level']['clf'] == 'cnn':
+        # CNN
+        # top_level_clf = classifiers['top_level']['clf']
+        # binarizer = classifiers['top_level']['binarizer']
+        # token2idx = classifiers['top_level']['token2idx']
+        # max_sent_len = classifiers['top_level']['max_sent_len']
+        # tokenisation = classifiers['top_level']['tokenisation']
+        #
+        # test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+        # predictions = top_level_clf.predict(test_vectors)
+        # pred_bin = []
+        # for pred, true in zip(predictions, dev_data_x):
+        #     binary = [0 if i <= 0.4 else 1 for i in pred]
+        #     if np.all(binary == 0):
+        #         binary = [0 if i <= 0.3 else 1 for i in pred]
+        #     pred_bin.append(binary)
+        #
+        # for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
+        #     if pred is None:
+        #         continue
+        #     classification[data['isbn']][0] = [p for p in pred]
+        #     print('\t'.join([p for p in pred]))
+        #     print("-----")
+    elif classifiers['top_level']['clf'] == 'logit':
 
-    # CNN
-    # top_level_clf = classifiers['top_level']['clf']
-    # binarizer = classifiers['top_level']['binarizer']
-    # token2idx = classifiers['top_level']['token2idx']
-    # max_sent_len = classifiers['top_level']['max_sent_len']
-    # tokenisation = classifiers['top_level']['tokenisation']
-    #
-    # test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
-    # predictions = top_level_clf.predict(test_vectors)
-    # pred_bin = []
-    # for pred, true in zip(predictions, dev_data_x):
-    #     binary = [0 if i <= 0.4 else 1 for i in pred]
-    #     if np.all(binary == 0):
-    #         binary = [0 if i <= 0.3 else 1 for i in pred]
-    #     pred_bin.append(binary)
-    #
-    # for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
-    #     if pred is None:
-    #         continue
-    #     classification[data['isbn']][0] = [p for p in pred]
-    #     print('\t'.join([p for p in pred]))
-    #     print("-----")
+        # Logit
+        top_level_clf = classifiers['top_level']['clf']
+        binarizer = classifiers['top_level']['binarizer']
+        print("Predicting on dev data")
+        new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
 
-    # Logit
-    top_level_clf = classifiers['top_level']['clf']
-    binarizer = classifiers['top_level']['binarizer']
-    print("Predicting on dev data")
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+        # old strategy
+        """
+        predictions = top_level_clf.predict(new_data_x)
+        predictions_bins = np.where(predictions >= 0.5, 1, 0)
+        for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
+            if pred is None:
+                continue
+            classification[data['isbn']][0] = [p for p in pred]
+            print('\t'.join([p for p in pred]))
+            print("-----")
+        """
 
-    # old strategy
-    """
-    predictions = top_level_clf.predict(new_data_x)
-    predictions_bins = np.where(predictions >= 0.5, 1, 0)
-    for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
-        if pred is None:
-            continue
-        classification[data['isbn']][0] = [p for p in pred]
-        print('\t'.join([p for p in pred]))
-        print("-----")
-    """
+        # new strategy
+        predictions_prob = top_level_clf.predict_proba(new_data_x)
+        for pred, data in zip(predictions_prob, dev_data_x):
 
-    # new strategy
-    predictions_prob = top_level_clf.predict_proba(new_data_x)
-    for pred, data in zip(predictions_prob, dev_data_x):
+            predictions_bins = np.where(pred > 0.5, 1, 0)
+            if np.all(predictions_bins == 0):
+                predictions_bins = np.where(pred > 0.4, 1, 0)
 
-        predictions_bins = np.where(pred > 0.5, 1, 0)
-        if np.all(predictions_bins == 0):
-            predictions_bins = np.where(pred > 0.4, 1, 0)
+            print(predictions_bins)
+            labels = binarizer.inverse_transform(np.array([predictions_bins]))[0]
+            print(labels)
 
-        print(predictions_bins)
-        labels = binarizer.inverse_transform(np.array([predictions_bins]))[0]
-        print(labels)
-
-        classification[data['isbn']][0] = [l for l in labels]
+            classification[data['isbn']][0] = [l for l in labels]
 
     # apply level-1 classifiers for prediction from the top-level classifier
     for data in dev_data_x:
