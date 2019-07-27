@@ -316,7 +316,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
         ('tfidf', TfidfVectorizer(stop_words=None,
-                                  ngram_range=(2, 5),
+                                  ngram_range=(2, 7),
                                   max_df=0.75,
                                   analyzer='char')),
         ('clf', OneVsRestClassifier(
