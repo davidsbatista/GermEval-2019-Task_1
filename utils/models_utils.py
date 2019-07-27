@@ -315,13 +315,13 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
 
     stop_words = set(stopwords.words('german'))
     pipeline = Pipeline([
-        ('tfidf', TfidfVectorizer(stop_words=stop_words,
-                                  ngram_range=(1, 3),
+        ('tfidf', TfidfVectorizer(stop_words=None,
+                                  ngram_range=(2, 5),
                                   max_df=0.75,
                                   analyzer='char')),
         ('clf', OneVsRestClassifier(
             LogisticRegression(class_weight='balanced', solver='sag', max_iter=5000),
-            n_jobs=5))
+            n_jobs=10))
     ])
     parameters = {
         "clf__estimator__C": [300]
