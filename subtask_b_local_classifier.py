@@ -170,6 +170,7 @@ def subtask_b(train_data_x, train_data_y, dev_data_x, train=True):
         with open('results/classifiers.pkl', 'rb') as f_in:
             classifiers = pickle.load(f_in)
 
+    print(f"Applying classifiers on dev/test data")
     # apply on dev data
     # structure to store predictions on dev_data
     levels = {0: [], 1: [], 2: []}
