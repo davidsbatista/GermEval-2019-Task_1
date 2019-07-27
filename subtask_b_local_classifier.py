@@ -150,21 +150,23 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
     return classifiers
 
 
-def subtask_b(train_data_x, train_data_y, dev_data_x):
+def subtask_b(train_data_x, train_data_y, dev_data_x, train=True):
 
     out_file = 'results/classifiers.pkl'
 
-    # possibilities: logit, bag-of-tricks, cnn
-    clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
-    classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
+    if train:
+        # possibilities: logit, bag-of-tricks, cnn
+        clfs = {'top': 'cnn', 'level_1': 'cnn', 'level_2': 'cnn'}
+        classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
-    print(f"Saving trained classifiers to {out_file} ...")
-    with open(out_file, 'wb') as f_out:
-        pickle.dump(classifiers, f_out)
+        print(f"Saving trained classifiers to {out_file} ...")
+        with open(out_file, 'wb') as f_out:
+            pickle.dump(classifiers, f_out)
 
-    print(f"Reading trained classifiers to {out_file} ...")
-    with open('results/classifiers.pkl', 'rb') as f_in:
-        classifiers = pickle.load(f_in)
+    else:
+        print(f"Reading trained classifiers to {out_file} ...")
+        with open('results/classifiers.pkl', 'rb') as f_in:
+            classifiers = pickle.load(f_in)
 
     # apply on dev data
     # structure to store predictions on dev_data
@@ -320,7 +322,7 @@ def main():
     dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_b
-    subtask_b(train_data_x, train_data_y, dev_data_x)
+    subtask_b(train_data_x, train_data_y, dev_data_x, False)
 
     # load submission/test data
     # train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
