@@ -273,9 +273,9 @@ def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
 
 def main():
 
-    train = True
+    dev_data = False
 
-    if train:
+    if dev_data:
         # load train data
         train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
@@ -311,7 +311,7 @@ def main():
         print("Using a previous trained classifier...")
         model = load_model(filepath='global_classifier.h5')
 
-    if train:
+    if dev_data:
         # dev data
         dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
     else:
@@ -331,7 +331,7 @@ def main():
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
 
-    if train:
+    if dev_data:
         write_submission_file(dev_data_x, idx2labels, pred_bin)
     else:
         write_submission_file(test_data_x, idx2labels, pred_bin)
