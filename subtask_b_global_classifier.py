@@ -301,7 +301,7 @@ def main():
         model = build_neural_network(weight_matrix, x_train.shape[1], token2idx)
         model.summary()
         model.fit(x=x_train, y=y_train,
-                  batch_size=64,
+                  batch_size=32,
                   shuffle=True,
                   validation_split=0.4,
                   verbose=1,
