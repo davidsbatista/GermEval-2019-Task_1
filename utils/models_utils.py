@@ -276,11 +276,10 @@ def dummy_fun(doc):
     return doc
 
 
-def train_logit_tf_idf(train_data_x, train_data_y, level_label):
+def train_logit_tf_idf(train_data_x, train_data_y):
     """
     - TF-IDF weighted vectors as data representation and apply logistic regression with multi-label
 
-    :param level_label:
     :param train_data_x:
     :param train_data_y:
     :return: tuned classifier
@@ -407,6 +406,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, tokenisation):
         tokens = tokenise(text, lowercase=low, simple=simple, remove_stopwords=stop)
         vector = vectorizer(tokens, token2idx)
         vectors.append(vector)
+
     vectors_padded = pad_sequences(vectors,
                                    padding='post',
                                    maxlen=max_sent_len,
@@ -468,7 +468,7 @@ def train_cnn_sent_class(train_data_x, train_data_y, tokenisation):
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
                                            max_sent_len, trainable=True)
     model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
-    model.fit(train_data_x, data_y, batch_size=16, epochs=5, verbose=True)
+    model.fit(train_data_x, data_y, batch_size=8, epochs=5, verbose=True)
 
     return model, ml_binarizer, max_sent_len, token2idx
 
