@@ -319,7 +319,7 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         stop_words = set(stopwords.words('german'))
         pipeline = Pipeline([
             ('tfidf', TfidfVectorizer(stop_words=None,
-                                      ngram_range=(2, 7),
+                                      ngram_range=(2, 6),
                                       max_df=0.75,
                                       analyzer='char')),
             ('clf', OneVsRestClassifier(
@@ -328,9 +328,8 @@ def train_logit_tf_idf(train_data_x, train_data_y, level_label):
         ])
 
         parameters = {
-            'tfidf__max_df': (0.25, 0.5, 0.75, 1),
-            'tfidf__ngram_range': [(2, 2), (2, 3), (2, 4), (2, 5), (2, 6), (2, 7)],
-            'clf__estimator__C': [0.001, 0.1, 10, 50, 100, 300]
+            'tfidf__max_features': [(2, 6)],
+            'clf__estimator__C': [300]
         }
 
         grid_search_tune = GridSearchCV(pipeline, parameters, cv=3, n_jobs=20, verbose=2)

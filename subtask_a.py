@@ -148,9 +148,9 @@ def main():
     # train subtask_a
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
     # model = subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
-    subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
+    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
 
     # load submission/test data
     # train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
