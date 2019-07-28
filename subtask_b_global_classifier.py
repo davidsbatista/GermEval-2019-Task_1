@@ -98,6 +98,18 @@ def init_weight_matrix(matrix, train_data_y, labels2idx):
     return matrix
 
 
+def my_init(shape, dtype=None):
+    # ToDo: init weight matrix
+    return K.random_normal(shape, dtype=dtype)
+
+
+def init_f(shape, dtype=None):
+    # ToDo: init weight matrix
+    ker = np.zeros(shape, dtype=dtype)
+    ker[tuple(map(lambda x: int(np.floor(x / 2)), ker.shape))] = 1
+    return tf.convert_to_tensor(ker)
+
+
 def build_neural_network(weight_matrix, input_size, token2idx):
     # alphabet_size = vocab_size
     embedding_size = 300
@@ -168,7 +180,7 @@ def build_neural_network(weight_matrix, input_size, token2idx):
     return model
 
 
-def build_neural_network_2(weight_matrix, max_sent_len, vocab_size, token2idx):
+def build_convents_version_2(weight_matrix, max_sent_len, vocab_size, token2idx):
 
     num_of_classes = weight_matrix.shape[1]
 
@@ -266,17 +278,6 @@ def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
     return vectors_padded, np.array(train_y), token2idx, max_sent_len
 
 
-def my_init(shape, dtype=None):
-    # ToDo
-    return K.random_normal(shape, dtype=dtype)
-
-
-def init_f(shape, dtype=None):
-    ker = np.zeros(shape, dtype=dtype)
-    ker[tuple(map(lambda x: int(np.floor(x / 2)), ker.shape))] = 1
-    return tf.convert_to_tensor(ker)
-
-
 def main():
 
     train = True
@@ -336,7 +337,11 @@ def main():
     filtered = np.array(len(labels2idx) * [0.4])
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
-    write_submission_file(test_data_x, idx2labels, pred_bin)
+
+    if train:
+        write_submission_file(dev_data_x, idx2labels, pred_bin)
+    else:
+        write_submission_file(test_data_x, idx2labels, pred_bin)
 
 
 if __name__ == '__main__':
