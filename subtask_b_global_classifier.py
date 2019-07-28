@@ -305,7 +305,7 @@ def main():
                   shuffle=True,
                   validation_split=0.4,
                   verbose=1,
-                  epochs=75)
+                  epochs=40)
         model.save('global_classifier.h5')
     else:
         print("Using a previous trained classifier...")
