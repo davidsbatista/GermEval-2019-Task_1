@@ -164,11 +164,11 @@ def build_neural_network(weight_matrix, input_size, token2idx):
     predictions = Dense(num_of_classes, activation='sigmoid')(x)
 
     # Build and compile model
-    sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
-    # adam = optimizers.adam(lr=0.001, beta_1=0.9, beta_2=0.999)
+    # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
+    adam = optimizers.adam(lr=0.001, beta_1=0.9, beta_2=0.999)
 
     model = Model(inputs=inputs, outputs=predictions)
-    model.compile(optimizer=sgd, loss=loss, metrics=['accuracy'])
+    model.compile(optimizer=adam, loss=loss, metrics=['accuracy'])
 
     return model
 
