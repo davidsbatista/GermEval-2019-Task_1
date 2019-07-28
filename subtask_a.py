@@ -113,7 +113,6 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             tokenisation = {'low': True, 'simple': False, 'stop':  True}
             model, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                                 train_data_y,
-                                                                                'top_level',
                                                                                 tokenisation)
 
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
