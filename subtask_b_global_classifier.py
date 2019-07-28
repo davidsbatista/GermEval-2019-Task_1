@@ -327,7 +327,7 @@ def main():
     #   X-343 2nd_level: 0.1
     # - initialize weigh matrix
 
-    filtered = np.array(len(labels2idx) * [0.4])
+    filtered = np.array(len(labels2idx) * [0.5])
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
 
