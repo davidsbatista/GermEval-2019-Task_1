@@ -143,13 +143,6 @@ def build_neural_network(weight_matrix, input_size, token2idx):
     inputs = Input(shape=(input_size,), dtype='int64', name='main_input')
     x = embedding_layer(inputs)
 
-    """
-    # Input layer
-    inputs = Input(shape=(input_size,), name='sent_input', dtype='int64')
-    # Embedding layers
-    x = Embedding(vocab_size + 1, embedding_size, input_length=input_size, trainable=True)(inputs)
-    """
-
     # Convolution layers
     convolution_output = []
     for num_filters, filter_width in conv_layers:
@@ -312,7 +305,7 @@ def main():
                   shuffle=True,
                   validation_split=0.4,
                   verbose=1,
-                  epochs=250)
+                  epochs=50)
         model.save('global_classifier.h5')
     else:
         print("Using a previous trained classifier...")
