@@ -303,6 +303,7 @@ def main():
                                                               labels2idx, tokenisation)
 
     if not os.path.exists('global_classifier.h5'):
+        print("Training a new classifier...")
         model = build_neural_network(weight_matrix, x_train.shape[1], token2idx)
         model.summary()
         model.fit(x=x_train, y=y_train,
@@ -313,6 +314,7 @@ def main():
                   epochs=250)
         model.save('global_classifier.h5')
     else:
+        print("Using a previous trained classifier...")
         model = load_model(filepath='global_classifier.h5')
 
     if train:
