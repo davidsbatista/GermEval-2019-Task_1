@@ -324,10 +324,6 @@ def main():
 
     predictions = model.predict(dev_vector, verbose=1)
 
-    for x in predictions:
-        print(np.nonzero(x))
-    print(dev_vector.shape)
-
     # ToDo:
     # - tune threshold for different levels?
     #   0-7 top-level: 0.5
