@@ -113,8 +113,8 @@ def init_f(shape, dtype=None):
 def build_neural_network(weight_matrix, input_size, token2idx):
     # alphabet_size = vocab_size
     embedding_size = 300
-    conv_layers = [[256, 3], [256, 2], [256, 1]]
-    fully_connected_layers = [1024, 1024]
+    conv_layers = [[256, 5], [256, 3], [256, 2], [256, 1]]
+    fully_connected_layers = [2048, 2048]
     dropout_p = 0.5
     num_of_classes = weight_matrix.shape[1]
     loss = "binary_crossentropy"
@@ -287,9 +287,9 @@ def main():
         train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
         test_data_x, _, _ = load_data('blurbs_test_participants.txt', dev=False)
 
-    # create matrix and fill-in weight matrix
+    # # ToDo: initialization, create matrix and fill-in weight matrix
     weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
-    weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
+    # weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
 
     # tokenise training data
     tokenisation = {'low': True, 'simple': True, 'stop': True}
