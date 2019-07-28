@@ -113,7 +113,7 @@ def init_f(shape, dtype=None):
 def build_neural_network(weight_matrix, input_size, token2idx):
     # alphabet_size = vocab_size
     embedding_size = 300
-    conv_layers = [[256, 5], [256, 3], [256, 2], [256, 1]]
+    conv_layers = [[256, 4], [256, 3], [256, 2], [256, 1]]
     fully_connected_layers = [1024, 1024]
     dropout_p = 0.5
     num_of_classes = weight_matrix.shape[1]
