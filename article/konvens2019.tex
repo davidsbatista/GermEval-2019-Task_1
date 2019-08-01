@@ -45,19 +45,26 @@
 
 \begin{document}
 \maketitle
+
 \begin{abstract}
-\textbf{TODO:}
-\ \newline
+We present a detailed description of the systems used to generate two submissions
+for the GermEva'19 Task 1 on on hierarchical classification of blurbs.
+
+We achieved the 11th place out of 19th submissions for subtask_a and we
+
+
 \end{abstract}
 
 
 \section{Introduction}
 
-This paper describes the approach taken for the GermEval'19 task 1 taken by the Comtravo data-science team.
-The task aimed at developing systems to tackle the task of multi-label hierachical classifiction of text.
-We took two distinct approaches, one based on a local classifier strategy, where different classifiers are
-trained according to the hierarchical structure of the label space. The second
-
+This paper describes the approach taken for the GermEval'19 task 1 taken by the
+Comtravo data-science team. The task aimed at developing systems to tackle the
+task of multi-label hierarchical classification of text. We took two distinct
+approaches, one based on a local classifier strategy, where different classifiers
+are trained according to the hierarchical structure of the label space. Another
+approach uses a single classifier which tries to naively predict the label
+hierarchy for each sample.
 
 This paper is organized as follows, in Section~\ref{task} we describe task in detail and give a
 description of the dataset provided. In Section~\ref{hierarchical-clf} we describe some of the
@@ -185,7 +192,7 @@ Std. deviation $\sigma$ (sentences)        &  2.62              \\
 % TODO: Avg. blurb per co-occurrence ?
 
 
-\section{Hierarchical Classification}\label{hierarchical-clf}
+\section{Hierarchical Document Classification}\label{hierarchical-clf}
 
 
 \ \newline
@@ -283,7 +290,7 @@ information we would like to leverage to improve multi-label classification usin
 
 
 
-\section{System}\label{system}
+\section{System Developed}\label{system}
 
 In our developed system we tried out two main approaches: a classifier per
 parent node (parent-node), and global classifier by exploring the
@@ -433,8 +440,9 @@ Training is done with the Adam optimizer~\cite{journals/corr/KingmaB14} over
 shuffled mini-batches of size 16 for 10 epochs and using 33\% of the data for validation.
 The neural network was implemented in Keras 2.2.4 with Tensorflow 1.13.1 backend.
 
-% TODO: advantages and disadvantages of this method?
-
+% TODO:
+% - advantages and disadvantages of this method? errors propagate
+% - no need to apply a post-processing cleaning stop to enforce the hierarchical structure
 
 We then applied the best classifiers and parameters on the dev set and run the evaluation.
 Table~\ref{devset-results} shows the results for both tasks with the system described above on the
@@ -461,11 +469,28 @@ development set.
 
 
 
-\subsection{Official Results}
+\subsection{Test Results}
 
-\ \newline
-\textbf{TODO:}
-\ \newline
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline\centering\textbf{Task}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
+\hline
+ Sub-Task A   & 0.8247 & 0.8291 & 0.8269 \\
+ Sub-Task B   & 0.6930 & 0.5602 & 0.6196 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{devset-results} Best achieved results on the development set for both Sub-Tasks A and B.}
+\end{table}
+
+subtask_a
+- Comtravo-DS	Comtravo-DS__local_clf_logit_cnn	13	0.7178	0.8144	0.8255	0.8199	0.943
+- Comtravo-DS__global_clf_cnn	17	0.7183	0.7761	0.7839	0.78	0.9925
+
+subtask_b
+- Comtravo-DS__local_clf_logit_cnn	11	0.1924	0.7042	0.5274	0.6031	1	0.943
+- Comtravo-DS__global_clf_cnn	13	0.1751	0.5672	0.5185	0.5418	0.9363	0.9986
 
 \section{Future Work}\label{future}
 
