@@ -47,13 +47,18 @@
 \maketitle
 
 \begin{abstract}
-We present a detailed description of the systems used to generate two submissions
-for the GermEva'19 Task 1 on on hierarchical classification of blurbs.
-
-We achieved the 11th place out of 19th submissions for subtask_a and we
-
-
+We present a detailed description of the systems used for the GermEval'19 Task 1
+on hierarchical classification of blurbs. The challenges in this type of document
+classification are related with capturing the correct hierarchical structure of
+each document to label.
+We developed two systems, with which we generated two different submissions
+achieving the 13th place out of 19th submissions for Sub-Task A and 11th place
+out of 19th submissions for Sub-Task B. We describe in detailed these two systems
+pointing out the advantages and advantages of each and lay down some foundations
+for some possibly future work on how to improve this results.
 \end{abstract}
+
+
 
 
 \section{Introduction}
@@ -66,53 +71,59 @@ are trained according to the hierarchical structure of the label space. Another
 approach uses a single classifier which tries to naively predict the label
 hierarchy for each sample.
 
-This paper is organized as follows, in Section~\ref{task} we describe task in detail and give a
-description of the dataset provided. In Section~\ref{hierarchical-clf} we describe some of the
-proposed approaches in the literature to performer hierarchical document classification.
-In Section~\ref{system} we describe the system we build to tackle the task and the approaches taken.
-Section~\ref{experiments} details the experiments done and the results, finally in
-Section~\ref{future} we outline some future work and ideas.
+This paper is organized as follows, in Section~\ref{task} we describe task in
+detail and give a description of the dataset provided. In Section~\ref{hierarchical-clf}
+we describe some of the proposed approaches in the literature to performer
+hierarchical document classification. In Section~\ref{system} we describe the
+system we build to tackle the task and the approaches taken. Section~\ref{experiments}
+details the experiments done and the results, finally in Section~\ref{future} we
+outline some future work and ideas.
+
+
 
 \section{Task}\label{task}
 
-The GermEval 2010 Shared Task on hierarchical classification of blurbs challenges involved the
-classification of books into genres given a book's blurb i.e., a short textual description of the
-book. The competition contained two sub-tasks:
+The GermEval 2010 Shared Task on hierarchical classification of blurbs challenges
+involved the classification of books into genres given a book's blurb i.e., a
+short textual description of the book. The competition contained two sub-tasks:
 
 \begin{itemize}
 
-\item Sub-Task A: classify German books into one or multiple most general writing genres. Therefore,
-it can be considered a multi-label classification task. In total, there are 8 classes that can be
-assigned to a book.
+\item Sub-Task A: classify German books into one or multiple most general writing
+genres. Therefore, it can be considered a multi-label classification task. In
+total, there are 8 classes that can be assigned to a book.
 
-\item Sub-Task B: targets hierarchical multi-label classification into multiple writing genres. In
-addition to the very general writing genres, additional genres of different specificity can
-be assigned to a book.
+\item Sub-Task B: targets hierarchical multi-label classification into multiple
+writing genres. In addition to the very general writing genres, additional
+genres of different specificity can be assigned to a book.
 
 \end{itemize}
 
 
 \subsection{Dataset}
 
-The dataset made available for this task contains 3 levels and it's considered a hierarchically
-multi-label since any example can be can assigned to more than one class at any given level of
-the hierarchy. The hierarchy contains a total of 343 classes distinct classes, and in overall there
-are 16 627 samples available for training. Table~\ref{quantitivy-analysis-train} as a detailed statistical
-description of the dataset.
+The dataset made available for this task contains 3 levels and it's considered
+a hierarchically multi-label since any example can be can assigned to more than
+one class at any given level of the hierarchy. The hierarchy contains a total of
+343 classes distinct classes, and in overall there are 16 627 samples available
+for training, XX XXX for development and XX XXX for testing.
+
+The Tables~\ref{quantitivy-analysis-train} contain a detailed statistical description of
+the dataset provided organized by set, i.e.: train, dev and test.
 
 % every child has exacly one parent, The underlying hierarchy is a forest.
-
 % hierarchy-tree
 % imbalence of classes ?
 % taxonomy or tree ?
 % Whether the taxonomy is organized into a tree or a DAG influences the degree of difficulty of
 % the underlying hierarchical classification problem
 
+
 \begin{table}
 \small
 \begin{center}
 \begin{tabular}{|l|r|}
-\hline\centering\textbf{Training dataset}  &                    \\
+\hline\centering\textbf{Training set}  &                        \\
 \hline
 Avg. lenght of blurb (tokens)              &  96.78             \\
 Std. deviation $\sigma$ (tokens)           &  39.63             \\
@@ -144,7 +155,7 @@ Nr. samples with leaf nodes at:            &                    \\
 \small
 \begin{center}
 \begin{tabular}{|l|r|}
-\hline\centering\textbf{Development dataset}  &             \\
+\hline\centering\textbf{Development set}  &             \\
 \hline
 Avg. lenght of blurb (tokens)              &   98.71        \\
 Std. deviation $\sigma$ (tokens)           &   46.29        \\
@@ -173,9 +184,10 @@ Nr. samples with leaf nodes at:            &                   \\
 
 
 \begin{table}
+\small
 \begin{center}
 \begin{tabular}{|l|r|}
-\hline\centering\textbf{Test dataset}  &         \\
+\hline\centering\textbf{Test set}  &         \\
 \hline
 Avg. lenght of blurb (tokens)              &  96.91             \\
 Std. deviation $\sigma$ (tokens)           &  39.83             \\
@@ -192,12 +204,31 @@ Std. deviation $\sigma$ (sentences)        &  2.62              \\
 % TODO: Avg. blurb per co-occurrence ?
 
 
+
+
+
+
+
+
+
+
+
+
+
 \section{Hierarchical Document Classification}\label{hierarchical-clf}
 
 
+Several real-world classification problems are naturally cast within a hierarchy,
+where the labels to be predicted are organized in an hierarchy, typically as
+tree or a DAG (Direct Acyclic Graph).
+
 \ \newline
-\textbf{TODO:}
+\textbf{TODO: give a few examples}
 \ \newline
+
+There are different strategies to approach this problem and within the context
+of the GermEval'19 Task 1 we explored two strategies: local classifier and a
+global classifier.
 
 
 \subsection{Local Classifier}
@@ -263,53 +294,33 @@ approach is the propagation of errors downwards the hierarchy.
 
 
 
-\subsection{Global Classifier: labels co-occurrence}
+\subsection{Global Classifier}
 
-Another type of strategy is to learn a classifier than can globally learn to output the predictions
-for each level in the hierarchical structure. This is done by flatenning and hierarchical structure
-and leveraging on the labels co-occurrence.
-
-\citet{kurata-etal-2016-improved} proposed a novel neural network initialisation method to
-treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label
-co-occurrence These dedicated neurons are initialised to connect to the corresponding co-occurring
-labels with stronger weights than to others.
+Another type of strategy is to learn a classifier than can globally learn to
+output the predictions for each level in the hierarchical structure. This is
+done by flattening and hierarchical structure and leveraging on the labels
+co-occurrence.
 
 
-\begin{comment}
-When the labels form a hierarchy, they share a hypernym–hyponym relation. When multiple
- labels are assigned to the text, if it is explicitly labeled by a subclass it must also implicitly
- include all of the its super- classes.
-The co-occurrence between subclasses and superclasses as labels for the input text contains
-information we would like to leverage to improve multi-label classification using a neural network.
-\end{comment}
+\section{Systems Developed}\label{system}
 
-
-
-
-
-
-
-
-\section{System Developed}\label{system}
-
-In our developed system we tried out two main approaches: a classifier per
+We developed two systems implementing the following approaches: a classifier per
 parent node (parent-node), and global classifier by exploring the
 labels co-occurrence.
-
 
 
 \subsection{Local Classifier}
 
 We employed a parent per parent approach, which has the advantage of not being
-prone to hierarchy inconsistency errors. We need to train classifiers for
-parents node, so we for the Level 3 we don't need to train any classifier
-since it contains only leaf nodes, plus some nodes on Level 2 are already leaf
-nodes.
+prone to hierarchy inconsistency errors. We need to train classifiers for each
+parent node, except for the leaf nodes. For the Level 2 we don't need to train
+any classifier since it contains only leaf nodes, plus some nodes on Level 1
+are already leaf nodes.
 
 According to Table~\ref{quantitivy-analysis-train} the first level has 8 possible
 labels, which means that the parent node of the first level (i.e, the Root node)
 needs to be trained in a multi-label fashion and predict over 8 classes. Each of
-these 8 classes represents a parent node of some child classes on then
+these 8 classes represents a parent node of some child classes on the
 second level of the hierarchy. So for Level 1 we need to train eight multi-label
 classifiers where the labels are the child`s of each parent in the root level.
 Finally, for Level 2, we train 42 classifiers only, since according to the
@@ -333,15 +344,17 @@ Total Classifiers & 51       \\
 \caption{\label{parent-per-node-classifiers}Number of parent nodes per level in the hierarchy.}
 \end{table}
 
+% TODO:
+% - advantages and disadvantages of this method? errors propagate
+% - no need to apply a post-processing cleaning stop to enforce the hierarchical structure
+
+
 \subsection{Global Classifier}
 
+The global classifier needs to be a multi-label classifier targeting a label
+space with a total of 343 classes.
 
-
-\ \newline
-\textbf{TODO:}
-\ \newline
-
-
+\begin{comment}
 \begin{figure}[h]
 \centering
     \includegraphics[width=8cm]{global_classifier_nn.png}
@@ -356,23 +369,47 @@ Total Classifiers & 51       \\
     \caption{Weight initialization matrix (adapted from )}
     \label{fig:mesh1}
 \end{figure}
+\end{comment}
 
+
+% TODO:
+% - advantages and disadvantages of this method?
+% - single classifer
+% - need to apply a post-processing cleaning to enforce the hierarchical structure
 
 
 
 \section{Experiments and Results}\label{experiments}
 
-\ \newline
-\textbf{TODO:}
-\ \newline
+In this section we describe the experimental setup and results for the two
+devised strategies for tackling both subtasks.
 
 \subsection{Results on the Development Set}
 
-We randomly split the development data into training (70\%) and test (30\%) sets.
-The training set was used to develop and trained classifiers, and the test set
-to evaluate the trained classifiers.
+For both strategies we randomly split the training set into two sub-sets, of
+70\%, 30\%, for training and testing/parameter search respectively. The biggest
+portion (70\%) was used to train the classifiers, and the remaining portion (30\%)
+to evaluate each set selected parameters the one which yielded the best results.
 
-\subsubsection{Local classifier per node: root classifier}
+Then the complete training data was used to train a classifier with the best
+parameters, and this classifier was evaluated on the development set. Results
+reported in this section are all in regard to the development set.
+
+
+\subsubsection{Local classifier per node}
+
+For the local classifier (\textit{local\_clf\_logit\_cnn}) we tried different root
+classifiers and selected for Level 1 and Level 2 a Convolutional Neural Network.
+Note that one can see this root classifier as attending the Sub-Task A only.
+
+For the root level classifier we also tried the following approaches:
+Logistic Regression with TF-IDF weighted vectors~\cite{},
+ConvNets~\cite{kim-2014-convolutional},
+LSTM~\cite{Hochreiter:1997:LSM:1246443.1246450}
+Bag-of-Tricks~\cite{joulin-etal-2017-bag}.
+
+\begin{comment}
+We also explored different methods of tokenisation
 
 The best results were achieved with the following classifiers configuration.
 
@@ -400,37 +437,48 @@ We preformed a parameter search, on 3 folds over the training set, varying follo
 \item regularization C: \{0.1, 10, 100, 300\}
 \end{itemize}
 
-This classifier is also the one that reports the results for Sub-Task A. We also experimented with
-other methods for the root classifier, namely with: Hierarchical Attention Networks~(HAN)~\cite{yang-etal-2016-hierarchical},
-Bag-of-Tricks~\cite{joulin-etal-2017-bag}, bi-LSTM~\cite{Hochreiter:1997:LSM:1246443.1246450}, ConvNets~\cite{kim-2014-convolutional}
+\end{comment}
 
-
-\begin{table}
+\begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
 \hline\centering\textbf{Method}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
 \hline
- ConvNets       & 0.8635 & 0.8000 & 0.8305 \\
- Logit (TF-IDF) & 0.8216 & 0.8363 & 0.8289 \\
- HAN            & 0.8101 & 0.7574 & 0.7829 \\
- bi-LSTM        & 0.8016 & 0.7031 & 0.7492 \\
- Bag-of-Tricks  & 0.5325 & 0.4964 & 0.5138 \\
-
+ Logit (TF-IDF) & 0.8211 & 0.8359 & 0.8284 \\
+ ConvNets       & 0.8542 & 0.7879 & 0.8197 \\
+ bi-LSTM        & 0.8062 & 0.7987 & 0.8024 \\
+ Bag-of-Tricks  & 0.3787 & 0.6717 & 0.4843 \\
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{devset-results} Results for different classifiers on the Sub-Task A}
+\caption{\label{devset-results} Results for different classifiers on the Sub-Task A on the development set.}
 \end{table}
 
-\subsubsection{Local classifier per node: 1st and 2nd levels}
+This root classifier is also the one that reports the results for Sub-Task A
+using the local classifier strategy.
 
-For Level 1 and 2 in the hierarchy tree we trained classifiers based the convolutional
-neural networks sentence classification model from~\citet{kim-2014-convolutional}.
 
-We implemented the variation of the proposed architecture based on pre-trained embeddings
-which are fine-tuned during learning, and we used the public available German fastText embeddings
-trained on Wikipedia, of dimension 300 and obtained using the skip-gram model described in
-~\citet{bojanowski-etal-2017-enriching} with default parameters.
+
+
+
+
+
+
+
+
+\begin{comment}
+
+For Level 1 and 2 in the hierarchy tree we trained in total 50 classifiers based
+the convolutional neural networks sentence classification model
+from~\citet{kim-2014-convolutional}.
+
+We implemented the variation of the proposed architecture based on pre-trained
+embeddings which are fine-tuned during learning, and we used the public
+available German fastText embeddings trained on Wikipedia, of dimension 300
+and obtained using the skip-gram model as described in~\citet{bojanowski-etal-2017-enriching}
+with default parameters.
+
+% tokenisation = {'low': True, 'simple': True, 'stop': True}
 
 We used rectified linear units in the activation functions of the 1D convolutions,
 filter windows (i.e., n-grams) of size 1 and 2 with 300 feature maps each and a
@@ -440,29 +488,54 @@ Training is done with the Adam optimizer~\cite{journals/corr/KingmaB14} over
 shuffled mini-batches of size 16 for 10 epochs and using 33\% of the data for validation.
 The neural network was implemented in Keras 2.2.4 with Tensorflow 1.13.1 backend.
 
-% TODO:
-% - advantages and disadvantages of this method? errors propagate
-% - no need to apply a post-processing cleaning stop to enforce the hierarchical structure
 
 We then applied the best classifiers and parameters on the dev set and run the evaluation.
 Table~\ref{devset-results} shows the results for both tasks with the system described above on the
 development set.
 
-\begin{table}
+\end{comment}
+
+\begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
-\hline\centering\textbf{Task}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
+\hline\centering\textbf{Method}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
 \hline
- Sub-Task A   & 0.8247 & 0.8291 & 0.8269 \\
- Sub-Task B   & 0.6930 & 0.5602 & 0.6196 \\
+ Conf\_1 & 0.7151 & 0.5330 & 0.6108 \\
+ Conf\_2 & 0.7144 & 0.5303 & 0.6087 \\
+ Conf\_3 & 0.7219 & 0.5235 & 0.6069 \\
+ Conf\_4 & 0.7274 & 0.5085 & 0.5986 \\
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{devset-results} Best achieved results on the development set for both Sub-Tasks A and B.}
+\caption{\label{devset-results} Results for Sub-Task B for different configurations of the ConvNets-based classifier for Levels 1 and 2 of the hierarchy, using the best classifier for the Root Level from Table 5.}
 \end{table}
 
+\begin{comment}
+1)
+n_grams=[1, 2]; feature_maps=300; epochs=5; batch_size=16; pre-trainned embeddings=de-wiki-fasttext-300d-1M
+Precision	0.7151
+Recall	0.533
+F1	0.6108
 
+2)
+n_grams=[1, 2, 3], feature_maps=200
+Precision	0.7144
+Recall	0.5303
+F1	0.6087
 
+3)
+n_grams=[1, 2, 3, 5, 7], feature_maps=300
+Precision	0.7219
+Recall	0.5235
+F1	0.6069
+
+4)
+n_grams=[3, 5, 7, 10], feature_maps=256
+Precision	0.7274
+Recall	0.5085
+F1	0.5986
+
+\end{comment}
 
 
 
@@ -471,30 +544,73 @@ development set.
 
 \subsection{Test Results}
 
-\begin{table}
+We applied the systems
+
+
+
+% Comtravo-DS	Comtravo-DS__local_clf_logit_cnn
+% subtask_a - Comtravo-DS	Comtravo-DS__local_clf_logit_cnn	13	0.7178	0.8144	0.8255	0.8199	0.943
+% subtask_b - Comtravo-DS__local_clf_logit_cnn	11	0.1924	0.7042	0.5274	0.6031	1	0.943
+\begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
 \hline\centering\textbf{Task}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
 \hline
- Sub-Task A   & 0.8247 & 0.8291 & 0.8269 \\
- Sub-Task B   & 0.6930 & 0.5602 & 0.6196 \\
+ Sub-Task A   &  0.8144 & 0.8255 & 0.8199 \\
+ Sub-Task B   &  0.7042 & 0.5274 & 0.6031 \\
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{devset-results} Best achieved results on the development set for both Sub-Tasks A and B.}
+\caption{\label{devset-results} Best achieved results on the development set for both Sub-Tasks A and B with the parent per node classifier.}
 \end{table}
 
-subtask_a
-- Comtravo-DS	Comtravo-DS__local_clf_logit_cnn	13	0.7178	0.8144	0.8255	0.8199	0.943
-- Comtravo-DS__global_clf_cnn	17	0.7183	0.7761	0.7839	0.78	0.9925
 
-subtask_b
-- Comtravo-DS__local_clf_logit_cnn	11	0.1924	0.7042	0.5274	0.6031	1	0.943
-- Comtravo-DS__global_clf_cnn	13	0.1751	0.5672	0.5185	0.5418	0.9363	0.9986
+% Comtravo-DS__global_clf_cnn
+% - Comtravo-DS__global_clf_cnn	17	0.7183	0.7761	0.7839	0.78390.7839	0.9925
+% - Comtravo-DS__global_clf_cnn	13	0.1751	0.5672	0.5185	0.5418	0.9363	0.9986
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline\centering\textbf{Task}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
+\hline
+ Sub-Task A   &  0.7761 & 0.7839 & 0.7839 \\
+ Sub-Task B   &  0.5672 & 0.5185 & 0.5418 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{devset-results} Best achieved results on the development set for both Sub-Tasks A and B with the global classifier.}
+\end{table}
+
+
+
+
+
+
+
+
+
 
 \section{Future Work}\label{future}
 
 % other features, release date, author's name
+
+\begin{comment}
+\citet{kurata-etal-2016-improved} proposed a novel neural network initialization method to
+treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label
+co-occurrence These dedicated neurons are initialized to connect to the corresponding co-occurring
+labels with stronger weights than to others.
+
+When the labels form a hierarchy, they share a hypernym–hyponym relation. When multiple
+ labels are assigned to the text, if it is explicitly labeled by a subclass it must also implicitly
+ include all of the its super- classes.
+The co-occurrence between subclasses and superclasses as labels for the input text contains
+information we would like to leverage to improve multi-label classification using a neural network.
+\end{comment}
+
+
+
+
+
 
 
 \ \newline
@@ -507,7 +623,7 @@ subtask_b
 \section*{Acknowledgments}
 
 \ \newline
-\newpage
+
 \bibliography{konvens2019.bib}
 \bibliographystyle{acl_natbib}
 
