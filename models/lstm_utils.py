@@ -120,8 +120,6 @@ def build_lstm_based_model(embeddings, label_encoder, max_sent_length, token2idx
     :return:
     """
     hidden_units = 128
-    dropout = 0.2
-    recurrent_dropout = 0.3
     dense_dropout = 0.1
     learning_rate = 0.001
 
