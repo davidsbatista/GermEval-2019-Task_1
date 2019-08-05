@@ -218,6 +218,9 @@ tree or a DAG (Direct Acyclic Graph).
 
 \ \newline
 \textbf{TODO: give a few examples}
+
+% Reuters, Wikipedia, etc.
+
 \ \newline
 
 There are different strategies to approach this problem and within the context
@@ -292,13 +295,14 @@ approach is the propagation of errors downwards the hierarchy.
 
 Another type of strategy is to learn a classifier than can globally learn to
 output the predictions for each level in the hierarchical structure. This is
-done by flattening and hierarchical structure and leveraging on the labels
-co-occurrence.
+done by flattening and hierarchical structure and one idea one can explore is to
+leverage on the labels co-occurrence.
 
-%TODO
-\ \newline
-\textbf{TODO: a few more sentences?}
-\ \newline
+Although having only a single classifier, can turn the hierarchical classification
+into a much harder problem, specially with a sparse label space and with an order
+of magnitude of $10^2$, the labels co-occurrence can be a good guiding heuristic
+for a statistical model to infer the hierarchy label structure associated with
+a given sample.
 
 \section{Systems Developed}\label{system}
 
@@ -362,9 +366,11 @@ devised strategies for tackling both subtasks.
 
 \subsection{Results on the Development Set}
 
-During the development phase we only have the labels for the training data to
-select parameters, so the training
-%TODO: only to write the code and have a working framework for experiments
+During the development phase we only had the labels for the training, so we
+randomly split the training dataset into two-subsets of 70\% and 30\% for
+training and parameter tuning, training then on the whole dataset and applying
+the trained model to the development dataset. This approach was mainly to have
+a working framework for experiments.
 
 Then, during the test phase the labels for the development set were made available
 and we could use them to tune/test the classifiers. For both strategies we used
@@ -414,10 +420,11 @@ tokens, i.e., all punctuation tokens were discarded.
 % self.max_len = 300
 
 %TODO: also 30% for validation split? yes
+%TODO: - coverage of results: 0.5, if nothing 0.4, if nothing 0.3
 
 \end{comment}
 
-%TODO: - coverage of results: 0.5, if nothing 0.4, if nothing 0.3
+
 
 
 \subsubsection{Local classifier per node}
@@ -483,10 +490,9 @@ Training was performed with batch sizes of 16 for 10 epochs.
 
 Table~\ref{subtask_a_devset-results} shows the results for different classifiers
 when trained with the best parameters on the training set and evaluated against
-the development set.
-
-% The Logistic Regression classifier achieved the best results although the CNN
-% classifier was had a similar F\textsubscript{1} score, essentially by trading recall for precision.
+the development set. The Logistic Regression classifier achieved the best results
+although the CNN classifier  had a similar F\textsubscript{1} score, essentially
+by trading recall for precision.
 
 \begin{table}[!h]
 \begin{center}
@@ -502,7 +508,6 @@ the development set.
 \end{center}
 \caption{\label{subtask_a_devset-results} Results for different classifiers on the Sub-Task A on the development set.}
 \end{table}
-
 
 For Level 1 and 2 in the hierarchy tree we trained a total of 50 classifiers, one
 for each parent node, based on the CNN model by~\citet{kim-2014-convolutional}
@@ -561,8 +566,10 @@ The global classifier uses a flattened hierarchy and tries to learn how to corre
 predict a vector of 343 dimensions given the training data. For this strategy we
 used a CNN again based on the model proposed by~\shortcite{kim-2014-convolutional}.
 
-We explored different sets of parameters, varying again filter windows and the
-the filter maps.
+Our initial idea with the global classifier was to explore to leverage on and
+explore the label co-occurrence by initializing a weight matrix, but due to
+time constrains this was not possible. Nevertheless, we explored different sets
+configuration of parameters, varying again filter windows and the filter maps.
 
 
 \begin{table}[!h]
@@ -572,20 +579,20 @@ the filter maps.
 \hline
 Conf\_1 & & & \\
 \hline
- Sub-Task A   &  0.8144 & 0.8255 & 0.8199 \\
- Sub-Task B   &  0.7042 & 0.5274 & 0.6031 \\
+ Sub-Task A   &   &  &  \\
+ Sub-Task B   &   &  &  \\
 \hline
 \hline
 Conf\_2 & & & \\
 \hline
- Sub-Task A   &  0.8144 & 0.8255 & 0.8199 \\
- Sub-Task B   &  0.7042 & 0.5274 & 0.6031 \\
+ Sub-Task A   &   &  &  \\
+ Sub-Task B   &   &  &  \\
 \hline
 \hline
 Conf\_3 & & & \\
 \hline
- Sub-Task A   &  0.8144 & 0.8255 & 0.8199 \\
- Sub-Task B   &  0.7042 & 0.5274 & 0.6031 \\
+ Sub-Task A   &   &  &  \\
+ Sub-Task B   &   &  &  \\
 \hline
 \hline
 \end{tabular}
@@ -671,9 +678,12 @@ parameters that yielded the best results on the development dataset, by training
 on all available data (i.e., training + development sets) and applied them
 on the test dataset, therefore generating with two submissions for each Sub-Task.
 
-With the one parent per node strategy we achieved the 13th best place on Sub-Task A,
-and the 11th best place on Sub-Task B. Results for the different evaluation metrics
-are described in Table~\ref{local_devset-results}.
+\subsubsection{Parent Per Node: local\_clf\_logit\_cnn}
+
+With the one parent per node strategy classifier, (\textit{local\_clf\_logit\_cnn})
+we achieved the 13th best place on Sub-Task A, and the 11th best place on
+Sub-Task B. Results for the different evaluation metrics are described in
+Table~\ref{local_devset-results}.
 
 % Comtravo-DS	Comtravo-DS__local_clf_logit_cnn
 % subtask_a - Comtravo-DS	Comtravo-DS__local_clf_logit_cnn	13	0.7178	0.8144	0.8255	0.8199	0.943
@@ -691,6 +701,17 @@ are described in Table~\ref{local_devset-results}.
 \caption{\label{local_devset-results} Best achieved results on the development
           set for both Sub-Tasks A and B with the parent per node classifier.}
 \end{table}
+
+Also, this classifier achieved the 9th recall and the 15th best precision
+for Sub-Task A, and the 8th best recall and the 14th best precision for Sub-Task B.
+This results were achieved with a support of 0.943, meaning that for
+roughly 5\% of the samples the classifier did not managed to produce any
+predictions.
+
+
+
+
+\subsubsection{Global: global\_clf\_cnn}
 
 With the global classifier strategy we achieved the 17th best place on Sub-Task A,
 and the 13th best place on Sub-Task B. Detailed results are presented in
@@ -713,49 +734,38 @@ Table~\ref{global_devset-results}.
           set for both Sub-Tasks A and B with the global classifier.}
 \end{table}
 
+Also, this classifier achieved the 15th recall and the 17th best precision
+for Sub-Task A, and the 9th best recall and the 18th best precision for Sub-Task B.
+
+The support was 0.9986, meaning that for roughly 1\% of the samples the classifier
+did not produced any predictions. The hierarchy consistency is of 0.9363, reflecting
+the lack of the a proper post-processing step to enforce the hierarchical structure.
 
 %TODO: are the results in-line with the dev test results?
 
 
 
+
+
+
+
 \section{Future Work}\label{future}
 
+% Local classifier
+A few more features could have been explored, for instance the author's name
+and the release date of the book.
 
+% Global Classifier
+Due to time constrains we failed to employ a post-processing step on the global
+classifier to make sure that the labels output is in-line with the hierarchy-tree
+constrains.
 
-\begin{comment}
-
-
-- initialized weight matrix based on label co-occurrence
-\citet{kurata-etal-2016-improved} proposed a novel neural network initialization method to
-treat some of the neurons in the final hidden layer as dedicated neurons for each pattern of label
-co-occurrence These dedicated neurons are initialized to connect to the corresponding co-occurring
-labels with stronger weights than to others.
-
-- % no global classifier faltou um post-processing step
-When the labels form a hierarchy, they share a hypernym–hyponym relation. When multiple
- labels are assigned to the text, if it is explicitly labeled by a subclass it must also implicitly
- include all of the its super- classes.
-The co-occurrence between subclasses and superclasses as labels for the input text contains
-information we would like to leverage to improve multi-label classification using a neural network.
-
-- use a proper corpus with embeddings as well for n-grams
-
-- % other features, release date, author's name
-
-
-
-
-\end{comment}
-
-
-\ \newline
-\textbf{TODO:}
-\ \newline
-
-\begin{comment}
-\section*{Acknowledgments}
-\ \newline
-\end{comment}
+The global classifier could be improved by initializing a weight matrix based on
+label co-occurrence. \citet{kurata-etal-2016-improved} proposed a novel neural
+network initialization method to treat some of the neurons in the final
+hidden layer as dedicated neurons for each pattern of label co-occurrence
+These dedicated neurons are initialized to connect to the corresponding
+co-occurring labels with stronger weights than to others.
 
 \bibliography{konvens2019.bib}
 \bibliographystyle{acl_natbib}
