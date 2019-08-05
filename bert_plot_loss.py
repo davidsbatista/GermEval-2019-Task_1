@@ -24,4 +24,3 @@ with open('./loss.txt', 'r') as fh:
     ax.vlines(epochs, ymin=0, ymax=df.loss.max(), colors='r', alpha=0.25, linestyles='--')
     plt.savefig('./loss.png')
     plt.close()
-    
