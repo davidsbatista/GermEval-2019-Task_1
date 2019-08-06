@@ -291,8 +291,8 @@ def main():
 
     # train subtask_a
     # subtask_a(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
-    subtask_b_one_per_level(train_data_x[:64], train_data_y[:64], dev_data_x[:64], train=os.environ.get('TRAIN', True))
-    subtask_b_one_per_parent(train_data_x[:64], train_data_y[:64], dev_data_x[:64], train=os.environ.get('TRAIN', True))
+    subtask_b_one_per_level(train_data_x[:1024], train_data_y[:1024], dev_data_x[:1024], train=os.environ.get('TRAIN', True))
+    subtask_b_one_per_parent(train_data_x[:1024], train_data_y[:1024], dev_data_x[:1024], train=os.environ.get('TRAIN', True))
     # model = subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
