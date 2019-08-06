@@ -48,15 +48,7 @@
 \maketitle
 
 \begin{abstract}
-We present a detailed description of Comtravo-DS team participation at the
-GermEval'19 Task 1 on hierarchical classification of blurbs. The challenge
-consisted in a document classification task where one also needs to capture
-the correct hierarchical structure of each document to label. We developed two
-systems, with which we generated two different submissions for each subtask,
-achieving the 13th place out of 19th submissions for Sub-Task A and 11th place
-out of 19th submissions for Sub-Task B. We describe in detail these two
-systems pointing out the advantages and advantages of each and laying down some
-foundations for future work on how to improve this results.
+We present two systems developed by the Comtravo Data Science team for the GermEval'19 Task 1 on hierarchical classification of blurbs. The challenge is a document classification task where the hierarchical structure of each document needs to be captured. Our system achieved the 13th place out of 19 submissions for Sub-Task A and the 11th place out of 19 submissions for Sub-Task B. We describe in detail these two systems pointing out the advantages and disadvantages of each as well as laying out future research directions.
 \end{abstract}
 
 
@@ -64,47 +56,46 @@ foundations for future work on how to improve this results.
 
 \section{Introduction}
 
-This paper describes the approach taken for the GermEval'19 task 1 taken by the
-Comtravo data-science team. The task aimed at developing systems to tackle the
+This paper describes the approach taken by the Comtravo Data Science team
+for the GermEval'19 task 1. The task aimed at developing systems to tackle the
 task of multi-label hierarchical classification of text.
 
 Several real-world classification problems are naturally cast within a hierarchy,
-where the labels to be predicted are organized in an hierarchy, typically as
-tree, several trees (i.e., a forest) or a direct acyclic graph. Some examples
-of hierarchical document categorization are for instance categorizing a news
-article~\cite{Lewis:2004:RNB:1005332.1005345}, a web page into a web directory
+where the labels to be predicted are organized in an hierarchy. Typically the hierarchies
+for a tree or several trees (a forest) or a directed acyclic graph. Some examples
+of hierarchical document categorization are for instance categorizing news
+articles~\cite{Lewis:2004:RNB:1005332.1005345}, a web page into a web directory
 or Wikipedia articles~\cite{PartalasKBAPGAA15}.
 
-We took two distinct approaches, one based on a local classifier strategy, where different classifiers
+We developed two distinct approaches, one based on a local classifier strategy, where different classifiers
 are trained according to the hierarchical structure of the label space. Another
-approach uses a single classifier which tries to naively predict the label
+approach uses a single classifier which tries to naively predict the entire label
 hierarchy for each sample.
 
-This paper is organized as follows, in Section~\ref{task} we describe task in
+This paper is organized as follows, in Section~\ref{task} we describe the task in
 detail and give a statistical description of the provided dataset. In Section~\ref{hierarchical-clf}
-we describe some of the proposed approaches in the literature to performer
+we describe some of the proposed approaches in the literature for
 hierarchical document classification. In Section~\ref{system} we describe
-the approaches taken and systems built to tackle both subtasks. Section~\ref{experiments}
-details the experiments done and the results, finally in Section~\ref{future} we
-outline some future work and ideas.
+our approaches to tackle both subtasks. Section~\ref{experiments}
+details the our experimental setup and results. Finally in Section~\ref{future} we
+outline some ideas for future work.
 
 
 
 \section{Task}\label{task}
 
-The GermEval 2010 Shared Task on hierarchical classification of blurbs challenges
-involved the classification of books into genres given a book's blurb i.e., a
+The GermEval 2019 Shared Task on hierarchical classification of blurbs
+involved the classification of german language books into genres given a book's blurb i.e., a
 short textual description of the book and related meta-data. The competition
 contained two sub-tasks:
 
 \begin{itemize}
 
-\item Sub-Task A: classify German books into one or multiple general writing
-genres, essentially a multi-label classification task with a total of 8 classes
-that can be assigned to a book.
+\item Sub-Task A: classify German books into one or multiple general 
+genres, a non-hierarchical multi-label classification task with a total of 8 classes.
 
 \item Sub-Task B: targets hierarchical multi-label classification into multiple
-writing genres. In addition to the general writing genres, genres of different
+writing genres. In addition to the general genres from Sub-Task A, any number of sub-genres of increasing
 specificity can be assigned to a book.
 
 \end{itemize}
@@ -112,18 +103,14 @@ specificity can be assigned to a book.
 
 \subsection{Dataset}
 
-The dataset made available for this task contains 3 levels of categories and
-it's considered a hierarchically multi-label since any book can be can associated
-to more than one class at any given level of the hierarchy.
-
-In the hierarchy every child-label has exactly one parent-label, and being
-each level multi-label one can think of this as an hierarchy made of several
-trees, a forest.
+The dataset made available for these tasks contains 3 label levels oragnised in a hierarchy;
+any book can be can associated with more than one label at any given level of the hierarchy.
+In the hierarchy every child-label has exactly one parent-label.
 
 The hierarchy contains a total of 343 distinct classes, 3 datasets were
 provided: 14 548 samples available for training, 2 079 for development and
 4 157 for testing. Tables~\ref{quantitivy-analysis-train}, \ref{quantitivy-analysis-dev},
-\ref{quantitivy-analysis-test}  contain a detailed statistical description of
+\ref{quantitivy-analysis-test}  contain a detailed description of
 the datasets provided i.e.: training, development and test, respectively. One can
 see that in terms of tokens and sentences the 3 datasets are aligned, and also
 between training and development in terms of labels per blurb, and labels per blurb
@@ -137,9 +124,9 @@ per level.
 
 \multicolumn{2}{ |c| }{\textbf{Training set}}                   \\
 \hline
-Avg. lenght of blurb (tokens)              &  96.78             \\
+Avg. length of blurb (tokens)              &  96.78             \\
 Std. deviation $\sigma$ (tokens)           &  39.63             \\
-Avg. lenght of blurb (sentences)           &  6.55              \\
+Avg. length of blurb (sentences)           &  6.55              \\
 Std. deviation $\sigma$ (sentences)        &  2.76              \\
 \hline
 Nr. unique tokens original                 &  114 903           \\
@@ -174,9 +161,9 @@ Nr. samples with leaf nodes at:            &                    \\
 \hline
 \multicolumn{2}{ |c| }{\textbf{Development set}}              \\
 \hline
-Avg. lenght of blurb (tokens)              &   98.71        \\
+Avg. length of blurb (tokens)              &   98.71        \\
 Std. deviation $\sigma$ (tokens)           &   46.29        \\
-Avg. lenght of blurb (sentences)           &   6.68         \\
+Avg. length of blurb (sentences)           &   6.68         \\
 Std. deviation $\sigma$ (sentences)        &   3.80         \\
 \hline
 Nr. unique tokens original                 &  33 599        \\
@@ -212,9 +199,9 @@ Total number of samples                    &  2 079            \\
 \hline
 \multicolumn{2}{ |c| }{\textbf{Test set}}                       \\
 \hline
-Avg. lenght of blurb (tokens)              &  96.91             \\
+Avg. length of blurb (tokens)              &  96.91             \\
 Std. deviation $\sigma$ (tokens)           &  39.83             \\
-Avg. lenght of blurb (sentences)           &  6.55              \\
+Avg. length of blurb (sentences)           &  6.55              \\
 Std. deviation $\sigma$ (sentences)        &  2.62              \\
 \hline
 Total number of samples                    &  4 157             \\
@@ -242,54 +229,47 @@ the local information and devise a strategy to build several classifiers~\cite{S
 
 
 \subsubsection{A classifier per node} % Local Classifier Per Node Approach
-The \textit{local classifier per node approach} consists in training one binary classifier for each
-node in the hierarchy tree, where a node is every possible label in the hierarchy tree.
+The \textit{local classifier per node approach} consists of training one binary one versus rest classifier for each
+node in the hierarchy, where each label in the hierarchy is a node. Normally, the negative training data is taken from
+the same level in the label hierarchy as the positive data.
 
-For instance, having classes 1, 2 and 3 in the first level, one classifier can be trained with
-samples belonging to class 1 as positive and classes 2 and 3 as negative, a similar approach is then
-followed for the the other classes and lower levels in the hierarchy. There are different strategies
-on how to select the positive and negative classes (see~\cite{}).
-
-During prediction a top-down strategy is applied, the output of each binary classifier will be a
+During prediction a top-down strategy is applied, the output of each binary classifier is a
 prediction of whether or not a given test sample belongs to the classifier’s predicted class. This
-approach is naturally multi-label since it is possible to predict multiple labels per class level.
+approach is naturally multi-label since it is possible to predict multiple labels at each level of the hierarchy.
 
-This approach however is prone to class-membership inconsistency, consider having again in the first
-level classes 1, 2 and 3, and in the second level, for instance, classes 1.1, 1.2, since the
-classifiers for nodes 1 and 1.1 are independently trained, one can classify a sample as belonging to
-classes 1.2 and 1.1 but not to class 1. This approach should be complemented by
-a post-processing method that tries to correct the prediction inconsistency.
+This approach, however, is prone to label inconsistency. Consider a document that has, for the first level,
+labels 1, 2 and 3, and, for the second level, labels 1.1, 1.2. Since the
+classifiers for nodes 1 and 1.1 are independently trained, it is possible to classify a sample as having labels
+1.2 and 1.1 but not the parent label 1. This approach should, therefore, be complemented by
+a post-processing method that tries to correct the label inconsistency.
 
 
 \subsubsection{A classifier per parent node} % Local Classifier Per Parent Node Approach
-In \textit{a per parent node approach}, for each parent node in the hierarchy tree, a multi-class
-classifier is trained to classify the probability of a given sample belonging to each of the parent's
+In \textit{a classifier per parent node} approach, a multi-class classifier is trained for each parent node in the label hierarchy.
+The classifier is trained to classify the probability of a given sample belonging to each of the parent's
 child nodes. A parent node is in this case every label in the hierarchy-tree which has one or more
 child labels.
 
 Given a test sample, first the top-level classifier is applied, then for every top-level
-predicted class (e.g., class 2 and 3) we apply it's child classifiers, e.g.: a classifier
-trained to predicted every 2.x classes and another for 3.x classes, and so one until we reach the
-last level.
+predicted label (e.g., class 2 and 3) its child classifiers, e.g.: a classifier
+trained to predict the 2.x labels and another for 3.x labels, and so one until the last level is reached.
 
-Note that the sub-classifiers were trained only with the children of classes 2 and 3, therefore
-this approach avoids the problem of making inconsistent predictions and respects the constrains
-of class-membership defined by the hierarchy-tree.
+Note that the sub-classifiers are only trained with the children of each respective parent label, therefore
+this approach avoids the label inconsistency problem and respects the constrains
+of class-membership defined by the label hierarchy.
 
 
 \subsubsection{A classifier per level} % Local Classifier Per Level Approach
 The \textit{local classifier per level} approach consists of training one multi-class classifier
-for each level of the hierarchy-tree. When a new test sample is presented we get the output of the
-classifiers from each level and use this information as the final classification.
+for each level of the label hierarchy. When a new test sample is presented the output of the
+classifiers from each level is used as the final classification.
 
-This approach however is prone to class-membership inconsistency, since different classifiers are
-trained for each level of the hierarchy. For instance, it's possible to have has outputs for the
-first-level classes 2 and 3, and then classes 1.1 and 1.2 at the second-level, and class 3.1.1
-at the third-level, which generates an inconsistent classification. This approach should also
-be complemented by a post-processing method that tries to correct the prediction inconsistency.
+This approach, however, is prone to label inconsistency, as different classifiers are
+trained for each level of the hierarchy and should, therefore, also
+be complemented by a post-processing method to correct the prediction inconsistency.
 
-One common error to all strategies in the local classifier and the top-down class-prediction
-approach is the propagation of errors downwards the hierarchy.
+One common error for all local classifier strategies the utilise the top-down class-prediction
+approach is the propagation of errors down the hierarchy.
 
 
 
@@ -318,8 +298,8 @@ We developed two systems implementing the following approaches:
 
 \subsection{Local Classifier}
 
-We employed a parent per node approach, which has the advantage of not being
-prone to hierarchy inconsistency errors. We need to train classifiers for each
+We employed a classifier per parent node approach, which has the advantage of not being
+prone to label inconsistency errors. We need to train classifiers for each
 parent node. For Level 3 we don't need to train any classifier since it
 contains only leaf nodes, plus some nodes on Level 2 are already leaf nodes.
 
@@ -403,11 +383,11 @@ padding was done to match the size of the longest document in the dataset.
 
 \subsubsection{Prediction threshold}\label{threshold}
 
-We set the probably prediction threshold at 0.5, so any label prediction probability
-above 0.5 is selected. But we noticed that for some samples no labels were
-being selected, since the correct labels were predicted probability scores lower than 0.5.
-To tackle this problem, for a given sample, if no predictions are done we lower
-the threshold to 0.4, if still no label predictions are done, we lower again
+We set the prediction threshold to 0.5, so any label with a predicted probability
+above 0.5 is selected. We noticed that for some samples no labels were
+being selected, as all labels had predicted probability scores lower than 0.5.
+To tackle this problem, for a given sample, if no predictions were done we lowered
+the threshold to 0.4, if still no label predictions are done, we lowered again
 the threshold to 0.3.
 
 
@@ -705,7 +685,7 @@ which would be 1.0 if employed.
 
 \section{Future Work}\label{future}
 
-We had planed to explore different features and carry more experiments but time
+We had planned to explore different features and carry more experiments but time
 constraints for the submission of the test results did not allowed us to experiment
 all that was planned.
 
