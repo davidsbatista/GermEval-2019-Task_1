@@ -17,7 +17,7 @@
 \usepackage{latexsym}
 \usepackage{verbatim}
 \usepackage{url}
-%\usepackage{fixltx2e}
+\usepackage{multirow}
 \usepackage{graphicx}
 \usepackage{url}
 
@@ -70,7 +70,7 @@ task of multi-label hierarchical classification of text.
 
 Several real-world classification problems are naturally cast within a hierarchy,
 where the labels to be predicted are organized in an hierarchy, typically as
-tree, several trees (i.e., a forest) or a DAG (Direct Acyclic Graph). Some examples
+tree, several trees (i.e., a forest) or a direct acyclic graph. Some examples
 of hierarchical document categorization are for instance categorizing a news
 article~\cite{Lewis:2004:RNB:1005332.1005345}, a web page into a web directory
 or Wikipedia articles~\cite{PartalasKBAPGAA15}.
@@ -133,7 +133,9 @@ per level.
 \small
 \begin{center}
 \begin{tabular}{|l|r|}
-\hline\centering\textbf{Training set}  &                        \\
+\hline
+
+\multicolumn{2}{ |c| }{\textbf{Training set}}                   \\
 \hline
 Avg. lenght of blurb (tokens)              &  96.78             \\
 Std. deviation $\sigma$ (tokens)           &  39.63             \\
@@ -158,7 +160,7 @@ Nr. samples with leaf nodes at:            &                    \\
  - Level 2                                 & 44,6\% (7.422)     \\
  - Level 3                                 & 53,5\% (8.894)     \\
  \hline
- Total Nr. of samples                      & 14 548             \\
+ Total number of samples                   & 14 548             \\
 \hline
 \end{tabular}
 \end{center}
@@ -169,7 +171,8 @@ Nr. samples with leaf nodes at:            &                    \\
 \small
 \begin{center}
 \begin{tabular}{|l|r|}
-\hline\centering\textbf{Development set}  &             \\
+\hline
+\multicolumn{2}{ |c| }{\textbf{Development set}}              \\
 \hline
 Avg. lenght of blurb (tokens)              &   98.71        \\
 Std. deviation $\sigma$ (tokens)           &   46.29        \\
@@ -194,7 +197,7 @@ Nr. samples with leaf nodes at:            &                   \\
  - Level 2                                 &  44.8\% (932 )    \\
  - Level 3                                 &  53.6\% (1113)    \\
 \hline
-Total Nr. of samples                       &  2 079            \\
+Total number of samples                    &  2 079            \\
 \hline
 \end{tabular}
 \end{center}
@@ -206,14 +209,15 @@ Total Nr. of samples                       &  2 079            \\
 \small
 \begin{center}
 \begin{tabular}{|l|r|}
-\hline\centering\textbf{Test set}  &         \\
+\hline
+\multicolumn{2}{ |c| }{\textbf{Test set}}                       \\
 \hline
 Avg. lenght of blurb (tokens)              &  96.91             \\
 Std. deviation $\sigma$ (tokens)           &  39.83             \\
 Avg. lenght of blurb (sentences)           &  6.55              \\
 Std. deviation $\sigma$ (sentences)        &  2.62              \\
 \hline
-Total Nr. of samples                       &  4 157             \\
+Total number of samples                    &  4 157             \\
 \hline
 \end{tabular}
 \end{center}
@@ -306,9 +310,9 @@ label structure associated with a given sample.
 We developed two systems implementing the following approaches:
 
 \begin{description}
-  \item[local classifier:] a classifier per parent node using
+  \item[Local Classifier:] a classifier per parent node using
   different types of classifiers;
-  \item[global classifier:] relying on the hypothesis
+  \item[Global Classifier:] relying on the hypothesis
   to explore the labels co-occurrence;
 \end{description}
 
@@ -397,12 +401,12 @@ token representations and removal of stop-words. For the neural networks the
 padding was done to match the size of the longest document in the dataset.
 
 
-\subsubsection{Prediction threshold}
+\subsubsection{Prediction threshold}\label{threshold}
 
 We set the probably prediction threshold at 0.5, so any label prediction probability
 above 0.5 is selected. But we noticed that for some samples no labels were
 being selected, since the correct labels were predicted probability scores lower than 0.5.
-To tackle this problema, for a given sample, if no predictions are done we lower
+To tackle this problem, for a given sample, if no predictions are done we lower
 the threshold to 0.4, if still no label predictions are done, we lower again
 the threshold to 0.3.
 
@@ -426,7 +430,7 @@ All the code used for this experiments is available
 on-line~\footnote{\url{https://github.com/davidsbatista/GermEval-2019-Task_1}}.
 
 
-\subsubsection{Local classifier per node: root}
+\subsubsection{Local classifier per node: Root Node}
 
 We explored different classifiers for the Root Node and for Level 1 and Level 2 we
 selected a Convolutional Neural Network (CNN).
@@ -448,26 +452,28 @@ weighted vectors in a one-versus-rest scenario varying following parameters:
 
 Training was performed with Stochastic Average Gradient for a maximum of 5 000 iterations.
 
-\item[\textbf{CNN}]\cite{kim-2014-convolutional}: for sentence classification with rectified linear units in
-the activation functions of the 1D convolutions, and varying:
+\item[\textbf{CNN}]\cite{kim-2014-convolutional}: for sentence classification
+with rectified linear units in the activation functions of the 1D convolutions,
+and varying:
 
 \begin{itemize}
 \item filter windows: (1), \textbf{(1, 2)}, (1, 2, 3);
 \item feature maps: 256, \textbf{300};
 \end{itemize}
 
-\item[\textbf{LSTM}]\cite{Hochreiter:1997:LSM:1246443.1246450}: recursively reads each token in the text updating it's
-internal state using the last state to represent the document, with a dropout
-layer of rate 0.1 between the LSTM's last state and the final sigmoid layer.
+\item[\textbf{LSTM}]\cite{Hochreiter:1997:LSM:1246443.1246450}: recursively reads
+each token in the text updating it's internal state using the last state to
+represent the document, with a dropout layer of rate 0.1 between the LSTM's last
+state and the final sigmoid layer.
 
 \begin{itemize}
 \item single LSTM vs \textbf{bi-directional LSTM};
 \item hidden units: 32, 64, \textbf{128};
 \end{itemize}
 
-\item[\textbf{Bag-of-Tricks}]\cite{joulin-etal-2017-bag}: token embeddings representations are averaged into
-a single vector representation, which is fed to a sigmoid classifier, we varied
-the following parameters:
+\item[\textbf{Bag-of-Tricks}]\cite{joulin-etal-2017-bag}: token embeddings
+representations are averaged into a single vector representation, which is fed
+to a sigmoid classifier, we varied the following parameters:
 
 \begin{itemize}
 \item n-grams: \textbf{2}, 3, 4, 5;
@@ -492,7 +498,8 @@ the development set.
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{subtask_a_devset-results} Results for different classifiers on the Sub-Task A on the development set.}
+\caption{\label{subtask_a_devset-results} Results for different classifiers on
+         the Sub-Task A on the development set.}
 \end{table}
 
 The Logistic Regression classifier achieved the best results
@@ -507,45 +514,47 @@ for each parent node, 8 for Level 1 and 42 for Level 2. All these classifiers
 were based on the CNN model.
 
 We explored some parameters configurations by varying the filter windows size and
-the filter maps size, Table~\ref{subtask_b_parameters} shows a subset of the different
+the filter maps size, Table~\ref{subtask_b_parameters_local} shows a subset of the different
 configuration parameters tried which yielded some of the best results. All these
 classifiers were training with mini-batch size of 16 for 5 epochs.
 
 \begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
-\hline\centering\textbf{Configuration}  & \textbf{filter windows} &  \textbf{filter maps} \\
+\hline\centering\textbf{}  & \textbf{Filter Windows} &  \textbf{Filter Maps} \\
 \hline
- Conf\_1 & 1,2       & 300 \\
- Conf\_2 & 1,2,3     & 200 \\
- Conf\_3 & 1,2,3,5,7 & 300 \\
- Conf\_4 & 3,5,6,10  & 256 \\
+Conf\textsubscript{1} & 1,2       & 300 \\
+Conf\textsubscript{2} & 1,2,3     & 200 \\
+Conf\textsubscript{3} & 1,2,3,5,7 & 300 \\
+Conf\textsubscript{4} & 3,5,6,10  & 256 \\
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{subtask_b_parameters} Different configuration parameters for the CNN classifiers for Level 1 and 2.}
+\caption{\label{subtask_b_parameters_local} Different configuration parameters for the
+         CNN classifiers for Level 1 and 2.}
 \end{table}
 
 In these experiments we used the Root Node classifier which yielded the best
 results, i.e. the logistic regression, to predict the labels for the root level,
-and experiment with different parameters for the Levels 1 and 2. Table~\ref{level-1-2} shows
-the results for Sub-Task B for configurations of parameters in Table~\ref{subtask_b_parameters}.
+and experiment with different parameters for the Levels 1 and 2.
+Table~\ref{level-1-2} shows the results for Sub-Task B for configurations of
+parameters in Table~\ref{subtask_b_parameters_local}.
 
 \begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
-\hline\centering\textbf{Method}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
+\hline\centering\textbf{}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
 \hline
- Conf\_1 & 0.7151 & 0.5330 & 0.6108 \\
- Conf\_2 & 0.7144 & 0.5303 & 0.6087 \\
- Conf\_3 & 0.7219 & 0.5235 & 0.6069 \\
- Conf\_4 & 0.7274 & 0.5085 & 0.5986 \\
+Conf\textsubscript{1} & 0.7151 & 0.5330 & 0.6108 \\
+Conf\textsubscript{2} & 0.7144 & 0.5303 & 0.6087 \\
+Conf\textsubscript{3} & 0.7219 & 0.5235 & 0.6069 \\
+Conf\textsubscript{4} & 0.7274 & 0.5085 & 0.5986 \\
 \hline
 \end{tabular}
 \end{center}
 \caption{\label{level-1-2} Results for Sub-Task B for different configurations
 of the CNN-based classifier for Levels 1 and 2 of the hierarchy, using the best
-classifier for the Root Level from Table~\ref{subtask_b_parameters}.}
+classifier for the Root Level from Table~\ref{subtask_b_parameters_local}.}
 \end{table}
 
 
@@ -555,110 +564,77 @@ classifier for the Root Level from Table~\ref{subtask_b_parameters}.}
 
 \subsubsection{Global classifier}
 
-%TODO: results?
+The global classifier uses a flattened hierarchy and learns how to predict a
+vector of 343 dimensions.
 
-The global classifier uses a flattened hierarchy and learns to predict a vector
-of 343 dimensions. For this strategy we used also a CNN model.
+Our initial idea was to use a neural network architecture and leverage on the
+labels co-occurrence by initializing a weight matrix, but due to time constrains
+this was not possible to take to the end. Also, due to time constrains we did not
+employ a post-processing step.
 
-Our initial idea with the global classifier was to leverage and explore the label
-co-occurrence by initializing a weight matrix, but due to time constrains this was
-not possible. Nevertheless, we explored different sets configuration of parameters,
-varying again filter windows and the filter maps.
+Nevertheless, we still applied a CNN architecture and explored different configuration
+parameters, varying the filter windows and the filter maps.
+
+\begin{comment}
+dropout_p = 0.5
+fully_connected_layers=2
+filtered = np.array(len(labels2idx) * [0.4])
+\end{comment}
+
+
+We used the same tokenization schema as with the Local classifier, as well
+as the same pre-trained word embeddings, which are fine-tuned during training.
+
+The training was done with the Adam optimizer~\cite{journals/corr/KingmaB14}
+using binary cross-entropy as a loss function, with mini-batch sizes of 128 for
+250 epochs and using 30\% of the training dataset for validation.
+
+We also used the same threshold filtering strategy as described in Section~\ref{threshold}
+
+\begin{table}[!h]
+\begin{center}
+\begin{tabular}{|l|r|r|r|}
+\hline\centering\textbf{}  & \textbf{Filter Windows} &  \textbf{Filter Maps} \\
+\hline
+
+
+Conf\textsubscript{1} &           1, 2, 3  &  300 \\
+Conf\textsubscript{2} &        3, 5, 7, 10 &  256 \\
+Conf\textsubscript{3} &  1, 2, 3, 5, 7, 10 &  256 \\
+\hline
+\end{tabular}
+\end{center}
+\caption{\label{subtask_b_parameters_global} Different configuration parameters for
+                the CNN classifiers for the global classifier.}
+\end{table}
 
 \begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
 \hline\centering\textbf{}  & \textbf{Precision} &  \textbf{Recall} &  \textbf{F\textsubscript{1}}\\
 \hline
-Conf\_1 & & & \\
+\multicolumn{4}{ |l| }{\textbf{Conf\textsubscript{1}}}              \\
 \hline
- Sub-Task A   &   &  &  \\
- Sub-Task B   &   &  &  \\
+ Sub-Task A   & 0.7163  & 0.7484 & 0.7320 \\
+ Sub-Task B   & 0.5257  & 0.4603 & 0.4909 \\
 \hline
+\multicolumn{4}{ |l| }{\textbf{Conf\textsubscript{2}}}              \\
 \hline
-Conf\_2 & & & \\
+ Sub-Task A   & 0.7353  & 0.7686 & 0.7516 \\
+ Sub-Task B   & 0.5470  & 0.4717 & 0.5066 \\
 \hline
- Sub-Task A   &   &  &  \\
- Sub-Task B   &   &  &  \\
+\multicolumn{4}{ |l| }{\textbf{Conf\textsubscript{3}}}              \\
 \hline
-\hline
-Conf\_3 & & & \\
-\hline
- Sub-Task A   &   &  &  \\
- Sub-Task B   &   &  &  \\
-\hline
+ Sub-Task A   & 0.8389  & 0.7659 & 0.8008 \\
+ Sub-Task B   & 0.6733  & 0.5032 & 0.5760 \\
 \hline
 \end{tabular}
 \end{center}
-\caption{\label{}}
+\caption{\label{results_global_b} Results for both sub-tasks using the
+         configuration parameters from Table~\ref{subtask_b_parameters_global}.}
 \end{table}
 
 
-
-\begin{comment}
-low	TRUE
-simple	TRUE
-stopwords	TRUE
-
-[[256, 10], [256, 7], [256, 5], [256, 3], [256, 2], [256, 1]]
-kernel_initializer=random_uniform
-de-wiki-fasttext-300d-1M
-dropout_p = 0.5
-fully_connected_layers=2
-adam
-batch_size=128,
-shuffle=True,
-validation_split=0.4,
-verbose=1,
-epochs=250
-filtered = np.array(len(labels2idx) * [0.4])
-
-
-subtask_a			subtask_b
-Precision	0.8389		Precision	0.6733
-Recall	0.7659		Recall	0.5032
-F1	0.8008		F1	0.576
-\end{comment}
-
-
-
-\begin{comment}
-
-classifier			tokenisation schema
-[[256, 10], [256, 7], [256, 5], [256, 3], [256, 2], [256, 1]]			low	TRUE
-kernel_initializer=random_uniform			simple	TRUE
-de-wiki-fasttext-300d-1M			stopwords	TRUE
-dropout_p = 0.5
-fully_connected_layers=2
-adam
-batch_size=128,
-shuffle=True,
-validation_split=0.4,
-verbose=1,
-epochs=500
-filtered = np.array(len(labels2idx) * [0.4])
-
-subtask_a			subtask_b
-Precision	0.7875		Precision	0.6235
-Recall	0.7942		Recall	0.5066
-F1	0.7908		F1	0.559
-\begin{comment}
-
-
-\begin{comment}
-[[256, 10], [256, 7], [256, 5], [256, 3], [256, 2], [256, 1]]
-dropout_p = 0.5
-fully_connected_layers=2
-adam
-batch_size=128,
-shuffle=True,
-epochs=250
-
-subtask_a			subtask_b
-Precision	0.3355		Precision	0.2381
-Recall	0.6256		Recall	0.3057
-F1	0.4368		F1	0.2677
-\end{comment}
 
 
 
@@ -673,14 +649,15 @@ on the test dataset, therefore generating with two submissions for each Sub-Task
 
 \subsubsection{Parent Per Node}
 
-With the one parent per node strategy classifier, (\textit{local\_clf\_logit\_cnn})
-we achieved the 13th best place on Sub-Task A, and the 11th best place on
-Sub-Task B. Results for the detailed evaluation metrics are described in
-Table~\ref{local_devset-results}.
+With the one parent per node strategy classifier, we achieved the 13th best place
+on Sub-Task A, and the 11th best place on Sub-Task B. Results for the detailed
+evaluation metrics are described in Table~\ref{local_devset-results}. Also, this
+classifier achieved the 9th best recall and the 15th best precision for Sub-Task A,
+and the 8th best recall and the 14th best precision for Sub-Task B. This results were
+achieved with a support of 0.943, meaning that for roughly 5\% of the samples the
+classifier did not managed to produce any predictions.
 
-% Comtravo-DS	Comtravo-DS__local_clf_logit_cnn
-% subtask_a - Comtravo-DS	Comtravo-DS__local_clf_logit_cnn	13	0.7178	0.8144	0.8255	0.8199	0.943
-% subtask_b - Comtravo-DS__local_clf_logit_cnn	11	0.1924	0.7042	0.5274	0.6031	1	0.943
+
 \begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
@@ -695,11 +672,6 @@ Table~\ref{local_devset-results}.
           set for both Sub-Tasks A and B with the parent per node classifier.}
 \end{table}
 
-Also, this classifier achieved the 9th best recall and the 15th best precision
-for Sub-Task A, and the 8th best recall and the 14th best precision for Sub-Task B.
-This results were achieved with a support of 0.943, meaning that for
-roughly 5\% of the samples the classifier did not managed to produce any
-predictions.
 
 
 
@@ -710,9 +682,6 @@ With the global classifier strategy we achieved the 17th best place on Sub-Task 
 and the 13th best place on Sub-Task B. Detailed results are presented in
 Table~\ref{global_devset-results}.
 
-% Comtravo-DS__global_clf_cnn
-% - Comtravo-DS__global_clf_cnn	17	0.7183	0.7761	0.7839	0.78390.7839	0.9925
-% - Comtravo-DS__global_clf_cnn	13	0.1751	0.5672	0.5185	0.5418	0.9363	0.9986
 \begin{table}[!h]
 \begin{center}
 \begin{tabular}{|l|r|r|r|}
@@ -731,31 +700,35 @@ Also, this classifier achieved the 15th best recall and the 17th best precision
 for Sub-Task A, and the 9th best recall and the 18th best precision for Sub-Task B.
 The support was 0.9986, meaning that for roughly 1\% of the samples the classifier
 did not produced any predictions. The hierarchy consistency is of 0.9363, reflecting
-the lack of the a proper post-processing step to enforce the hierarchical structure.
-
+the lack of a post-processing step to enforce the hierarchical structure,
+which would be 1.0 if employed.
 
 \section{Future Work}\label{future}
 
-%TODO:
-% - Prediction threshold
-% For the neural networks the padding was done to match the size of the longest document in the dataset.
-% why not for the avg. number of tokens?
+We had planed to explore different features and carry more experiments but time
+constraints for the submission of the test results did not allowed us to experiment
+all that was planned.
 
 % Local classifier
 A few more features could have been explored, for instance the author's name
 and the release date of the book.
 
-% Global Classifier
-Due to time constrains we failed to employ a post-processing step on the global
-classifier to make sure that the labels output is in-line with the hierarchy-tree
-constrains.
+Also the padding of the documents representation for the neural network could be
+set to the average since of the documents, instead of the longest one.
 
-The global classifier could be improved by initializing a weight matrix based on
-label co-occurrence. \citet{kurata-etal-2016-improved} proposed a novel neural
-network initialization method to treat some of the neurons in the final
-hidden layer as dedicated neurons for each pattern of label co-occurrence
-These dedicated neurons are initialized to connect to the corresponding
-co-occurring labels with stronger weights than to others.
+% Global Classifier
+One crucial aspect in the global classifier is a post-processing step to make
+sure that the labels output is in-line with the hierarchy-tree constrains.
+
+The global classifier could also be improved by initializing a weight matrix
+based on label co-occurrence. \citet{kurata-etal-2016-improved} proposed a neural
+network initialization method to treat some of the neurons in the final hidden
+layer as dedicated neurons for each pattern of label co-occurrence. These dedicated
+neurons are initialized to connect to the corresponding co-occurring labels with
+stronger weights than to others representing non co-occurring labels.
+
+The values for the prediction threshold were selected in an ad-hoc fashion, these
+could also be properly set, through a set of experiments.
 
 \bibliography{konvens2019.bib}
 \bibliographystyle{acl_natbib}
