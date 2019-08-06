@@ -7,6 +7,8 @@ import tensorflow as tf
 import random as rn
 
 # necessary for starting Numpy generated random numbers in a well-defined initial state.
+from joblib import dump
+
 np.random.seed(42)
 
 # necessary for starting core Python generated random numbers in a well-defined state.
@@ -42,12 +44,26 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
 
     if clf == 'logit':
         model, ml_binarizer = train_logit_tf_idf(train_data_x, train_data_y, 'top_level')
+
+        # save model to disk
+        dump(model, 'logit.joblib')
+
+        # apply on test dev data
         new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-        predictions = model.predict(new_data_x)
+        predictions_prob = model.predict_proba(new_data_x)
         with open('answer.txt', 'wt') as f_out:
             f_out.write(str('subtask_a\n'))
-            for pred, data in zip(ml_binarizer.inverse_transform(predictions), dev_data_x):
-                f_out.write(data['isbn'] + '\t' + '\t'.join([p for p in pred]) + '\n')
+            for pred, data in zip(predictions_prob, dev_data_x):
+
+                predictions_bins = np.where(pred > 0.5, 1, 0)
+                if np.all(predictions_bins == 0):
+                    predictions_bins = np.where(pred > 0.4, 1, 0)
+
+                print(predictions_bins)
+                labels = ml_binarizer.inverse_transform(np.array([predictions_bins]))[0]
+                print(labels)
+
+                f_out.write(data['isbn'] + '\t' + '\t'.join([l for l in labels]) + '\n')
 
     else:
         if clf == 'han':
@@ -97,7 +113,6 @@ def subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit'):
             tokenisation = {'low': True, 'simple': False, 'stop':  True}
             model, ml_binarizer, max_sent_len, token2idx = train_cnn_sent_class(train_data_x,
                                                                                 train_data_y,
-                                                                                'top_level',
                                                                                 tokenisation)
 
             test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
@@ -133,13 +148,13 @@ def main():
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='bag-of-tricks')
     # model = subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
-    # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
+    subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='logit')
 
     # load submission/test data
-    train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
-    test_data_x, _, _ = load_data('blurbs_train_all.txt', dev=False)
-    subtask_a(train_data_x, train_data_y, test_data_x, clf='logit')
+    # train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
+    # test_data_x, _, _ = load_data('blurbs_train_all.txt', dev=False)
+    # subtask_a(train_data_x, train_data_y, test_data_x, clf='logit')
 
 
 if __name__ == '__main__':

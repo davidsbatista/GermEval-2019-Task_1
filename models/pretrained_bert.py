@@ -129,7 +129,6 @@ class PretrainedBert:
             class_weights = (((inverted - inverted.min()) * (minmax_ratio - 1)) / (inverted.max() - inverted.min())) + 1
             instance_weights = (y * class_weights).max(dim=1)[0]
 
-        print(class_weights)
         train_sampler = WeightedRandomSampler(instance_weights, len(X), replacement=True)
         train_dataloader = DataLoader(train_data, sampler=train_sampler,
                                       batch_size=self.batch_size)
@@ -191,7 +190,6 @@ class PretrainedBert:
             class_weights = (((inverted - inverted.min()) * (minmax_ratio - 1)) / (inverted.max() - inverted.min())) + 1
             instance_weights = (y * class_weights).max(dim=1)[0]
 
-        print(class_weights)
         class_weights = class_weights.to(DEVICE)
         i_step = 1  # stop pylint from complaining
         start_time = time.time()
@@ -340,7 +338,7 @@ class BertForHierarchicalMultilabelSequenceClassification(BertPreTrainedModel):
 
         loss_fct = MultiLabelSoftMarginLoss()
 
-        loss = torch.FloatTensor([0])
+        loss = torch.FloatTensor([0]).to(input_ids.device)
         logits = torch.zeros((input_ids.size()[0], self.num_labels), dtype=torch.float32, device=input_ids.device)
 
         # go through the label hierarchy and get predictions from the corresponding models

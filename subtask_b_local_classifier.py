@@ -4,12 +4,16 @@
 import pickle
 from collections import defaultdict
 from copy import deepcopy
+
+import keras
 import numpy as np
 
 import tensorflow as tf
 import random as rn
 
 # necessary for starting Numpy generated random numbers in a well-defined initial state.
+from sklearn.pipeline import Pipeline
+
 np.random.seed(42)
 
 # necessary for starting core Python generated random numbers in a well-defined state.
@@ -26,7 +30,7 @@ K.set_session(sess)
 
 from utils.statistical_analysis import extract_hierarchy
 from utils.models_utils import train_cnn_sent_class, train_logit_tf_idf
-from utils.pre_processing import load_data, vectorize_one_sample
+from utils.pre_processing import load_data, vectorize_one_sample, vectorize_dev_data
 
 
 def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
@@ -150,24 +154,25 @@ def train_clf_per_parent_node(train_data_x, train_data_y, type_clfs):
     return classifiers
 
 
-def subtask_b(train_data_x, train_data_y, dev_data_x):
+def subtask_b(train_data_x, train_data_y, dev_data_x, train=True):
 
     out_file = 'results/classifiers.pkl'
 
-    # possibilities: logit, bag-of-tricks, cnn
-    clfs = {'top': 'logit', 'level_1': 'cnn', 'level_2': 'cnn'}
-    classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
+    if train:
+        # possibilities: logit, bag-of-tricks, cnn
+        clfs = {'top': 'logit', 'level_1': 'cnn', 'level_2': 'cnn'}
+        classifiers = train_clf_per_parent_node(train_data_x, train_data_y, clfs)
 
-    """
-    print(f"Saving trained classifiers to {out_file} ...")
-    with open(out_file, 'wb') as f_out:
-        pickle.dump(classifiers, f_out)
+        print(f"Saving trained classifiers to {out_file} ...")
+        with open(out_file, 'wb') as f_out:
+            pickle.dump(classifiers, f_out)
 
-    print(f"Reading trained classifiers to {out_file} ...")
-    with open('results/classifiers.pkl', 'rb') as f_in:
-        classifiers = pickle.load(f_in)
-    """
+    else:
+        print(f"Reading trained classifiers to {out_file} ...")
+        with open('results/classifiers.pkl', 'rb') as f_in:
+            classifiers = pickle.load(f_in)
 
+    print(f"Applying classifiers on dev/test data")
     # apply on dev data
     # structure to store predictions on dev_data
     levels = {0: [], 1: [], 2: []}
@@ -176,43 +181,63 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
         classification[data['isbn']] = deepcopy(levels)
 
     # apply the top-level classifier
+    if isinstance(classifiers['top_level']['clf'], keras.engine.training.Model):
+        # ConvNets
+        top_level_clf = classifiers['top_level']['clf']
+        binarizer = classifiers['top_level']['binarizer']
+        token2idx = classifiers['top_level']['token2idx']
+        max_sent_len = classifiers['top_level']['max_sent_len']
+        tokenisation = classifiers['top_level']['tokenisation']
 
-    # CNN
-    # top_level_clf = classifiers['top_level']['clf']
-    # binarizer = classifiers['top_level']['binarizer']
-    # token2idx = classifiers['top_level']['token2idx']
-    # max_sent_len = classifiers['top_level']['max_sent_len']
-    # tokenisation = classifiers['top_level']['tokenisation']
-    #
-    # test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
-    # predictions = top_level_clf.predict(test_vectors)
-    # pred_bin = []
-    # for pred, true in zip(predictions, dev_data_x):
-    #     binary = [0 if i <= 0.4 else 1 for i in pred]
-    #     if np.all(binary == 0):
-    #         binary = [0 if i <= 0.3 else 1 for i in pred]
-    #     pred_bin.append(binary)
-    #
-    # for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
-    #     if pred is None:
-    #         continue
-    #     classification[data['isbn']][0] = [p for p in pred]
-    #     print('\t'.join([p for p in pred]))
-    #     print("-----")
+        test_vectors = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+        predictions = top_level_clf.predict(test_vectors)
+        pred_bin = []
+        for pred, true in zip(predictions, dev_data_x):
+            binary = [0 if i <= 0.4 else 1 for i in pred]
+            if np.all(binary == 0):
+                binary = [0 if i <= 0.3 else 1 for i in pred]
+            pred_bin.append(binary)
 
-    # Logit
-    top_level_clf = classifiers['top_level']['clf']
-    binarizer = classifiers['top_level']['binarizer']
-    print("Predicting on dev data")
-    new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
-    predictions = top_level_clf.predict(new_data_x)
-    predictions_bins = np.where(predictions >= 0.5, 1, 0)
-    for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
-        if pred is None:
-            continue
-        classification[data['isbn']][0] = [p for p in pred]
-        print('\t'.join([p for p in pred]))
-        print("-----")
+        for pred, data in zip(binarizer.inverse_transform(np.array(pred_bin)), dev_data_x):
+            if pred is None:
+                continue
+            classification[data['isbn']][0] = [p for p in pred]
+            print('\t'.join([p for p in pred]))
+            print("-----")
+
+    elif isinstance(classifiers['top_level']['clf'], Pipeline):
+
+        # Logit
+        top_level_clf = classifiers['top_level']['clf']
+        binarizer = classifiers['top_level']['binarizer']
+        print("Predicting on dev data")
+        new_data_x = [x['title'] + " SEP " + x['body'] for x in dev_data_x]
+
+        # old strategy
+        """
+        predictions = top_level_clf.predict(new_data_x)
+        predictions_bins = np.where(predictions >= 0.5, 1, 0)
+        for pred, data in zip(binarizer.inverse_transform(predictions_bins), dev_data_x):
+            if pred is None:
+                continue
+            classification[data['isbn']][0] = [p for p in pred]
+            print('\t'.join([p for p in pred]))
+            print("-----")
+        """
+
+        # new strategy
+        predictions_prob = top_level_clf.predict_proba(new_data_x)
+        for pred, data in zip(predictions_prob, dev_data_x):
+
+            predictions_bins = np.where(pred > 0.5, 1, 0)
+            if np.all(predictions_bins == 0):
+                predictions_bins = np.where(pred > 0.4, 1, 0)
+
+            print(predictions_bins)
+            labels = binarizer.inverse_transform(np.array([predictions_bins]))[0]
+            print(labels)
+
+            classification[data['isbn']][0] = [l for l in labels]
 
     # apply level-1 classifiers for prediction from the top-level classifier
     for data in dev_data_x:
@@ -296,21 +321,18 @@ def subtask_b(train_data_x, train_data_y, dev_data_x):
 
 def main():
     # load train data
-    # train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
+    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
     # load dev data
-    # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
-
-    # load dev data
-    # dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
 
     # train subtask_b
-    # subtask_b(train_data_x, train_data_y, dev_data_x)
+    subtask_b(train_data_x, train_data_y, dev_data_x, False)
 
     # load submission/test data
-    train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
-    test_data_x, _, _ = load_data('blurbs_test_participants.txt', dev=False)
-    subtask_b(train_data_x, train_data_y, test_data_x)
+    # train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
+    # test_data_x, _, _ = load_data('blurbs_test_participants.txt', dev=False)
+    # subtask_b(train_data_x, train_data_y, test_data_x)
 
 
 if __name__ == '__main__':

@@ -30,8 +30,8 @@ import os
 import tensorflow as tf
 from keras import Input, Model, backend as K
 from keras.engine.saving import load_model
-from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, GlobalMaxPooling1D, \
-    Conv1D, MaxPooling1D, Flatten, concatenate
+from keras.layers import AlphaDropout, Concatenate, Convolution1D, Dense, Embedding, \
+    GlobalMaxPooling1D, Conv1D, MaxPooling1D, Flatten, concatenate
 from keras_preprocessing.sequence import pad_sequences
 
 
@@ -84,7 +84,7 @@ def create_weight_matrix(n_samples):
             labels2idx[sublabel] = label_idx
             label_idx += 1
 
-    weight_matrix = np.zeros((n_samples, len(labels2idx)), dtype=np.float32)
+    weight_matrix = np.zeros((n_samples, len(labels2idx)))
 
     return weight_matrix, labels2idx
 
@@ -98,10 +98,22 @@ def init_weight_matrix(matrix, train_data_y, labels2idx):
     return matrix
 
 
+def my_init(shape, dtype=None):
+    # ToDo: init weight matrix
+    return K.random_normal(shape, dtype=dtype)
+
+
+def init_f(shape, dtype=None):
+    # ToDo: init weight matrix
+    ker = np.zeros(shape, dtype=dtype)
+    ker[tuple(map(lambda x: int(np.floor(x / 2)), ker.shape))] = 1
+    return tf.convert_to_tensor(ker)
+
+
 def build_neural_network(weight_matrix, input_size, token2idx):
     # alphabet_size = vocab_size
     embedding_size = 300
-    conv_layers = [[256, 10], [256, 7], [256, 5], [256, 3], [256, 2], [256, 1]]
+    conv_layers = [[256, 7], [256, 5], [256, 3], [256, 2], [256, 1]]
     fully_connected_layers = [1024, 1024]
     dropout_p = 0.5
     num_of_classes = weight_matrix.shape[1]
@@ -109,13 +121,10 @@ def build_neural_network(weight_matrix, input_size, token2idx):
     threshold = 1e-6
     vocab_size = len(token2idx)
 
-    print("weight_matrix")
-    print(weight_matrix.shape)
-
     # embeddings layer
-    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
     print("Loading pre-trained Embeddings\n")
     static_embeddings = KeyedVectors.load('resources/de-wiki-fasttext-300d-1M')
+    # build a word embeddings matrix, out of vocabulary words will be initialized randomly
     embedding_matrix = np.random.random((len(token2idx), static_embeddings.vector_size))
     not_found = 0
     for word, i in token2idx.items():
@@ -124,6 +133,8 @@ def build_neural_network(weight_matrix, input_size, token2idx):
             embedding_matrix[i] = embedding_vector
         except KeyError:
             not_found += 1
+
+    print("embedding_matrix: ", embedding_matrix.shape)
 
     embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings', input_size,
                                            trainable=True)
@@ -144,25 +155,13 @@ def build_neural_network(weight_matrix, input_size, token2idx):
         convolution_output.append(pool)
     x = Concatenate()(convolution_output)
 
-    def my_init(shape, dtype=None):
-        print("shape")
-        print(shape)
-        print()
-        return K.random_normal(shape, dtype=dtype)
-
-    def init_f(shape, dtype=None):
-        ker = np.zeros(shape, dtype=dtype)
-        ker[tuple(map(lambda x: int(np.floor(x / 2)), ker.shape))] = 1
-        print(ker.shape)
-        return tf.convert_to_tensor(ker)
-
     # Fully connected layers
-    # for fl in fully_connected_layers:
-    x = Dense(weight_matrix.shape[0], activation='relu', kernel_initializer='glorot_uniform')(x)
-    x = AlphaDropout(dropout_p)(x)
+    for fl in fully_connected_layers:
+        x = Dense(fl, activation='relu', kernel_initializer='random_uniform')(x)
+        x = AlphaDropout(dropout_p)(x)
 
     # Output layer
-    predictions = Dense(num_of_classes, activation='sigmoid', trainable=True)(x)
+    predictions = Dense(num_of_classes, activation='sigmoid')(x)
 
     # Build and compile model
     # sgd = optimizers.SGD(lr=0.01, decay=1e-6, momentum=0.9, nesterov=True)
@@ -174,7 +173,7 @@ def build_neural_network(weight_matrix, input_size, token2idx):
     return model
 
 
-def build_neural_network_2(weight_matrix, max_sent_len, vocab_size, token2idx):
+def build_convents_version_2(weight_matrix, max_sent_len, vocab_size, token2idx):
 
     num_of_classes = weight_matrix.shape[1]
 
@@ -223,6 +222,16 @@ def build_neural_network_2(weight_matrix, max_sent_len, vocab_size, token2idx):
     model = Model(inputs=i, outputs=o)
     model.compile(loss={'output': 'binary_crossentropy'}, optimizer='adam', metrics=['accuracy'])
 
+    """
+    model.fit(train_x, train_y, batch_size=16, epochs=20, verbose=True, validation_split=0.33)
+    predictions = model.predict([test_x], verbose=1)
+    # train on all data without validation split
+    embedding_layer = get_embeddings_layer(embedding_matrix, 'static-embeddings',
+                                           max_sent_len, trainable=True)
+    model = get_cnn_pre_trained_embeddings(embedding_layer, max_sent_len, n_classes)
+    model.fit(train_data_x, data_y, batch_size=16, epochs=5, verbose=True)
+    """
+
     return model
 
 
@@ -231,10 +240,13 @@ def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
     low = tokenisation['low']
     simple = tokenisation['simple']
     stop = tokenisation['stop']
+
     token2idx, max_sent_len, _ = build_token_index(train_data_x,
                                                    lowercase=low,
                                                    simple=simple,
                                                    remove_stopwords=stop)
+
+    print("token2idx: ", len(token2idx))
 
     # y_data: encode into one-hot vectors with all labels in the hierarchy
     train_y = []
@@ -246,6 +258,7 @@ def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
         train_y.append(all_labels)
 
     # vectorize, i.e. tokens to indexes and pad
+    print("Vectorizing input data\n")
     vectors = []
     for x in train_data_x:
         text = x['title'] + " SEP " + x['body']
@@ -260,15 +273,23 @@ def build_vectors(train_data_x, train_data_y, labels2idx, tokenisation):
 
 def main():
 
-    # load train data
-    train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
+    dev_data = False
 
-    # load dev data
-    dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+    if dev_data:
+        # load train data
+        train_data_x, train_data_y, labels = load_data('blurbs_train.txt', dev=True)
 
-    # create matrix and fill-in weight matrix
+        # load dev data
+        dev_data_x, _, _ = load_data('blurbs_dev_participants.txt', dev=True)
+
+    else:
+        # load submission/test data
+        train_data_x, train_data_y, labels = load_data('blurbs_train_all.txt', dev=False)
+        test_data_x, _, _ = load_data('blurbs_test_participants.txt', dev=False)
+
+    # # ToDo: initialization, create matrix and fill-in weight matrix
     weight_matrix, labels2idx = create_weight_matrix(n_samples=len(train_data_x))
-    weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
+    # weight_matrix = init_weight_matrix(weight_matrix, train_data_y, labels2idx)
 
     # tokenise training data
     tokenisation = {'low': True, 'simple': True, 'stop': True}
@@ -276,34 +297,27 @@ def main():
                                                               labels2idx, tokenisation)
 
     if not os.path.exists('global_classifier.h5'):
+        print("Training a new classifier...")
         model = build_neural_network(weight_matrix, x_train.shape[1], token2idx)
-
-        # model.save_weights('my_model_weights.h5')
         model.summary()
-
-        # initialize the weight matrix between hidden and output layers
-        """
-        def reset_weights(model):
-            session = K.get_session()
-            for layer in model.layers:
-                if hasattr(layer, 'kernel_initializer'):
-                    layer.kernel.initializer.run(session=session)
-        """
-
-        bias = np.zeros(weight_matrix.shape[1])
-        model.layers[-1].set_weights([weight_matrix, bias])
-
         model.fit(x=x_train, y=y_train,
                   batch_size=64,
                   shuffle=True,
                   validation_split=0.4,
                   verbose=1,
-                  epochs=250)
+                  epochs=40)
         model.save('global_classifier.h5')
     else:
+        print("Using a previous trained classifier...")
         model = load_model(filepath='global_classifier.h5')
 
-    dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+    if dev_data:
+        # dev data
+        dev_vector = vectorize_dev_data(dev_data_x, max_sent_len, token2idx, tokenisation)
+    else:
+        # submission: test_data
+        dev_vector = vectorize_dev_data(test_data_x, max_sent_len, token2idx, tokenisation)
+
     predictions = model.predict(dev_vector, verbose=1)
 
     # ToDo:
@@ -316,7 +330,11 @@ def main():
     filtered = np.array(len(labels2idx) * [0.4])
     pred_bin = (predictions > filtered).astype(int)
     idx2labels = {v: k for k, v in labels2idx.items()}
-    write_submission_file(dev_data_x, idx2labels, pred_bin)
+
+    if dev_data:
+        write_submission_file(dev_data_x, idx2labels, pred_bin)
+    else:
+        write_submission_file(test_data_x, idx2labels, pred_bin)
 
 
 if __name__ == '__main__':

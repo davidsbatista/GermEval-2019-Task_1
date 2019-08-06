@@ -152,7 +152,7 @@ def subtask_b_one_per_level(train_data_x, train_data_y, dev_data_x, train=True):
                                               batch_size=10,
                                               loss=loss)
     if train:
-        # bert_mdl.post_epoch_hook = evaluate_after_epoch
+        bert_mdl.post_epoch_hook = evaluate_after_epoch
         try:
             train, test = train_test_split(list(range(len(train_data_x))), test_size=0.2, random_state=89734)
             _data_x, _data_y = [train_data_x[idx] for idx in test], [y_labels[idx] for idx in test]
@@ -233,7 +233,7 @@ def subtask_b_one_per_parent(train_data_x, train_data_y, dev_data_x, train=True)
                                               batch_size=10,
                                               loss=loss)
     if train:
-        # bert_mdl.post_epoch_hook = evaluate_after_epoch
+        bert_mdl.post_epoch_hook = evaluate_after_epoch
         try:
             train, test = train_test_split(list(range(len(train_data_x))), test_size=0.2, random_state=89734)
             _data_x, _data_y = [train_data_x[idx] for idx in test], [y_labels[idx] for idx in test]
@@ -293,6 +293,14 @@ def main():
     # subtask_a(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
     subtask_b_one_per_level(train_data_x[:1024], train_data_y[:1024], dev_data_x[:1024], train=os.environ.get('TRAIN', True))
     subtask_b_one_per_parent(train_data_x[:1024], train_data_y[:1024], dev_data_x[:1024], train=os.environ.get('TRAIN', True))
+    subtask_a(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
+    """
+    if os.environ['MODEL'] == 'one_per_level':
+        subtask_b_one_per_level(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
+    if os.environ['MODEL'] == 'one_per_parent':
+        subtask_b_one_per_parent(train_data_x, train_data_y, dev_data_x, train=os.environ.get('TRAIN', True))
+    """
+
     # model = subtask_a(train_data_x, train_data_y, dev_data_x, clf='han')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='lstm')
     # subtask_a(train_data_x, train_data_y, dev_data_x, clf='cnn')
