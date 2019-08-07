@@ -1,13 +1,29 @@
 # GermEval2019
 
+This repository contains the code from the participation on GermEval 2019 Task 1 -- Shared task on 
+hierarchical classification of blurbs.
 
+ 
+To run the experiments:
+
+    pip install -r requirements.txt
+    
     wget https://s3.eu-central-1.amazonaws.com/alan-nlp/resources/embeddings-v0.4/de-wiki-fasttext-300d-1M.vectors.npy
     wget https://s3.eu-central-1.amazonaws.com/alan-nlp/resources/embeddings-v0.4/de-wiki-fasttext-300d-1M
-    wget https://dl.fbaipublicfiles.com/fasttext/vectors-crawl/cc.de.300.bin.gz
-
-    pip install gensim
-    pip install nltk
-    pip install keras
     
     python -m nltk.downloader punkt
     python -m nltk.downloader stopwords
+
+
+The following files run experiments for different strategies
+
+    subtask_a.py
+    
+    subtask_b_local_classifier.py
+    
+    subtask_b_global_classifier.py
+    
+    
+Evaluating an experiment:
+
+    score.sh
