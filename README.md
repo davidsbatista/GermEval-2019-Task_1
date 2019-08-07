@@ -1,6 +1,6 @@
-# GermEval2019
+### GermEval 2019 Task 1 - Shared Task on Hierarchical Classification of Blurbs
 
-This repository contains the code from the participation on GermEval 2019 Task 1 -- Shared task on 
+This repository contains the code for the participation on GermEval 2019 Task 1 -- Shared task on 
 hierarchical classification of blurbs.
 
  
