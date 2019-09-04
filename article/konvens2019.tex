@@ -32,7 +32,7 @@
 
 \newcommand\BibTeX{B\textsc{ib}\TeX}
 
-\title{COMTRAVO-DS team at GermEval 2019 Task 1 on hierarchical classification of blurbs}
+\title{COMTRAVO-DS team at GermEval 2019 Task 1 on Hierarchical Classification of Blurbs}
 
 \author{David S. Batista \\
   Comtravo GmbH \\
@@ -63,8 +63,8 @@ out future research directions.
 \section{Introduction}
 
 This paper describes the approach taken by the Comtravo Data Science team
-for the GermEval'19 Task 1. The task aimed at developing systems to tackle the
-task of multi-label hierarchical classification of text.
+for the GermEval'19 Task 1~\cite{Remus:2019}. The task aimed at developing systems
+to tackle the task of multi-label hierarchical classification of text.
 
 Several real-world classification problems are naturally cast within a hierarchy,
 where the labels to be predicted are organized in an hierarchy. Typically the
@@ -266,8 +266,9 @@ post-processing method that tries to correct the label inconsistency.
 In \textit{a classifier per parent node} approach, a multi-class classifier,
 possibly also multi-label, is trained for each parent node in the label
 hierarchy. The classifier is trained to classify the probability of a given
-sample belonging to each of the parent's child nodes. A parent node is in this
-case every label in the hierarchy-tree which has one or more child labels.
+sample belonging to each of the parent's child nodes. In this
+case, a parent node is every label in the hierarchy-tree which has one or more
+child labels.
 
 Given a test sample, first the top-level classifier is applied, then for every
 top-level predicted label (e.g., class 2 and 3) its child classifiers, e.g.: a
@@ -291,7 +292,7 @@ This approach, however, is prone to label inconsistency, as different classifier
 are trained for each level of the hierarchy and should, therefore, also be
 complemented by a post-processing method to correct the prediction inconsistency.
 
-One common error for all local classifier strategies the utilize the top-down
+One common problem for all local classifier strategies the utilize the top-down
 class-prediction approach is the propagation of errors down the hierarchy.
 
 
@@ -304,9 +305,10 @@ done by flattening the whole hierarchical structure.
 
 Having only a single classifier, although easier to tune, it can turn the
 hierarchical classification into a much harder problem, specially having a
-sparse label space with an order of magnitude of $10^2$, but the labels
-co-occurrence can be a good guiding heuristic for a statistical model to infer
-the hierarchical label structure associated with a given sample.
+sparse label space with an order of magnitude of $10^2$, i.e. there are 343
+possible classes,  but the labels co-occurrence can be a good guiding heuristic
+for a statistical model to infer the hierarchical label structure associated
+with a given sample.
 
 \section{Systems Developed}\label{system}
 
@@ -332,7 +334,7 @@ needs to be trained in a multi-label fashion and predict over 8 classes. Each of
 these 8 classes represents a parent node of some child classes on the
 next level of the hierarchy. So for Level 1 we need to train eight multi-label
 classifiers where the labels are the child`s of each parent in the root level.
-Finally, for Level 2, we train 42 classifiers only, since according to the
+Finally, for Level 2, we train only 42 classifiers, since according to the
 hierarchy-tree some labels in this level are already leaf nodes, and only 42
 labels have then child labels. So, in total we trained 51 classifiers
 distributed by different levels as described in Table~\ref{parent-per-node-classifiers}.
@@ -354,7 +356,7 @@ Total Classifiers & 51       \\
 the hierarchy.}
 \end{table}
 
-As stated before one of the advantages of this approach is the that it always
+As stated before, one of the advantages of this approach is that it always
 produces a label structure that is enforced by the hierarchy-tree, but it is
 prone to error propagation from the top levels further down the tree.
 
@@ -363,9 +365,14 @@ prone to error propagation from the top levels further down the tree.
 
 The global classifier needs to be a multi-label classifier targeting a label
 space with a total of 343 classes. One of the advantages is that there is only
-one single classifier to tune and explore, but on the other and it has a high
-and sparse label space, plus one needs to employ some post-processing cleaning
-to enforce the hierarchical structure.
+one single multi-label classifier to tune and explore, but on the other and it
+has a high and sparse label space. Plus, one needs to employ some post-processing
+cleaning to enforce the hierarchical structure, since there is an hierarchical
+dependency between the some of the 343 possible classes. For instance, the
+classifier can predict the labels 4.3 and 4.4 - corresponding to labels in
+the Level 2 in the hierarchy - but not the label 4, corresponding to Level 1
+in the hierarchy.
+
 
 \section{Experiments and Results}\label{section_experiments}
 
@@ -392,7 +399,10 @@ are all in regard to the development set.
 \subsubsection{Pre-processing}
 
 For representing a book we concatenated the book's title with book's textual
-description. We explored two tokenization schemas, one tokenizes the blurbs into
+description. In some cases only the title is present, for this cases we simply
+use the title.
+
+We explored two tokenization schemas, one tokenizes the blurbs into
 sentences, and then from sentences into tokens, considering the title of the
 book as a sentence, this tokenization strategy was based on the german sentence
 tokenizer, and the \textit{word\_punkt\_tokenizer} from NLTLK 3.4.1~\cite{Bird:2009:NLP:1717171},
@@ -404,14 +414,15 @@ token representations and removal of stop-words. For the neural networks the
 padding was done to match the size of the longest document in the dataset.
 
 
-\subsubsection{Prediction threshold}\label{threshold}
+\subsubsection{Prediction threshold gltment}\label{threshold}
 
 We set the prediction threshold to 0.5, so any label with a predicted probability
 above 0.5 is selected. We noticed that for some samples no labels were
 being selected, as all labels had predicted probability scores lower than 0.5.
 To tackle this problem, for a given sample, if no predictions were done we lowered
 the threshold to 0.4, if still no label predictions are done, we lowered again
-the threshold to 0.3.
+the threshold to 0.3. This was done in a simple ad-hoc way, and no proper strategy
+was employed, and is done in a per label fashion.
 
 
 \subsubsection{Models implementation}
@@ -459,7 +470,7 @@ iterations.
 
 \item[\textbf{CNN}]\cite{kim-2014-convolutional}: for sentence classification
 with rectified linear units in the activation functions of the 1D convolutions,
-and varying:
+and with a fully connected layer of size 600 and varying:
 
 \begin{itemize}
 \item filter windows: (1), \textbf{(1, 2)}, (1, 2, 3);
@@ -508,7 +519,7 @@ the development set.
 \end{table}
 
 The Logistic Regression classifier achieved the best results
-although the CNN classifier  had a similar F\textsubscript{1} score, essentially
+although the CNN classifier had a similar F\textsubscript{1} score, essentially
 by trading recall for precision.
 
 
@@ -562,24 +573,25 @@ of the CNN-based classifier for Levels 1 and 2 of the hierarchy, using the best
 classifier for the Root Level from Table~\ref{subtask_b_parameters_local}.}
 \end{table}
 
-
-
-
-
+We opted not to use a logistic regression classifier for Level 1 and 2 since
+this type of classifier needed to be trained in a one-versus-rest fashion.
+This would mean that for Level 2 we would need to train 93 classifiers and 242
+for Level 3.
 
 \subsubsection{Global classifier}
 
 The global classifier uses a flattened hierarchy and learns how to predict a
 vector of 343 dimensions.
 
-One advantage of this approach in contrast to the local one is the we need only
+One advantage of this approach, in contrast to the local one, is the we need only
 to tune a single classifier, and both sub-tasks can also be tackled with this
 single classifier.
 
 Our initial idea was to use a neural network architecture and leverage on the
-labels co-occurrence by initializing a weight matrix, but due to time constrains
-this was not possible to take to the end. Also, due to time constrains we did not
-employ a post-processing step.
+labels co-occurrence by initializing a weight matrix - we describe this idea in
+Section~\ref{future} - but due to time constrains this was not possible to
+explore this idea to the end. Also, due to time constrains we did not employ
+a post-processing step.
 
 Nevertheless, we still applied a CNN architecture and explored different
 configuration parameters, varying the filter windows and the filter maps.
@@ -659,9 +671,10 @@ Results for the detailed evaluation metrics are described in Table~\ref{local_de
 
 This classifier achieved the 9th best recall and the 15th best precision for
 Sub-Task A, and the 8th best recall and the 14th best precision for Sub-Task B.
-This results were achieved with a support of 0.943, meaning that for roughly 5\%
-of the samples the classifier did not managed to produce any predictions.
 
+For roughly 5\% of the test samples the classifier did not produce any predictions,
+due to the class probabilities scores being lower 0.3., the lowest possibly threshold
+selected in the adjustment.
 
 \begin{table}[!h]
 \begin{center}
@@ -703,10 +716,12 @@ Table~\ref{global_devset-results}.
 
 This classifier achieved the 15th best recall and the 17th best precision
 for Sub-Task A, and the 9th best recall and the 18th best precision for Sub-Task B.
-The support was 0.9986, meaning that for roughly 1\% of the samples the classifier
-did not produced any predictions. The hierarchy consistency is of 0.9363, reflecting
-the lack of a post-processing step to enforce the hierarchical structure,
-which would be 1.0 if employed.
+For roughly 1\% of the samples the classifier did not produced any predictions.
+The hierarchy consistency is of 0.9363, reflecting the lack of a post-processing
+step to enforce the hierarchical structure, which would be 1.0 if employed.
+
+Considering only the best submissions from all teams, we ranked 8th for
+Sub-Task A and 6th for Sub-Task B.
 
 \section{Future Work}\label{future}
 

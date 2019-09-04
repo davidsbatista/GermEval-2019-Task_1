@@ -3,7 +3,6 @@
 This repository contains the code for the participation on GermEval 2019 Task 1 -- Shared task on 
 hierarchical classification of blurbs.
 
- 
 To run the experiments:
 
     pip install -r requirements.txt
@@ -27,3 +26,8 @@ The following files run experiments for different strategies
 Evaluating an experiment:
 
     score.sh
+    
+    
+The competition data and evaluation scripts are still available through codalab:
+
+- [https://competitions.codalab.org/competitions/20139](https://competitions.codalab.org/competitions/20139)
