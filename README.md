@@ -12,10 +12,14 @@ You can see on the images below the results for both tasks achieved by all parti
   <img align="center" src="results_subtask_b.png" width="50%" height="50%">
 </p>
 
+The paper describing our system:
+- [COMTRAVO-DS team at GermEval 2019 Task 1 on Hierarchical
+Classification of Blurbs](https://corpora.linguistik.uni-erlangen.de/data/konvens/proceedings/papers/germeval/Germeval_Task1_paper_4.pdf)
 
 You can read the papers of both best winners here:
- - TODO
- - TODO
+ - [Multi-Label Multi-Class Hierarchical Classification using
+Convolutional Seq2Seq](https://corpora.linguistik.uni-erlangen.de/data/konvens/proceedings/papers/germeval/Germeval_Task1_paper_2.pdf)
+ - [TwistBytes - Hierarchical Classification at GermEval 2019: walking the fine line (of recall and precision) Fernando Benites](https://corpora.linguistik.uni-erlangen.de/data/konvens/proceedings/papers/germeval/Germeval_Task1_paper_6.pdf)
 
 ---
 
