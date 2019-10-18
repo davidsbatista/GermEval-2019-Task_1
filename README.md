@@ -1,9 +1,12 @@
-### GermEval 2019 Task 1 - Shared Task on Hierarchical Classification of Blurbs
+# GermEval 2019 Task 1 - Shared Task on Hierarchical Classification of Blurbs
 
-This repository contains the code for the participation on GermEval 2019 Task 1 -- Shared task on 
-hierarchical classification of blurbs.
+This repository contains the code for the participation on GermEval 2019 Task 1 -- Shared task on hierarchical classification of blurbs.
 
-To run the experiments:
+
+
+
+
+## To run the experiments first install:
 
     pip install -r requirements.txt
     
@@ -14,7 +17,7 @@ To run the experiments:
     python -m nltk.downloader stopwords
 
 
-The following files run experiments for different strategies
+# The following files run experiments for different strategies:
 
     subtask_a.py
     
@@ -23,11 +26,11 @@ The following files run experiments for different strategies
     subtask_b_global_classifier.py
     
     
-Evaluating an experiment:
+# Evaluating an experiment:
 
     score.sh
     
     
-The competition data and evaluation scripts are still available through codalab:
+# The competition data and evaluation scripts are still available through codalab:
 
 - [https://competitions.codalab.org/competitions/20139](https://competitions.codalab.org/competitions/20139)
